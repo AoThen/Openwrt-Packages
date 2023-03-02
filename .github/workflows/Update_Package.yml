@@ -89,6 +89,6 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.OPENWRT_PACKAGES }}
-          repository: ""
+          repository: "AoThen/Openwrt-Packages"
           branch: "Packages"
           directory: ${{ github.event.inputs.pkgname }}
