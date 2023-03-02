@@ -77,6 +77,7 @@ jobs:
 
       - name: Test
         run: |
+          git clone ${{ github.repository }} -b Packages
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
           echo "Test" > Test.log
