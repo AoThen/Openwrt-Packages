@@ -67,10 +67,10 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
-          mkdir ${{ github.event.inputs.dirname }}
-          git add ${{ github.event.inputs.dirname }}
-          cd ${{ github.event.inputs.dirname }}
-          cp -rf openwrt-sdk/bin/* ${{ github.event.inputs.dirname }}/
+          mkdir ${{ github.event.inputs.pkgname }}
+          git add ${{ github.event.inputs.pkgname }}
+          cd ${{ github.event.inputs.pkgname }}
+          cp -rf openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
 
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
