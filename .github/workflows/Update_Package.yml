@@ -65,8 +65,8 @@ jobs:
 
       - name: Push packages
         run: |
-          git config --global user.email {{ secrets.EMAIL }}
-          git config --global user.name {{ secrets.NAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git config --global user.name ${{ secrets.NAME }}
           mkdir ${{ github.event.inputs.dirname }}
           git add ${{ github.event.inputs.dirname }}
           cd ${{ github.event.inputs.dirname }}
@@ -74,4 +74,4 @@ jobs:
 
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-          git push --quiet "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" Packages
+          git push -f "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
