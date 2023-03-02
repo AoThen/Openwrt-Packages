@@ -17,11 +17,11 @@ on:
           - SFT1200
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/sbwml/luci-app-alist.git"
+        default: "https://github.com/AoThen/luci-app-broadbandacc.git"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-alist"
+        default: "luci-app-broadbandacc"
         required: true
       email:
         description: "Git accuont email address"
