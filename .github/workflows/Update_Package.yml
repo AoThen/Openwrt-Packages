@@ -17,11 +17,11 @@ on:
           - SFT1200
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/AoThen/luci-app-broadbandacc.git"
+        default: "https://github.com/messense/aliyundrive-webdav.git"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-broadbandacc"
+        default: "aliyundrive-webdav"
         required: true
       email:
         description: "Git accuont email address"
@@ -68,10 +68,9 @@ jobs:
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
           mkdir ${{ github.event.inputs.pkgname }}
+          cp -rf $(pwd)/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
           git add ${{ github.event.inputs.pkgname }}
           cd ${{ github.event.inputs.pkgname }}
-          cp -rf openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
           git push -f "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
