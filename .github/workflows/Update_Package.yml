@@ -77,9 +77,9 @@ jobs:
 
       - name: Test
         run: |
-          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch packages_temp
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
+          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch packages_temp
           cd packages_temp
           echo "Test" > Test.log
           git add .
