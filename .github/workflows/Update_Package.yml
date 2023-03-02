@@ -80,9 +80,8 @@ jobs:
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
-          echo ${{ github.repository }}
           echo "Test" > Openwrt-Packages/Test.log
-          git add .
+          git add Openwrt-Packages
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}" -a
 
@@ -90,6 +89,7 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.OPENWRT_PACKAGES }}
-          repository: "AoThen/Openwrt-Packages"
+          repository: ${{ github.repository }}
           branch: "Packages"
           directory: "Openwrt-Packages"
+
