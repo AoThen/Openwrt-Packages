@@ -79,8 +79,8 @@ jobs:
         run: |
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
-          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch packages_temp
-          cd packages_temp
+          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          cd Openwrt-Packages
           echo "Test" > Test.log
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
@@ -92,5 +92,5 @@ jobs:
           github_token: ${{ secrets.OPENWRT_PACKAGES }}
           repository: "AoThen/Openwrt-Packages"
           branch: "Packages"
-          directory: "packages_temp"
+          directory: "Openwrt-Packages"
           force: true
