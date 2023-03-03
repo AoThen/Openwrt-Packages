@@ -75,7 +75,7 @@ jobs:
       #     mkdir ${{ github.event.inputs.pkgname }}
       #     cp -rf $(pwd)/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
       #     git add ${{ github.event.inputs.pkgname }}
-      #git add .
+      #
       #     cd ${{ github.event.inputs.pkgname }}
       #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
       #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
@@ -86,10 +86,8 @@ jobs:
           git config --global user.name ${{ secrets.NAME }}
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
-          rm -rf *
-          git init
+          rm -rf Test*
           git add .
-          git commit -m "Initial commit"
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
