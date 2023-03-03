@@ -41,60 +41,62 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      # - name: build ipk
-      #   id: build
-      #   env:
-      #     SOURCECODEURL: ${{ github.event.inputs.sourcecode }}
-      #     PKGNAME: ${{ github.event.inputs.pkgname }}
-      #     BOARD: ${{ github.event.inputs.device }}
-      #     EMAIL: ${{ github.event.inputs.email }}
-      #     PASSWORD: ${{ github.event.inputs.password }}
-      #   run: |
-      #     sudo apt update
-      #     sudo apt install libfuse-dev
+      - name: build ipk
+        id: build
+        env:
+          SOURCECODEURL: ${{ github.event.inputs.sourcecode }}
+          PKGNAME: ${{ github.event.inputs.pkgname }}
+          BOARD: ${{ github.event.inputs.device }}
+          EMAIL: ${{ github.event.inputs.email }}
+          PASSWORD: ${{ github.event.inputs.password }}
+        run: |
+          sudo apt update
+          sudo apt install libfuse-dev
 
-      #     cd $GITHUB_WORKSPACE
-      #     chmod +x ./build.sh
-      #     ./build.sh
+          cd $GITHUB_WORKSPACE
+          chmod +x ./build.sh
+          ./build.sh
 
-      # - uses: actions/upload-artifact@main
-      #   with:
-      #     name: ${{ github.event.inputs.pkgname }}_related_ipks
-      #     path: |
-      #       ./*ipk*
+      - uses: actions/upload-artifact@main
+        with:
+          name: ${{ github.event.inputs.pkgname }}_related_ipks
+          path: |
+            ./*ipk*
 
-      # # cd packages
-      # # git clone https://github.com/AoThen/Openwrt-Packages -b Packages
-      # # git reset --soft HEAD^
-      # # git push -f "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
+      # cd packages
+      # git clone https://github.com/AoThen/Openwrt-Packages -b Packages
+      # git reset --soft HEAD^
+      # git push -f "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
 
-      # - name: Commit packages
-      #   run: |
-      #     git config --global user.email ${{ secrets.EMAIL }}
-      #     git config --global user.name ${{ secrets.NAME }}
-      #     mkdir ${{ github.event.inputs.pkgname }}
-      #     cp -rf $(pwd)/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-      #     git add ${{ github.event.inputs.pkgname }}
-      #
-      #     cd ${{ github.event.inputs.pkgname }}
-      #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
-      #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-
-      - name: Test
+      - name: Commit packages
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
-
-          git checkout --orphan latest_branch
-          git add -A
-
+          rm -rf ${{ github.event.inputs.pkgname }}
+          mkdir ${{ github.event.inputs.pkgname }}
+          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
+          git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
-          git branch -D Packages
-          git branch -m Packages
+      #重建
+      # - name: Rebase
+      #   run: |
+      #     git config --global user.email ${{ secrets.EMAIL }}
+      #     git config --global user.name ${{ secrets.NAME }}
+      #     git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+      #     cd Openwrt-Packages
+
+      #     git checkout --orphan latest_branch
+      #     git add -A
+
+      #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
+      #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+
+      #     git branch -D Packages
+      #     git branch -m Packages
 
       - name: Push changes
         uses: ad-m/github-push-action@master
