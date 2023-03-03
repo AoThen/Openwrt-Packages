@@ -86,10 +86,15 @@ jobs:
           git config --global user.name ${{ secrets.NAME }}
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
-          rm -rf Test*
-          git add .
+
+          git checkout --orphan latest_branch
+          git add -A
+
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+
+          git branch -D Packages
+          git branch -m Packages
 
       - name: Push changes
         uses: ad-m/github-push-action@master
