@@ -17,11 +17,11 @@ on:
           - SFT1200
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/messense/aliyundrive-webdav.git"
+        default: "https://github.com/sbwml/luci-app-alist.git"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-aliyundrive-webdav"
+        default: "luci-app-alist"
         required: true
       email:
         description: "Git accuont email address"
@@ -50,6 +50,8 @@ jobs:
           EMAIL: ${{ github.event.inputs.email }}
           PASSWORD: ${{ github.event.inputs.password }}
         run: |
+          sudo apt update
+          sudo apt install libfuse-dev
           cd $GITHUB_WORKSPACE
           chmod +x ./build.sh
           ./build.sh
@@ -60,8 +62,6 @@ jobs:
           path: |
             ./*ipk*
 
-          # sudo apt update
-          # sudo apt install libfuse-dev
       # cd packages
       # git clone https://github.com/AoThen/Openwrt-Packages -b Packages
       # git reset --soft HEAD^
