@@ -86,7 +86,10 @@ jobs:
           git config --global user.name ${{ secrets.NAME }}
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
-          git reset --hard 370c00752abe96788092a6c1c1b6747906e265bc
+          rm -rf *
+          git init
+          git add .
+          git commit -m "Initial commit"
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
