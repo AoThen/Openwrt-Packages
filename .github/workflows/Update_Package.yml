@@ -30,6 +30,10 @@ on:
         description: "Git account password"
         required: false
 
+  push:
+    branches:
+      - main
+
 jobs:
   build_package:
     runs-on: ubuntu-20.04
@@ -84,7 +88,7 @@ jobs:
           echo "Test" > Test.log
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
-          git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}" -a
+          git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
