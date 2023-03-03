@@ -81,8 +81,8 @@ jobs:
 
       - name: Test
         run: |
-          git config --local user.email ${{ secrets.EMAIL }}
-          git config --local user.name ${{ secrets.NAME }}
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
           echo "Test" > Test.log
