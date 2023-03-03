@@ -21,7 +21,7 @@ on:
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "aliyundrive-webdav"
+        default: "luci-app-aliyundrive-webdav"
         required: true
       email:
         description: "Git accuont email address"
