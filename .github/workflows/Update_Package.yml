@@ -50,9 +50,6 @@ jobs:
           EMAIL: ${{ github.event.inputs.email }}
           PASSWORD: ${{ github.event.inputs.password }}
         run: |
-          sudo apt update
-          sudo apt install libfuse-dev
-
           cd $GITHUB_WORKSPACE
           chmod +x ./build.sh
           ./build.sh
@@ -63,6 +60,8 @@ jobs:
           path: |
             ./*ipk*
 
+          # sudo apt update
+          # sudo apt install libfuse-dev
       # cd packages
       # git clone https://github.com/AoThen/Openwrt-Packages -b Packages
       # git reset --soft HEAD^
