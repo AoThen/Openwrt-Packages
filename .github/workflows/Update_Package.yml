@@ -76,8 +76,8 @@ jobs:
           rm -rf ${{ github.event.inputs.pkgname }}
           mkdir ${{ github.event.inputs.pkgname }}
           cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-          zip -r ${{ github.event.inputs.pkgname }}.zip packages/aarch64_cortex-a53/githubaction
-          CRTDIRTEMP=$(pwd)
+          zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
+          echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
@@ -114,7 +114,7 @@ jobs:
           tag_name: ${{ github.event.inputs.pkgname }}
           body: ${{ github.event.inputs.sourcecode }}
           token: ${{ secrets.OPENWRT_PACKAGES }}
-          files: $(CRTDIRTEMP)/${{ github.event.inputs.pkgname }}.zip
+          files: ${{ env.CRTDIRTEMP }}/${{ github.event.inputs.pkgname }}.zip
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
