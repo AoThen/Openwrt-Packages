@@ -1,6 +1,11 @@
 name: Build GL-MT2500 软件仓库
 
 on:
+  workflow_run:
+    workflows: ["Build"]
+    types: [requested]
+    branches-ignore:
+      - "Packages"
   workflow_dispatch:
     inputs:
       device:
