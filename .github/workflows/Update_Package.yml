@@ -17,11 +17,11 @@ on:
           - SFT1200
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/sbwml/luci-app-alist.git"
+        default: "https://github.com/AoThen/luci-app-broadbandacc.git"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-alist"
+        default: "luci-app-broadbandacc"
         required: true
       email:
         description: "Git accuont email address"
@@ -76,7 +76,7 @@ jobs:
           rm -rf ${{ github.event.inputs.pkgname }}
           mkdir ${{ github.event.inputs.pkgname }}
           cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-          zip -r ${{ github.event.inputs.pkgname }}.zip packages/aarch64_cortex-a53/githubaction/*.ipk
+          zip -r ${{ github.event.inputs.pkgname }}.zip packages/aarch64_cortex-a53/githubaction
           CRTDIRTEMP=$(pwd)
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
