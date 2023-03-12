@@ -30,9 +30,9 @@ on:
         description: "Git account password"
         required: false
 
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   build_package:
@@ -76,6 +76,8 @@ jobs:
           rm -rf ${{ github.event.inputs.pkgname }}
           mkdir ${{ github.event.inputs.pkgname }}
           cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
+          zip -r ${{ github.event.inputs.pkgname }}.zip packages/aarch64_cortex-a53/githubaction/*.ipk
+          CRTDIRTEMP=$(pwd)
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
@@ -105,3 +107,19 @@ jobs:
           branch: "Packages"
           directory: "Openwrt-Packages"
           force: true
+
+      - name: Upload firmware to release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.event.inputs.pkgname }}
+          body: ${{ github.event.inputs.sourcecode }}
+          token: ${{ secrets.OPENWRT_PACKAGES }}
+          files: $(CRTDIRTEMP)/${{ github.event.inputs.pkgname }}.zip
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 30
+          keep_minimum_runs: 8
