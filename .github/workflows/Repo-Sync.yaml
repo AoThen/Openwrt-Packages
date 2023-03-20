@@ -31,17 +31,16 @@ jobs:
           git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          ll
-          
           git checkout --orphan temp
 
           cd ..
           mv Openwrt-Packages Openwrt-Packages_bak
           mkdir Openwrt-Packages
           cd Openwrt-Packages
-          mv Openwrt-Packages_bak/.git Openwrt-Packages/
           mv Openwrt-Packages_bak/README.md Openwrt-Packages/
           mv Openwrt-Packages_bak/LICENSE Openwrt-Packages/
+
+          git init
 
           git add -A
 
