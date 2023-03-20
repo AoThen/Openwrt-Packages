@@ -31,7 +31,7 @@ jobs:
           git clone -b main https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          git checkout --orphan
+          git checkout --orphan latest_branch
           git add -A
 
           git commit -am "init commit"
@@ -113,24 +113,3 @@ jobs:
           branch: "feeds"
           directory: "Openwrt-Packages"
           force: true
-
-      # - name: Repo
-      #   run: |
-      #     bash Scripts/Sync.sh \
-      #       https://github.com/immortalwrt/luci master \
-      #       https://${{ github.repository_owner }}:${{ secrets.ACTION_SECRET }}@github.com/kenzok78/luci ts2js
-      # - name: packages
-      #   run: |
-      #     bash Scripts/Sync.sh \
-      #       https://github.com/immortalwrt/packages master \
-      #       https://${{ github.repository_owner }}:${{ secrets.ACTION_SECRET }}@github.com/kenzok78/packages
-      # - name: helloworld
-      #   run: |
-      #     bash Scripts/Sync.sh \
-      #       https://github.com/fw876/helloworld master \
-      #       https://${{ github.repository_owner }}:${{ secrets.ACTION_SECRET }}@github.com/kenzok78/helloworld
-      # - name: openwrt-passwall
-      #   run: |
-      #     bash Scripts/Sync.sh \
-      #       https://github.com/xiaorouji/openwrt-passwall packages \
-      #       https://${{ github.repository_owner }}:${{ secrets.ACTION_SECRET }}@github.com/kenzok78/openwrt-passwall
