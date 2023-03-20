@@ -47,7 +47,7 @@ jobs:
           cd Openwrt-Packages
 
           rm -rf luci-theme-argon
-          git clone https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
+          svn export https://github.com/jerrykuku/luci-theme-argon/trunk luci-theme-argon
           rm -rf luci-theme-argon/.git
 
           git add ./
