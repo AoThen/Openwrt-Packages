@@ -47,7 +47,7 @@ jobs:
           cd Openwrt-Packages
 
           rm -rf luci-theme-argon
-          git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
+          git clone https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
           rm -rf luci-theme-argon/.git
 
           git add ./
@@ -117,7 +117,7 @@ jobs:
           svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
 
           git add ./
-          Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
+          Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
       - name: Push changes
