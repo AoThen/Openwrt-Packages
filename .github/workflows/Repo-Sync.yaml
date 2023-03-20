@@ -47,7 +47,7 @@ jobs:
           cd Openwrt-Packages
 
           rm -rf luci-theme-argon
-          git clone --depth 1 -b master https://github.com/jerrykuku/luci-theme-argon.git
+
 
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
