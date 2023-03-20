@@ -28,15 +28,26 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
-          git clone -b main https://github.com/AoThen/Openwrt-Packages --single-branch
+          git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          git branch -D feeds
+          git checkout --orphan temp
 
-          git checkout --orphan feeds
+          cd ..
+          mv Openwrt-Packages Openwrt-Packages_bak
+          mkdir Openwrt-Packages
+          cd Openwrt-Packages
+          mv Openwrt-Packages_bak/.git Openwrt-Packages/
+          mv Openwrt-Packages_bak/README.md Openwrt-Packages/
+          mv Openwrt-Packages_bak/LICENSE Openwrt-Packages/
+
           git add -A
 
           git commit -am "init commit"
+
+          git branch -D feeds
+          git branch -m feeds
+
           
       - name: Sync packages
         if: env.IsRebase == 'false'
