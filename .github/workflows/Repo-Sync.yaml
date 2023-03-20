@@ -31,11 +31,10 @@ jobs:
           git clone -b main https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          git checkout --orphan latest_branch
+          git checkout --orphan
           git add -A
 
-          Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
-          git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          git commit -am "init commit"
 
           git branch -D feeds
           git branch -m feeds
