@@ -31,13 +31,12 @@ jobs:
           git clone -b main https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          git checkout --orphan latest_branch
+          git branch -D feeds
+
+          git checkout --orphan feeds
           git add -A
 
           git commit -am "init commit"
-
-          git branch -D feeds
-          git branch -m feeds
           
       - name: Sync packages
         if: env.IsRebase == 'false'
