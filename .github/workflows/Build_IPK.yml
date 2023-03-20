@@ -9,12 +9,7 @@ on:
         default: "MT2500"
         type: choice
         options:
-          - AX1800
-          - AXT1800
           - MT2500
-          - MT3000
-          - SF1200
-          - SFT1200
       sourcecode:
         description: "Source code URL"
         default: "https://github.com/AoThen/luci-app-broadbandacc.git"
@@ -76,11 +71,11 @@ jobs:
           rm -rf ${{ github.event.inputs.pkgname }}
           mkdir ${{ github.event.inputs.pkgname }}
           cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-          zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
           echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
 
       #重建
       # - name: Rebase
