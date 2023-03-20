@@ -12,11 +12,11 @@ on:
           - MT2500
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/AoThen/luci-app-broadbandacc.git"
+        default: "https://github.com/messense/aliyundrive-webdav.git"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-broadbandacc"
+        default: "luci-app-aliyundrive-webdav"
         required: true
       email:
         description: "Git accuont email address"
@@ -66,7 +66,7 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
-          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
           rm -rf ${{ github.event.inputs.pkgname }}
           mkdir ${{ github.event.inputs.pkgname }}
