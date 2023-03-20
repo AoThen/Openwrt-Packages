@@ -1,4 +1,4 @@
-name: Build GL-MT2500 软件仓库
+name: Build GL-MT2500 IPK
 
 on:
   workflow_dispatch:
