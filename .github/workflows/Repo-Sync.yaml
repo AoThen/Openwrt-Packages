@@ -14,7 +14,7 @@ on:
 
 env:
   IsRebase: false
-  onlya: true
+  onlya: false
 
 jobs:
   packages:
