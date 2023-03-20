@@ -44,38 +44,40 @@ jobs:
           git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          rm -rf luci-app-broadbandacc
+          find . -type d -exec rm -rf {} \;
+
           git clone --depth 1 https://github.com/AoThen/luci-app-broadbandacc.git luci-app-broadbandacc
-          rm -rf luci-app-broadbandacc/.git
 
-          rm -rf luci-app-vssr
           git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
-          rm -rf luci-app-vssr/.git
 
-          rm -rf luci-app-openclash
-          svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
-          rm -rf luci-app-openclash/.svn
+          svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
 
-          rm -rf openwrt-aliyundrive
-          svn co https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
-          rm -rf openwrt-aliyundrive/.svn
+          svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
 
-          rm -rf openwrt-alist
           git clone --depth 1 https://github.com/sbwml/luci-app-alist openwrt-alist
-          rm -rf openwrt-alist/.git
 
-          rm -rf helloworld
           git clone --depth 1 https://github.com/fw876/helloworld.git helloworld
-          rm -rf helloworld/.git
 
-          rm -rf passwall_packages
           git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall.git  passwall_packages
-          rm -rf passwall_packages/.git
 
-          rm -rf passwall_luci
           git clone --depth 1 -b luci https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
-          rm -rf passwall_luci/.git
 
+          git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
+
+          git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
+
+          git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb.git  lua-maxminddb
+
+          svn export https://github.com/tty228/luci-app-serverchan/trunk luci-app-serverchan
+
+          svn export https://github.com/AoThen/luci-app-broadbandacc/trunk luci-app-broadbandacc
+
+          svn export https://github.com/AoThen/luci-app-ramfree/trunk luci-app-ramfree
+
+          svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
+
+          find . -type d -name ".git" -exec rm -rf {} \;
+          find . -type d -name ".svn" -exec rm -rf {} \;
 
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
