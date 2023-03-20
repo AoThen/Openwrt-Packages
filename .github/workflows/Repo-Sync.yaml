@@ -47,10 +47,9 @@ jobs:
           cd Openwrt-Packages
 
           rm -rf luci-theme-argon
-          git clone --depth 1 -b master https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
-          rm -rf luci-theme-argon/.git
+          git clone --depth 1 -b master https://github.com/jerrykuku/luci-theme-argon.git
 
-          git add luci-theme-argon
+          git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
           
