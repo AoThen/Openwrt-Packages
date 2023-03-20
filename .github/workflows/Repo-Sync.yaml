@@ -44,7 +44,7 @@ jobs:
           git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          find . -type d -not -name "*.git" -exec rm -rf {} \;
+          find ./ -type d -not -name "*.git" -exec rm -rf {} \;
 
           git clone --depth 1 https://github.com/AoThen/luci-app-broadbandacc.git luci-app-broadbandacc
 
@@ -76,7 +76,7 @@ jobs:
 
           svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
 
-          git add .
+          git add ./
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
