@@ -74,9 +74,9 @@ jobs:
           git clone --depth 1 -b luci https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
           rm -rf passwall_luci/.git
 
-          rm -rf passwall_luci
+          rm -rf luci-theme-argon
           git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
-          rm -rf passwall_luci/.git
+          rm -rf luci-theme-argon/.git
 
           rm -rf luci-app-argon-config
           git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
