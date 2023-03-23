@@ -117,6 +117,9 @@ jobs:
           rm -rf netspeedtest
           svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
 
+          rm -rf custom
+          svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
+
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
