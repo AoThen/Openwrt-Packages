@@ -117,8 +117,15 @@ jobs:
           rm -rf netspeedtest
           svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
 
-          rm -rf custom
-          svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
+          rm -rf luci-app-cloudflarespeedtest
+          svn export https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest/trunk/applications/luci-app-cloudflarespeedtest luci-app-cloudflarespeedtest
+
+          rm -rf cdnspeedtest
+          svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest/trunk/cdnspeedtest cdnspeedtest
+
+
+        # rm -rf custom
+        # svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
 
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
