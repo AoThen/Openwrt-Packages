@@ -123,6 +123,12 @@ jobs:
           rm -rf cdnspeedtest
           svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest/trunk/cdnspeedtest cdnspeedtest
 
+          rm -rf luci-app-vlmcsd
+          svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-vlmcsd luci-app-vlmcsd
+
+          rm -rf vlmcsd
+          svn export https://github.com/kiddin9/openwrt-packages/trunk/vlmcsd vlmcsd
+
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
