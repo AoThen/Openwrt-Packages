@@ -14,7 +14,7 @@ on:
 
 env:
   IsRebase: false
-  onlya: false
+  onlya: true
 
 jobs:
   packages:
@@ -46,9 +46,10 @@ jobs:
           git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
-          rm -rf luci-theme-argon
-          git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
-          rm -rf luci-theme-argon/.git
+          rm -rf luci-app-openclash
+          git clone https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
+          git reset --hard b97b2bbca4a021a32c3f48aa81988edf17b3f627
+          rm -rf luci-app-openclash/.git
 
 
           git add .
@@ -73,6 +74,7 @@ jobs:
 
           rm -rf luci-app-openclash
           svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
+          
 
           rm -rf openwrt-aliyundrive
           svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
