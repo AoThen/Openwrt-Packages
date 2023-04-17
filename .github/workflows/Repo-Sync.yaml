@@ -47,9 +47,10 @@ jobs:
           cd Openwrt-Packages
 
           rm -rf luci-app-openclash
-          git clone https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
+          mkdir luci-app-openclash
+          git clone https://github.com/vernesong/OpenClash luci-app-openclash2
           git reset --hard b97b2bbca4a021a32c3f48aa81988edf17b3f627
-          rm -rf luci-app-openclash/.git
+          mv luci-app-openclash2/luci-app-openclash luci-app-openclash
 
 
           git add .
