@@ -9,8 +9,8 @@ on:
     paths:
       - '.github/workflows/Repo-Sync.yaml'
 
-  schedule:
-    - cron: "0 1 * * *"
+  # schedule:
+  #   - cron: "0 1 * * *"
 
 env:
   IsRebase: false
