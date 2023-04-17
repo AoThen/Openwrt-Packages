@@ -14,7 +14,7 @@ on:
 
 env:
   IsRebase: false
-  onlya: true
+  onlya: false
 
 jobs:
   packages:
@@ -60,6 +60,10 @@ jobs:
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
           
+          
+# rm -rf luci-app-openclash
+# svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
+
       - name: Sync packages
         if: env.onlya == 'false' && env.IsRebase == 'false'
         run: |
@@ -75,10 +79,6 @@ jobs:
           rm -rf luci-app-vssr
           git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
           rm -rf luci-app-vssr/.git
-
-          rm -rf luci-app-openclash
-          svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
-          
 
           rm -rf openwrt-aliyundrive
           svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
