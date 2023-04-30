@@ -129,6 +129,9 @@ jobs:
           rm -rf cdnspeedtest
           svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest/trunk/cdnspeedtest cdnspeedtest
 
+          rm -rf luci-app-netdata
+          svn export https://github.com/sirpdboy/luci-app-netdata/trunk luci-app-netdata
+
           rm -rf luci-theme-edge
           svn export https://github.com/kiddin9/luci-theme-edge/trunk luci-theme-edge
 
