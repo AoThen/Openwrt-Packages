@@ -62,9 +62,9 @@ jobs:
           
           
           
-          - name: Sync packages
-          if: env.onlya == 'false' && env.IsRebase == 'false'
-          run: |
+      - name: Sync packages
+        if: env.onlya == 'false' && env.IsRebase == 'false'
+        run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
           git clone -b feeds https://github.com/AoThen/Openwrt-Packages --single-branch
