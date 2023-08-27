@@ -72,8 +72,10 @@ cat feeds.conf.default
 ./scripts/feeds install -a
 
 #  - luci-app-alist
+# rm -rf feeds/packages/lang/golang
+# svn export https://github.com/sbwml/packages_lang_golang/branches/19.x feeds/packages/lang/golang
 rm -rf feeds/packages/lang/golang
-svn export https://github.com/sbwml/packages_lang_golang/branches/19.x feeds/packages/lang/golang
+git clone  --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
 
 echo CONFIG_ALL=y >.config
 make defconfig
