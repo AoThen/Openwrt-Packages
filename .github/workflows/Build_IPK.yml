@@ -12,11 +12,11 @@ on:
           - MT2500
       sourcecode:
         description: "Source code URL"
-        default: "https://github.com/messense/aliyundrive-webdav.git"
+        default: "https://github.com/sbwml/luci-app-alist"
         required: true
       pkgname:
         description: "Openwrt package name"
-        default: "luci-app-aliyundrive-webdav"
+        default: "luci-app-alist"
         required: true
       email:
         description: "Git accuont email address"
