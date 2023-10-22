@@ -93,11 +93,11 @@ jobs:
           rm -rf helloworld/.git
 
           rm -rf passwall_packages
-          git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall.git  passwall_packages
+          git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages  passwall_packages
           rm -rf passwall_packages/.git
 
           rm -rf passwall_luci
-          git clone --depth 1 -b luci https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
+          git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
           rm -rf passwall_luci/.git
 
           rm -rf luci-theme-argon
