@@ -73,13 +73,6 @@ jobs:
           rm -rf luci-app-openclash
           svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
 
-          rm -rf luci-app-broadbandacc
-          git clone --depth 1 https://github.com/AoThen/luci-app-broadbandacc.git luci-app-broadbandacc
-          rm -rf luci-app-broadbandacc/.git
-
-          rm -rf luci-app-vssr
-          git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
-          rm -rf luci-app-vssr/.git
 
           rm -rf openwrt-aliyundrive
           svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
@@ -108,9 +101,6 @@ jobs:
           git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
           rm -rf luci-app-argon-config/.git
 
-          rm -rf lua-maxminddb
-          git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb.git  lua-maxminddb
-          rm -rf lua-maxminddb/.git
 
           rm -rf luci-app-serverchan
           svn export https://github.com/tty228/luci-app-serverchan/trunk luci-app-serverchan
@@ -150,6 +140,9 @@ jobs:
 # rm -rf custom
 # svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
 
+# rm -rf luci-app-vssr
+# git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
+# rm -rf luci-app-vssr/.git
 
       - name: Push changes
         uses: ad-m/github-push-action@master
