@@ -1,0 +1,74 @@
+name: Build GL-MT2500 IPK New
+
+on:
+  workflow_dispatch:
+
+
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  build_package:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: build ipk
+        id: build
+        run: |
+          sudo apt update
+          sudo apt install libfuse-dev
+          cd $GITHUB_WORKSPACE
+          chmod +x ./build_ipks.sh
+          ./build_ipks.sh
+
+      - uses: actions/upload-artifact@main
+        with:
+          name: ipks.zip
+          path: |
+            ./*ipk*
+
+
+
+
+      # - name: Commit packages
+      #   run: |
+      #     git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+      #     cd Openwrt-Packages
+      #     rm -rf ${{ github.event.inputs.pkgname }}
+      #     mkdir ${{ github.event.inputs.pkgname }}
+      #     cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
+      #     echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
+      #     git add .
+      #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
+      #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+      #     zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
+
+
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ secrets.OPENWRT_PACKAGES }}
+      #     repository: "AoThen/Openwrt-Packages"
+      #     branch: "Packages"
+      #     directory: "Openwrt-Packages"
+      #     force: true
+
+      # - name: Upload firmware to release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     tag_name: ${{ github.event.inputs.pkgname }}
+      #     body: ${{ github.event.inputs.sourcecode }}
+      #     token: ${{ secrets.OPENWRT_PACKAGES }}
+      #     files: ${{ env.CRTDIRTEMP }}/${{ github.event.inputs.pkgname }}.zip
+
+
+      # - name: Delete workflow runs
+      #   uses: Mattraks/delete-workflow-runs@v2
+      #   with:
+      #     token: ${{ github.token }}
+      #     repository: ${{ github.repository }}
+      #     retain_days: 30
+      #     keep_minimum_runs: 8
