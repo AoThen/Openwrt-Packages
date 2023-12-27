@@ -51,10 +51,10 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-cd ${WORKDIR}
-mv .config openwrt-sdk/.config
-cd openwrt-sdk
-# echo CONFIG_ALL=y >.config
+# cd ${WORKDIR}
+# mv .config openwrt-sdk/.config
+# cd openwrt-sdk
+echo CONFIG_ALL=y >.config
 make defconfig
 
 
