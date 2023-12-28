@@ -55,7 +55,7 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 
 rm -rf ./package/feeds/packages/lang/golang
 #23.05？
-svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang ./package/feeds/packages/lang/golang
+svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
 
 cd ${WORKDIR}
