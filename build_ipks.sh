@@ -51,13 +51,24 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# cd ${WORKDIR}
+# ./scripts/feeds update packages
+
+rm -rf ./package/feeds/packages/lang/golang
+#23.05？
+svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang ./package/feeds/packages/lang/golang
+
+
+cd ${WORKDIR}
 mv .config openwrt-sdk/.config
-# cd openwrt-sdk
+cd openwrt-sdk
 # echo CONFIG_ALL=y >.config
 make defconfig
 
 make download -j8
+
+#修复bash: po2lmo: command not found
+make ./package/feeds/luci/luci-base/compile V=s
+make -j1 V=s
 
 make V=s ./package/feeds/openclash/luci-app-openclash/compile
 
@@ -79,6 +90,9 @@ make V=s ./package/feeds/passwall/luci-app-passwall/compile
 find bin -type f -exec ls -lh {} \;
 find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
 
+
+# rm -rf feeds/packages/lang/golang
+# git clone  --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
 
 
 
