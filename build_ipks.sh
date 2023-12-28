@@ -22,7 +22,7 @@ git config --global user.email "${EMAIL}"
 git config --global user.name "AoThen"
 [ -n "${PASSWORD}" ] && git config --global user.password "${PASSWORD}"
 
-# mkdir -p  ${WORKDIR}/buildsource
+mkdir -p  ${WORKDIR}/buildsource
 # cd  ${WORKDIR}/buildsource
 
 
@@ -52,14 +52,14 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 ./scripts/feeds install -a
 
 # cd ${WORKDIR}
-# mv .config openwrt-sdk/.config
+mv .config openwrt-sdk/.config
 # cd openwrt-sdk
-echo CONFIG_ALL=y >.config
+# echo CONFIG_ALL=y >.config
 make defconfig
 
+make download -j8
 
-
-make V=s ./package/feeds/luci-app-openclash/compile
+make V=s ./package/feeds/openclash/luci-app-openclash/compile
 
 pkgs=$(ls ./package/feeds/passwall_packages)
 
@@ -67,14 +67,17 @@ pkgs=$(ls ./package/feeds/passwall_packages)
 for pkg in $pkgs
 do
     # 编译每个包
+    echo $pkg
     make V=s ./package/feeds/passwall_packages/$pkg/compile
 done
 
 make V=s ./package/feeds/passwall/luci-app-passwall/compile
 
 
+# make -j$(nproc) || make -j1 || make -j1 V=s
+
 find bin -type f -exec ls -lh {} \;
-find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}" \; 
+find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
 
 
 

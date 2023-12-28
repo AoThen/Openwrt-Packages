@@ -26,9 +26,9 @@ jobs:
 
       - uses: actions/upload-artifact@main
         with:
-          name: ipks.zip
+          name: ipks
           path: |
-            ./*ipk*
+            ./buildsource/*ipk*
 
 
 
