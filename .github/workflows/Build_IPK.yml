@@ -60,7 +60,7 @@ jobs:
       # cd packages
       # git clone https://github.com/AoThen/Openwrt-Packages -b Packages
       # git reset --soft HEAD^
-      # git push -f "https://${{ secrets.OPENWRT_PACKAGES }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
+      # git push -f "https://${{ github.token }}@github.com/AoThen/Openwrt-Packages.git" HEAD:Packages
 
       - name: Commit packages
         run: |
@@ -97,7 +97,7 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.OPENWRT_PACKAGES }}
+          github_token: ${{ github.token }}
           repository: "AoThen/Openwrt-Packages"
           branch: "Packages"
           directory: "Openwrt-Packages"
@@ -108,7 +108,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.pkgname }}
           body: ${{ github.event.inputs.sourcecode }}
-          token: ${{ secrets.OPENWRT_PACKAGES }}
+          token: ${{ github.token }}
           files: ${{ env.CRTDIRTEMP }}/${{ github.event.inputs.pkgname }}.zip
 
       - name: Delete workflow runs
