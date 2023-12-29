@@ -31,6 +31,9 @@ on:
 
 jobs:
   build_package:
+    permissions:
+      actions: write #  to cancel/stop running workflows (styfle/cancel-workflow-action)
+      contents: write #  to create release tags (cycjimmy/semantic-release-action)
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout

@@ -4,7 +4,7 @@ echo PKGNAME: "$PKGNAME"
 echo BOARD: "$BOARD"
 EMAIL=${EMAIL:-"AoThen@GitHub.com"}
 echo EMAIL: "$EMAIL"
-echo PASSWORD: "$PASSWORD"
+# echo PASSWORD: "$PASSWORD"
 
 WORKDIR="$(pwd)"
 
