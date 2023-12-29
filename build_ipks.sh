@@ -74,10 +74,10 @@ esac
 
 rm -rf ./feeds/packages/lang/golang
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
-cd ..
-mv .config openwrt-sdk/.config
-cd openwrt-sdk
-# echo CONFIG_ALL=y >.config
+# cd ..
+# mv .config openwrt-sdk/.config
+# cd openwrt-sdk
+echo CONFIG_ALL=y >.config
 make defconfig
 
 #下载包
