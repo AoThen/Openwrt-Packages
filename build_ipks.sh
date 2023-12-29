@@ -1,8 +1,7 @@
 #!/bin/sh
 
 EMAIL=${EMAIL:-"AoThen@GitHub.com"}
-echo EMAIL: "$EMAIL"
-echo PASSWORD: "$PASSWORD"
+echo PKGNAME: "$PKGNAME"
 
 WORKDIR="$(pwd)"
 
