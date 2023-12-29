@@ -23,6 +23,9 @@ git config --global user.name "AoThen"
 [ -n "${PASSWORD}" ] && git config --global user.password "${PASSWORD}"
 
 mkdir -p  ${WORKDIR}/buildsource
+mkdir -p  ${WORKDIR}/buildsource/openclash
+mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall
+mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
 
 
@@ -52,13 +55,10 @@ echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >
 ./scripts/feeds install -a
 
 # ./scripts/feeds update packages
-
 rm -rf ./package/feeds/packages/lang/golang
-#23.05？
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
-
-cd ${WORKDIR}
+cd ..
 mv .config openwrt-sdk/.config
 cd openwrt-sdk
 # echo CONFIG_ALL=y >.config
@@ -66,7 +66,7 @@ make defconfig
 
 make download -j8
 
-#修复bash: po2lmo: command not found
+#修复openclash编译报错bash: po2lmo: command not found
 make ./package/feeds/luci/luci-base/compile V=s
 make -j1 V=s
 
@@ -82,14 +82,19 @@ do
     make V=s ./package/feeds/passwall_packages/$pkg/compile
 done
 
+
+./scripts/feeds update packages
+rm -rf ./package/feeds/packages/lang/golang
+svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 make V=s ./package/feeds/passwall/luci-app-passwall/compile
 
 
 # make -j$(nproc) || make -j1 || make -j1 V=s
 
-find bin -type f -exec ls -lh {} \;
-find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
-
+# find bin -type f -exec ls -lh {} \;
+find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
+find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
+find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
 
 # rm -rf feeds/packages/lang/golang
 # git clone  --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
