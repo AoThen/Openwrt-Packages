@@ -74,9 +74,11 @@ svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./
 
 rm -rf ./feeds/packages/lang/golang
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
+
 # cd ..
 # mv .config openwrt-sdk/.config
 # cd openwrt-sdk
+
 echo CONFIG_ALL=y >.config
 make defconfig
 
@@ -98,7 +100,7 @@ case "$PKGNAME" in
         find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
 	;;
 	"passwall_packages" |\
-	"passwallpackages" )
+	"passwall_packages" )
 		pkgs=$(ls ./package/feeds/passwall_packages)
 
         # 遍历所有包名
