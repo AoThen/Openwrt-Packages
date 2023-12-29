@@ -42,11 +42,11 @@ jobs:
       - name: build ipk
         id: build
         env:
-          SOURCECODEURL: ${{ github.event.inputs.sourcecode }}
-          PKGNAME: ${{ github.event.inputs.pkgname }}
-          BOARD: ${{ github.event.inputs.device }}
-          EMAIL: ${{ github.event.inputs.email }}
-          PASSWORD: ${{ github.event.inputs.password }}
+          SOURCECODEURL: ${{ inputs.sourcecode }}
+          PKGNAME: ${{ inputs.pkgname }}
+          BOARD: ${{ inputs.device }}
+          EMAIL: ${{ inputs.email }}
+          PASSWORD: ${{ inputs.password }}
         run: |
           sudo apt update -y
           sudo apt install libfuse-dev -y
@@ -56,7 +56,7 @@ jobs:
 
       - uses: actions/upload-artifact@main
         with:
-          name: ${{ github.event.inputs.pkgname }}_related_ipks
+          name: ${{ inputs.pkgname }}_related_ipks
           path: |
             ./*ipk*
 
@@ -71,14 +71,14 @@ jobs:
           git config --global user.name ${{ secrets.NAME }}
           git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
-          rm -rf ${{ github.event.inputs.pkgname }}
-          mkdir ${{ github.event.inputs.pkgname }}
-          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
+          rm -rf ${{ inputs.pkgname }}
+          mkdir ${{ inputs.pkgname }}
+          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ inputs.pkgname }}/
           echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-          zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
+          zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
 
       #重建
       # - name: Rebase
@@ -109,10 +109,10 @@ jobs:
       - name: Upload firmware to release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.pkgname }}
-          body: ${{ github.event.inputs.sourcecode }}
+          tag_name: ${{ inputs.pkgname }}
+          body: ${{ inputs.sourcecode }}
           token: ${{ github.token }}
-          files: ${{ env.CRTDIRTEMP }}/${{ github.event.inputs.pkgname }}.zip
+          files: ${{ env.CRTDIRTEMP }}/${{ inputs.pkgname }}.zip
 
       - name: Delete workflow runs
         uses: Mattraks/delete-workflow-runs@v2
