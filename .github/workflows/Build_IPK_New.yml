@@ -9,11 +9,11 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "passwall_packages"
+        default: "passwallpackages"
         options:
           - openclash
           - passwall
-          - passwall_packages
+          - passwallpackages
   push:
     branches:
       - main

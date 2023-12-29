@@ -69,8 +69,8 @@ esac
 # ./scripts/feeds update packages
 # 更新go版本
 
-# rm -rf ./package/feeds/packages/lang/golang
-# svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
+rm -rf ./package/feeds/packages/lang/golang
+svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
 rm -rf ./feeds/packages/lang/golang
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
@@ -98,7 +98,7 @@ case "$PKGNAME" in
         find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
 	;;
 	"passwall_packages" |\
-	"passwall_packages" )
+	"passwallpackages" )
 		pkgs=$(ls ./package/feeds/passwall_packages)
 
         # 遍历所有包名
