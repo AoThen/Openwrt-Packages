@@ -74,14 +74,14 @@ esac
 
 rm -rf ./feeds/packages/lang/golang
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
-# cd ..
-# mv .config openwrt-sdk/.config
-# cd openwrt-sdk
-echo CONFIG_ALL=y >.config
+cd ..
+mv .config openwrt-sdk/.config
+cd openwrt-sdk
+# echo CONFIG_ALL=y >.config
 make defconfig
 
-# make download -j8
-
+#下载包
+make download -j8 V=s
 
 case "$PKGNAME" in
 	"openclash" |\
@@ -117,8 +117,8 @@ esac
 
 
 
-
-
+#优先使用多线程编译，出错则使用单线程并输出详细信息
+make -j$(nproc) ||  make -j1 V=s
 
 
 

@@ -56,7 +56,7 @@ jobs:
 
       - uses: actions/upload-artifact@main
         with:
-          name: ${{ inputs.pkgname }}_related_ipks
+          name: ${{ inputs.pkgname }}
           path: |
             ./*ipk*
 
