@@ -118,7 +118,7 @@ esac
 
 
 #优先使用多线程编译，出错则使用单线程并输出详细信息
-make -j$(nproc) ||  make -j1 V=s
+# make -j$(nproc) ||  make -j1 V=s
 
 
 
