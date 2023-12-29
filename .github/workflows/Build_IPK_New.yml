@@ -2,11 +2,9 @@ name: Build GL-MT2500 IPK New
 
 on:
   workflow_dispatch:
-
-
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   build_package:
@@ -33,36 +31,36 @@ jobs:
 
 
 
-      # - name: Commit packages
-      #   run: |
-      #     git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
-      #     cd Openwrt-Packages
-      #     rm -rf ${{ github.event.inputs.pkgname }}
-      #     mkdir ${{ github.event.inputs.pkgname }}
-      #     cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ github.event.inputs.pkgname }}/
-      #     echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
-      #     git add .
-      #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
-      #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-      #     zip -r ${{ github.event.inputs.pkgname }}.zip ${{ github.event.inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
+      - name: Commit packages
+        run: |
+          git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          cd Openwrt-Packages
+          rm -rf luci-app-openclash
+          mkdir luci-app-openclash
+          cp -rf $GITHUB_WORKSPACE/buildsource/openclash/* luci-app-openclash/
+          echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
+          git add .
+          Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
+          git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          zip -r luci-app-openclash.zip luci-app-openclash
 
 
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.OPENWRT_PACKAGES }}
-      #     repository: "AoThen/Openwrt-Packages"
-      #     branch: "Packages"
-      #     directory: "Openwrt-Packages"
-      #     force: true
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ github.token }}
+          repository: "AoThen/Openwrt-Packages"
+          branch: "Packages"
+          directory: "Openwrt-Packages"
+          force: true
 
-      # - name: Upload firmware to release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ github.event.inputs.pkgname }}
-      #     body: ${{ github.event.inputs.sourcecode }}
-      #     token: ${{ secrets.OPENWRT_PACKAGES }}
-      #     files: ${{ env.CRTDIRTEMP }}/${{ github.event.inputs.pkgname }}.zip
+      - name: Upload firmware to release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: luci-app-openclash
+          body: luci-app-openclash
+          token: ${{ github.token }}
+          files: ${{ env.CRTDIRTEMP }}/luci-app-openclash.zip
 
 
       # - name: Delete workflow runs
