@@ -52,7 +52,7 @@ jobs:
 
       - uses: actions/upload-artifact@main
         with:
-          name: ipks
+          name: ${{ inputs.pkgname }}
           path: |
             ./buildsource
 
