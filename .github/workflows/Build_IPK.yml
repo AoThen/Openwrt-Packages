@@ -48,8 +48,8 @@ jobs:
           EMAIL: ${{ github.event.inputs.email }}
           PASSWORD: ${{ github.event.inputs.password }}
         run: |
-          sudo apt update
-          sudo apt install libfuse-dev
+          sudo apt update -y
+          sudo apt install libfuse-dev -y
           cd $GITHUB_WORKSPACE
           chmod +x ./build.sh
           ./build.sh
