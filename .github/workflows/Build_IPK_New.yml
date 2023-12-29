@@ -1,5 +1,8 @@
 name: Build GL-MT2500 IPK New
 
+env:
+  TZ: Asia/Shanghai
+
 on:
   workflow_dispatch:
     inputs:
