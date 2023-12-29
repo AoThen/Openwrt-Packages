@@ -40,16 +40,35 @@ git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-s
 cd openwrt-sdk
 
 
-echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
-echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
-echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
+
+case "$PKGNAME" in
+	"openclash" |\
+	"luci-app-openclash" )
+		echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
+	;;
+	"passwall" |\
+	"luci-app-passwall" )
+		echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+	;;
+	"passwall_packages" |\
+	"passwall_packages" )
+		echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+	;;
+	*)
+esac
+
+
+
+# echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+# echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
 
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
 # ./scripts/feeds update packages
+# 更新go版本
 rm -rf ./package/feeds/packages/lang/golang
 svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
@@ -61,28 +80,45 @@ make defconfig
 
 # make download -j8
 
-#修复openclash编译报错bash: po2lmo: command not found
-make ./package/feeds/luci/luci-base/compile V=s
-# make -j1 V=s
 
-make V=s ./package/feeds/openclash/luci-app-openclash/compile
+case "$PKGNAME" in
+	"openclash" |\
+	"luci-app-openclash" )
+		#修复openclash编译报错bash: po2lmo: command not found
+        make ./package/feeds/luci/luci-base/compile V=s
+        # make -j1 V=s
+        make V=s ./package/feeds/openclash/luci-app-openclash/compile
+        find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
+	;;
+	"passwall" |\
+	"luci-app-passwall" )
+		make V=s ./package/feeds/passwall/luci-app-passwall/compile
+        find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
+	;;
+	"passwall_packages" |\
+	"passwall_packages" )
+		pkgs=$(ls ./package/feeds/passwall_packages)
 
-# make V=s ./package/feeds/passwall/luci-app-passwall/compile
+        # 遍历所有包名
+        for pkg in $pkgs
+        do
+            # 编译每个包
+            echo $pkg
+            make V=s ./package/feeds/passwall_packages/$pkg/compile
+        done
+        
+        find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
+	;;
+	*)
+esac
 
-# pkgs=$(ls ./package/feeds/passwall_packages)
-
-# # 遍历所有包名
-# for pkg in $pkgs
-# do
-#     # 编译每个包
-#     echo $pkg
-#     make V=s ./package/feeds/passwall_packages/$pkg/compile
-# done
 
 
-find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
-# find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
-# find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
+
+
+
+
+
 
 # rm -rf feeds/packages/lang/golang
 # git clone  --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
