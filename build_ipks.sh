@@ -24,6 +24,7 @@ git config --global user.name "AoThen"
 mkdir -p  ${WORKDIR}/buildsource
 mkdir -p  ${WORKDIR}/buildsource/openclash
 mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall
+mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall2
 mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
 
@@ -44,6 +45,10 @@ case "$PKGNAME" in
 	"openclash" |\
 	"luci-app-openclash" )
 		echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
+	;;
+	"passwall2" |\
+	"luci-app-passwall2" )
+		echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> "feeds.conf.default"
 	;;
 	"passwall" |\
 	"luci-app-passwall" )
@@ -93,6 +98,11 @@ case "$PKGNAME" in
         # make -j1 V=s
         make V=s ./package/feeds/openclash/luci-app-openclash/compile
         find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
+	;;
+	"passwall2" |\
+	"luci-app-passwall2" )
+		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
+        find bin/packages/aarch64_cortex-a53/passwall2 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
 	;;
 	"passwall" |\
 	"luci-app-passwall" )
