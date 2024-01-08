@@ -9,12 +9,13 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "passwall2"
+        default: "smartdns"
         options:
           - openclash
           - passwall
           - passwall2
           - passwall_packages
+          - smartdns
   push:
     branches:
       - main

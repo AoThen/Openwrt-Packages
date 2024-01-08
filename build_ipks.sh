@@ -23,6 +23,7 @@ git config --global user.name "AoThen"
 
 mkdir -p  ${WORKDIR}/buildsource
 mkdir -p  ${WORKDIR}/buildsource/openclash
+mkdir -p  ${WORKDIR}/buildsource/smartdns
 mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall
 mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall2
 mkdir -p  ${WORKDIR}/buildsource/passwall_packages
@@ -42,6 +43,11 @@ cd openwrt-sdk
 
 
 case "$PKGNAME" in
+	"smartdns" |\
+	"luci-app-smartdns" )
+		echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
+		echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
+	;;
 	"openclash" |\
 	"luci-app-openclash" )
 		echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
@@ -91,6 +97,13 @@ make defconfig
 make download -j8 V=s
 
 case "$PKGNAME" in
+	"smartdns" |\
+	"luci-app-smartdns" )
+        make V=s ./package/feeds/smartdns/smartdns/compile
+		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+
+        find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
+	;;
 	"openclash" |\
 	"luci-app-openclash" )
 		#修复openclash编译报错bash: po2lmo: command not found
