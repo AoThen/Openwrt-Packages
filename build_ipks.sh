@@ -103,7 +103,7 @@ case "$PKGNAME" in
 		make V=s ./package/feeds/packages/smartdns/compile
 		make V=s ./package/feeds/luci/applications/luci-app-smartdns/compile
 
-        find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
+        find bin -type f -name "*smartdns*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
 	;;
 	"openclash" |\
 	"luci-app-openclash" )
