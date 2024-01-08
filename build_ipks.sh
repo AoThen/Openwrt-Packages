@@ -99,8 +99,9 @@ make download -j8 V=s
 case "$PKGNAME" in
 	"smartdns" |\
 	"luci-app-smartdns" )
-        make V=s ./package/feeds/smartdns/smartdns/compile
-		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+
+		make V=s ./package/feeds/packages/smartdns/compile
+		make V=s ./package/feeds/luci/applications/luci-app-smartdns/compile
 
         find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
 	;;
