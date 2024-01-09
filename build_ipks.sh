@@ -37,11 +37,11 @@ mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}
 
 
-# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-# cd openwrt-sdk
+git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+cd openwrt-sdk
 
-git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git
-cd immortalwrt-mt798x
+# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git
+# cd immortalwrt-mt798x
 
 
 
