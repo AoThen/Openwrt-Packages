@@ -78,18 +78,18 @@ esac
 # echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
 # echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
 
-./scripts/feeds clean -a
+# ./scripts/feeds clean -a
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
 # ./scripts/feeds update packages
 # 更新go版本
 
-rm -rf ./package/feeds/packages/lang/golang
-svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
+# rm -rf ./package/feeds/packages/lang/golang
+# svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
-rm -rf ./feeds/packages/lang/golang
-svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
+# rm -rf ./feeds/packages/lang/golang
+# svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
 
 # cd ..
 # mv .config openwrt-sdk/.config
@@ -121,7 +121,7 @@ case "$PKGNAME" in
 	"passwall2" |\
 	"luci-app-passwall2" )
 		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
-        find bin/packages/aarch64_cortex-a53/passwall2 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
+        find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
 	;;
 	"passwall" |\
 	"luci-app-passwall" )
