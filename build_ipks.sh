@@ -99,7 +99,7 @@ echo CONFIG_ALL=y >.config
 make defconfig
 
 #下载包
-make download -j8 V=s
+# make download -j8 V=s
 
 case "$PKGNAME" in
 	"smartdns" |\
