@@ -71,7 +71,9 @@ jobs:
           cd Openwrt-Packages
           
           rm -rf luci-app-openclash
-          svn export https://github.com/vernesong/OpenClash/trunk/luci-app-openclash luci-app-openclash
+          git clone --depth 1 https://github.com/vernesong/OpenClash.git luci-app-openclash2
+          mv luci-app-openclash2/luci-app-openclash .
+          rm -rf luci-app-openclash2
 
 
           rm -rf openwrt-aliyundrive
