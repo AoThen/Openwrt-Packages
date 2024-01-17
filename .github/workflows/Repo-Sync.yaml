@@ -100,45 +100,36 @@ jobs:
           git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
           rm -rf luci-app-argon-config/.git
 
-
-          rm -rf luci-app-serverchan
-          svn export https://github.com/tty228/luci-app-serverchan/trunk luci-app-serverchan
-
-          rm -rf luci-app-broadbandacc
-          svn export https://github.com/AoThen/luci-app-broadbandacc/trunk luci-app-broadbandacc
-
-          rm -rf luci-app-ramfree
-          svn export https://github.com/AoThen/luci-app-ramfree/trunk luci-app-ramfree
-
-          rm -rf netspeedtest
-          svn export https://github.com/sirpdboy/netspeedtest/trunk netspeedtest
-
-          rm -rf luci-app-cloudflarespeedtest
-          svn export https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest/trunk/applications/luci-app-cloudflarespeedtest luci-app-cloudflarespeedtest
-
-          rm -rf cdnspeedtest
-          svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest/trunk/cdnspeedtest cdnspeedtest
-
-          rm -rf luci-app-netdata
-          svn export https://github.com/sirpdboy/luci-app-netdata/trunk luci-app-netdata
-
-          rm -rf luci-theme-edge
-          svn export https://github.com/kiddin9/luci-theme-edge/trunk luci-theme-edge
-
-
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
 
 
+
 # rm -rf openwrt-aliyundrive
 # svn export https://github.com/messense/aliyundrive-webdav openwrt-aliyundrive
 
-# rm -rf luci-app-vlmcsd
-# svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-vlmcsd luci-app-vlmcsd
+# rm -rf luci-app-serverchan
+# svn export https://github.com/tty228/luci-app-serverchan      luci-app-serverchan
 
-# rm -rf vlmcsd
-# svn export https://github.com/kiddin9/openwrt-packages/trunk/vlmcsd vlmcsd
+# rm -rf luci-app-broadbandacc
+# svn export https://github.com/AoThen/luci-app-broadbandacc      luci-app-broadbandacc
+
+# rm -rf netspeedtest
+# svn export https://github.com/sirpdboy/netspeedtest      netspeedtest
+
+# rm -rf luci-app-cloudflarespeedtest
+# svn export https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest     /applications/luci-app-cloudflarespeedtest
+
+# luci-app-cloudflarespeedtest
+
+# rm -rf cdnspeedtest
+# svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest     /cdnspeedtest
+# cdnspeedtest
+
+
+
+
 
 # rm -rf custom
 # svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
