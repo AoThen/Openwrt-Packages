@@ -76,9 +76,6 @@ jobs:
           rm -rf luci-app-openclash2
 
 
-          rm -rf openwrt-aliyundrive
-          svn export https://github.com/messense/aliyundrive-webdav/trunk/openwrt openwrt-aliyundrive
-
           rm -rf openwrt-alist
           git clone --depth 1 https://github.com/sbwml/luci-app-alist openwrt-alist
           rm -rf openwrt-alist/.git
@@ -132,6 +129,10 @@ jobs:
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+
+
+# rm -rf openwrt-aliyundrive
+# svn export https://github.com/messense/aliyundrive-webdav openwrt-aliyundrive
 
 # rm -rf luci-app-vlmcsd
 # svn export https://github.com/kiddin9/openwrt-packages/trunk/luci-app-vlmcsd luci-app-vlmcsd
