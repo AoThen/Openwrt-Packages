@@ -100,8 +100,10 @@ esac
 # mv .config openwrt-sdk/.config
 # cd openwrt-sdk
 
-# echo CONFIG_ALL=y >.config
-# make defconfig
+# make savedefconfig
+
+echo CONFIG_ALL=y >.config
+make defconfig
 
 #下载包
 # make download -j8 V=s
