@@ -22,6 +22,7 @@ git config --global user.name "AoThen"
 [ -n "${PASSWORD}" ] && git config --global user.password "${PASSWORD}"
 
 mkdir -p  ${WORKDIR}/buildsource
+mkdir -p  ${WORKDIR}/buildsource/NetSpeedTest
 mkdir -p  ${WORKDIR}/buildsource/openclash
 mkdir -p  ${WORKDIR}/buildsource/smartdns
 mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall
@@ -48,6 +49,10 @@ cd openwrt-sdk
 
 
 case "$PKGNAME" in
+	"NetSpeedTest" |\
+	"luci-app-NetSpeedTest" )
+		git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
+	;;
 	"smartdns" |\
 	"luci-app-smartdns" )
 		echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
@@ -102,6 +107,11 @@ make defconfig
 # make download -j8 V=s
 
 case "$PKGNAME" in
+	"NetSpeedTest" |\
+	"luci-app-NetSpeedTest" )
+		make package/netspeedtest/luci-app-netspeedtest/compile V=s
+		find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/netspeedtest" \; 
+	;;
 	"smartdns" |\
 	"luci-app-smartdns" )
 

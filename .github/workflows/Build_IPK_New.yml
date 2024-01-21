@@ -9,13 +9,14 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "smartdns"
+        default: "NetSpeedTest"
         options:
           - openclash
           - passwall
           - passwall2
           - passwall_packages
           - smartdns
+          - NetSpeedTest
   push:
     branches:
       - main
