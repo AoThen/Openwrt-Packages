@@ -38,11 +38,11 @@ mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}
 
 
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+# cd openwrt-sdk
 
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git
-# cd immortalwrt-mt798x
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git
+cd immortalwrt-mt798x
 
 
 
@@ -110,7 +110,7 @@ case "$PKGNAME" in
 	"NetSpeedTest" |\
 	"luci-app-NetSpeedTest" )
 		make package/netspeedtest/luci-app-netspeedtest/compile V=s
-		find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/netspeedtest" \; 
+		find ./bin -type f -name "*.ipk"
 	;;
 	"smartdns" |\
 	"luci-app-smartdns" )

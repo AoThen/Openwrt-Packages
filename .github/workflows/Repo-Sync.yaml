@@ -92,6 +92,14 @@ jobs:
           git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
           rm -rf passwall_luci/.git
 
+          rm -rf luci-app-mosdns
+          git clone --depth 1 https://github.com/sbwml/luci-app-mosdns.git  luci-app-mosdns
+          rm -rf luci-app-mosdns/.git
+
+          rm -rf netspeedtest
+          git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git  netspeedtest
+          rm -rf netspeedtest/.git
+
           rm -rf luci-theme-argon
           git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
 

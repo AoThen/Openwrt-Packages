@@ -17,11 +17,11 @@ on:
           - passwall_packages
           - smartdns
           - NetSpeedTest
-  push:
-    branches:
-      - main
-    paths:
-      - 'build_ipks.sh'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'build_ipks.sh'
 jobs:
   build_package:
     runs-on: ubuntu-20.04
