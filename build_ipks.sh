@@ -96,14 +96,15 @@ esac
 # rm -rf ./feeds/packages/lang/golang
 # svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
 
-# cd ..
-# mv .config openwrt-sdk/.config
-# cd openwrt-sdk
+cd ..
+mv .config openwrt-sdk/.config
+cd openwrt-sdk
 
 # make savedefconfig
 
-echo CONFIG_ALL=y >.config
-make defconfig
+
+# echo CONFIG_ALL=y >.config
+# make defconfig
 
 #下载包
 # make download -j8 V=s
@@ -112,7 +113,7 @@ case "$PKGNAME" in
 	"NetSpeedTest" |\
 	"luci-app-NetSpeedTest" )
 		make package/netspeedtest/luci-app-netspeedtest/compile V=s
-		find ./bin -type f -name "*.ipk"
+		find bin/packages -type f -name "*.ipk"
 	;;
 	"smartdns" |\
 	"luci-app-smartdns" )
