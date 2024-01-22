@@ -22,6 +22,8 @@ on:
   #     - main
   #   paths:
   #     - 'build_ipks.sh'
+
+
 jobs:
   build_package:
     runs-on: ubuntu-20.04
@@ -58,12 +60,13 @@ jobs:
           name: ${{ inputs.pkgname }}
           path: |
             ./buildsource
+            ./$GITHUB_WORKSPACE/openwrt-sdk/bin/NetSpeedTest/packages/aarch64_cortex-a53/*ipk
 
 
       - name: Commit packages
         run: |
-          git config --global user.email ${{ secrets.EMAIL }}
-          git config --global user.name ${{ secrets.NAME }}
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git clone  --depth 1 -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
           rm -rf ${{ inputs.pkgname }}
@@ -73,18 +76,19 @@ jobs:
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          git push
 
 # echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
 # zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ github.token }}
-          repository: "AoThen/Openwrt-Packages"
-          branch: "Packages"
-          directory: "Openwrt-Packages"
-          force: true
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ github.token }}
+      #     repository: "AoThen/Openwrt-Packages"
+      #     branch: "Packages"
+      #     directory: "Openwrt-Packages"
+      #     force: true
 
       # - name: Commit packages
       #   run: |
