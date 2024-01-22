@@ -96,73 +96,74 @@ esac
 # rm -rf ./feeds/packages/lang/golang
 # svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
 
-cd ..
-mv .config openwrt-sdk/.config
-cd openwrt-sdk
+# cd ..
+# mv .config openwrt-sdk/.config
+# cd openwrt-sdk
 
 # make savedefconfig
 
 
-# echo CONFIG_ALL=y >.config
-# make defconfig
+echo CONFIG_ALL=y >.config
+make defconfig
 
 #下载包
 # make download -j8 V=s
 
-# case "$PKGNAME" in
-# 	"NetSpeedTest" |\
-# 	"luci-app-NetSpeedTest" )
-# 		make package/netspeedtest/luci-app-netspeedtest/compile V=s
-# 		find bin/packages -type f -name "*.ipk"
-# 	;;
-# 	"smartdns" |\
-# 	"luci-app-smartdns" )
+case "$PKGNAME" in
+	"NetSpeedTest" |\
+	"luci-app-NetSpeedTest" )
 
-# 		make V=s ./package/feeds/smartdns/smartdns/compile
-# 		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+		make ./package/netspeedtest/luci-app-netspeedtest/compile V=s
+		find bin/packages -type f -name "*.ipk"
+	;;
+	"smartdns" |\
+	"luci-app-smartdns" )
 
-#         find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
-# 	;;
-# 	"openclash" |\
-# 	"luci-app-openclash" )
-# 		#修复openclash编译报错bash: po2lmo: command not found
-#         make ./package/feeds/luci/luci-base/compile V=s
-#         # make -j1 V=s
-#         make V=s ./package/feeds/openclash/luci-app-openclash/compile
-#         find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
-# 	;;
-# 	"passwall2" |\
-# 	"luci-app-passwall2" )
-# 		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
-#         find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
-# 	;;
-# 	"passwall" |\
-# 	"luci-app-passwall" )
-# 		make V=s ./package/feeds/passwall/luci-app-passwall/compile
-#         find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
-# 	;;
-# 	"passwall_packages" |\
-# 	"passwall_packages" )
-# 		pkgs=$(ls ./package/feeds/passwall_packages)
+		make V=s ./package/feeds/smartdns/smartdns/compile
+		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
 
-#         # 遍历所有包名
-#         for pkg in $pkgs
-#         do
-#             # 编译每个包
-#             echo $pkg
-#             make V=s ./package/feeds/passwall_packages/$pkg/compile
-#         done
+        find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
+	;;
+	"openclash" |\
+	"luci-app-openclash" )
+		#修复openclash编译报错bash: po2lmo: command not found
+        make ./package/feeds/luci/luci-base/compile V=s
+        # make -j1 V=s
+        make V=s ./package/feeds/openclash/luci-app-openclash/compile
+        find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
+	;;
+	"passwall2" |\
+	"luci-app-passwall2" )
+		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
+        find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
+	;;
+	"passwall" |\
+	"luci-app-passwall" )
+		make V=s ./package/feeds/passwall/luci-app-passwall/compile
+        find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
+	;;
+	"passwall_packages" |\
+	"passwall_packages" )
+		pkgs=$(ls ./package/feeds/passwall_packages)
+
+        # 遍历所有包名
+        for pkg in $pkgs
+        do
+            # 编译每个包
+            echo $pkg
+            make V=s ./package/feeds/passwall_packages/$pkg/compile
+        done
         
-#         find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
-# 	;;
-# 	*)
-# esac
+        find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
+	;;
+	*)
+esac
 
 
 
 
 #优先使用多线程编译，出错则使用单线程并输出详细信息
-make -j$(nproc) ||  make -j1 V=s
+# make -j$(nproc) ||  make -j1 V=s
 
 
 
