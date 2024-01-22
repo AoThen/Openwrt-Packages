@@ -69,11 +69,13 @@ jobs:
           rm -rf ${{ inputs.pkgname }}
           mkdir ${{ inputs.pkgname }}
           cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ inputs.pkgname }}/
-          echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
+
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-          zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53/githubaction
+
+# echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
+# zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53
 
       - name: Push changes
         uses: ad-m/github-push-action@master
