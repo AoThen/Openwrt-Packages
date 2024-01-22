@@ -38,11 +38,11 @@ mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}
 
 
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+# cd openwrt-sdk
 
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git
-# cd immortalwrt-mt798x
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+cd openwrt-sdk
 
 
 
@@ -96,15 +96,15 @@ esac
 # rm -rf ./feeds/packages/lang/golang
 # svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
 
-# cd ..
-# mv .config openwrt-sdk/.config
-# cd openwrt-sdk
+cd ..
+mv .config openwrt-sdk/.config
+cd openwrt-sdk
 
 # make savedefconfig
 
 
-echo CONFIG_ALL=y >.config
-make defconfig
+# echo CONFIG_ALL=y >.config
+# make defconfig
 
 #下载包
 # make download -j8 V=s
