@@ -26,6 +26,9 @@ on:
 
 jobs:
   build_package:
+    permissions:
+      actions: write #  to cancel/stop running workflows (styfle/cancel-workflow-action)
+      contents: write #  to create release tags (cycjimmy/semantic-release-action)
     runs-on: ubuntu-20.04
     steps:
       - name: Initialization environment
@@ -60,7 +63,7 @@ jobs:
           name: ${{ inputs.pkgname }}
           path: |
             ./buildsource
-            ./$GITHUB_WORKSPACE/openwrt-sdk/bin/NetSpeedTest/packages/aarch64_cortex-a53/*ipk
+            ./openwrt-sdk/bin/NetSpeedTest/packages/aarch64_cortex-a53/*ipk
 
 
       - name: Commit packages
@@ -76,19 +79,19 @@ jobs:
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-          git push
+
 
 # echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
 # zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53
 
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ github.token }}
-      #     repository: "AoThen/Openwrt-Packages"
-      #     branch: "Packages"
-      #     directory: "Openwrt-Packages"
-      #     force: true
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ github.token }}
+          repository: "AoThen/Openwrt-Packages"
+          branch: "Packages"
+          directory: "Openwrt-Packages"
+          force: true
 
       # - name: Commit packages
       #   run: |
