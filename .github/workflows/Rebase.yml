@@ -24,6 +24,8 @@ jobs:
           cd Openwrt-Packages
 
           git checkout --orphan latest_branch
+
+          find . -name 'targets' -type d -exec rm -rf {} +
           git add -A
 
           git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
