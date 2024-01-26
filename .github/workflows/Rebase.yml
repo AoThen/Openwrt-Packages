@@ -1,0 +1,39 @@
+name: Rebase
+
+on:
+  workflow_dispatch:
+    inputs:
+      isRebase:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  build_package:
+    permissions:
+      actions: write #  to cancel/stop running workflows (styfle/cancel-workflow-action)
+      contents: write #  to create release tags (cycjimmy/semantic-release-action)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Rebase
+        if: ${{ inputs.isRebase }}
+        run: |
+          git config --global user.email ${{ secrets.EMAIL }}
+          git config --global user.name ${{ secrets.NAME }}
+          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          cd Openwrt-Packages
+
+          git checkout --orphan latest_branch
+          git add -A
+
+          git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
+
+          git branch -D Packages
+          git branch -m Packages
+          git push -f "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
+
+      - name: Delete workflow runs
+        uses: AoThen/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 5
