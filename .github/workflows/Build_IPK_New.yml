@@ -27,6 +27,10 @@ on:
         required: false
         type: boolean
         default: true
+      isRebase:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build_package:
@@ -64,6 +68,11 @@ jobs:
           chmod +x ./build_ipks.sh
           ./build_ipks.sh
 
+      - name: print
+        id: printipk
+        run: |
+          tree $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/aarch64_cortex-a53
+
       - name: Artifact
         uses: actions/upload-artifact@main
         if: ${{ inputs.packages }}
@@ -73,25 +82,25 @@ jobs:
             ./buildsource
             $GITHUB_WORKSPACE/openwrt-sdk/.config
 
-      # - name: Rebase
-      #   run: |
-      #     git config --global user.email ${{ secrets.EMAIL }}
-      #     git config --global user.name ${{ secrets.NAME }}
-      #     git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
-      #     cd Openwrt-Packages
+      - name: Rebase
+        if: ${{ inputs.isRebase }}
+        run: |
+          git config --global user.email ${{ secrets.EMAIL }}
+          git config --global user.name ${{ secrets.NAME }}
+          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          cd Openwrt-Packages
 
-      #     git checkout --orphan latest_branch
-      #     git add -A
+          git checkout --orphan latest_branch
+          git add -A
 
-      #     Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
-      #     git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
 
-      #     git branch -D Packages
-      #     git branch -m Packages
-      #     git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
+          git branch -D Packages
+          git branch -m Packages
+          git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
 
       - name: Commit packages
-        if: ${{ inputs.packages }}
+        if: ${{ inputs.packages }} && !${{ inputs.isRebase }}
         run: |
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}

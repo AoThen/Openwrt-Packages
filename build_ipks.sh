@@ -36,11 +36,11 @@ mkdir -p  ${WORKDIR}/buildsource
 
 
 
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
-
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 # cd openwrt-sdk
+
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+cd openwrt-sdk
 
 
 
@@ -82,7 +82,7 @@ case "$PKGNAME" in
 	;;
 	"passwall_packages" |\
 	"passwall_packages" )
-		echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+		echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
 	;;
 	*)
 esac
@@ -166,14 +166,14 @@ case "$PKGNAME" in
 	;;
 	"passwall_packages" |\
 	"passwall_packages" )
-		pkgs=$(ls ./package/feeds/passwall_packages)
+		pkgs=$(ls ./package/feeds/pspackages)
 
         # 遍历所有包名
         for pkg in $pkgs
         do
             # 编译每个包
             echo $pkg
-            make V=s ./package/feeds/passwall_packages/$pkg/compile
+            make V=s ./package/feeds/pspackages/$pkg/compile
         done
         
         # find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
