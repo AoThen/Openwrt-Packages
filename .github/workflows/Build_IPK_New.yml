@@ -71,6 +71,7 @@ jobs:
           name: ${{ inputs.pkgname }}
           path: |
             ./buildsource
+            $GITHUB_WORKSPACE/openwrt-sdk/.config
 
 
       - name: Commit packages

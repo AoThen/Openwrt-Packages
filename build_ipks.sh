@@ -187,4 +187,4 @@ esac
 
 find . -name "*.ipk" -print
 
-find . -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
+find . -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
