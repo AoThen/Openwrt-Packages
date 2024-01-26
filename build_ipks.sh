@@ -128,14 +128,14 @@ case "$PKGNAME" in
 
 		make ./package/feeds/luci/luci-base/compile V=s -j1
 
-		make ./package/mosdns/compile V=s -j1
+		make ./package/mosdns/luci-app-mosdns/compile V=s -j1
 		# find bin -type f -name "*.ipk"
 		
 	;;
 	"NetSpeedTest" |\
 	"luci-app-NetSpeedTest" )
 
-		make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
+		make ./package/netspeedtest/compile V=s -j1
 		# find bin/packages -type f -name "*.ipk"
 	;;
 	"smartdns" |\
