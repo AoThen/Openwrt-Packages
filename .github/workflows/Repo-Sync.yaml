@@ -3,11 +3,11 @@ name: Repo Sync
 on:
   workflow_dispatch:
   
-  push:
-    branches:
-      - 'main'
-    paths:
-      - '.github/workflows/Repo-Sync.yaml'
+  # push:
+  #   branches:
+  #     - 'main'
+  #   paths:
+  #     - '.github/workflows/Repo-Sync.yaml'
 
   # schedule:
   #   - cron: "0 1 * * *"
