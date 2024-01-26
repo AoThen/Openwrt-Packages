@@ -111,7 +111,7 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/
 
 echo CONFIG_ALL=y >.config
 
-make make ARCH=aarch64 defconfig
+make ARCH=aarch64 defconfig
 
 #下载包
 # make download -j8 V=s
