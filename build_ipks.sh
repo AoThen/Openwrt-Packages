@@ -111,7 +111,8 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/
 
 
 echo CONFIG_ALL=y >.config
-make defconfig
+
+make make ARCH=aarch64 defconfig
 
 #下载包
 # make download -j8 V=s
@@ -127,7 +128,8 @@ case "$PKGNAME" in
 	"luci-app-mosdns" )
 
 		make ./package/feeds/luci/luci-base/compile V=s -j1
-		make ./package/mosdns/luci-app-mosdns/compile V=s -j1
+
+		make ./package/mosdns/compile V=s -j1
 		# find bin -type f -name "*.ipk"
 		
 	;;
