@@ -120,7 +120,7 @@ case "$PKGNAME" in
 	"alist" |\
 	"luci-app-alist" )
 
-		make ./package/alist/luci-app-alist/luci-app-alist/compile V=s -j1
+		make ./package/alist/luci-app-alist/compile V=s -j1
 		
 	;;
 	"mosdns" |\
@@ -186,4 +186,4 @@ esac
 
 find . -name "*.ipk" -print
 
-find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
+find . -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 

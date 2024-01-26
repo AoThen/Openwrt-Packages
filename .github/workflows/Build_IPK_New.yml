@@ -19,7 +19,14 @@ on:
           - NetSpeedTest
           - luci-app-mosdns
           - luci-app-alist
-
+      packages:
+        required: false
+        type: boolean
+        default: true
+      artifact:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build_package:
@@ -57,7 +64,9 @@ jobs:
           chmod +x ./build_ipks.sh
           ./build_ipks.sh
 
-      - uses: actions/upload-artifact@main
+      - name: Artifact
+        uses: actions/upload-artifact@main
+        if: ${{ inputs.packages }}
         with:
           name: ${{ inputs.pkgname }}
           path: |
@@ -65,6 +74,7 @@ jobs:
 
 
       - name: Commit packages
+        if: ${{ inputs.packages }}
         run: |
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
@@ -78,12 +88,6 @@ jobs:
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
           git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
-
-
-# echo "CRTDIRTEMP=$PWD" >> $GITHUB_ENV
-# zip -r ${{ inputs.pkgname }}.zip ${{ inputs.pkgname }}/packages/aarch64_cortex-a53
-
-
 
 
       # - name: Delete workflow runs
