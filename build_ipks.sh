@@ -36,11 +36,11 @@ mkdir -p  ${WORKDIR}/buildsource
 
 
 
-# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-# cd openwrt-sdk
-
-git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 cd openwrt-sdk
+
+# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+# cd openwrt-sdk
 
 
 
@@ -108,11 +108,10 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/
 
 # make savedefconfig
 
-
+# cp -f defconfig/mt7981-ax3000.config .config
 echo CONFIG_ALL=y >.config
-
 make ARCH=aarch64 defconfig
-
+# make defconfig
 #下载包
 # make download -j8 V=s
 

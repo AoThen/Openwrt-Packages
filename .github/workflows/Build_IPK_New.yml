@@ -9,7 +9,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-app-alist"
+        default: "luci-app-mosdns"
         options:
           - openclash
           - passwall
@@ -71,7 +71,7 @@ jobs:
       - name: print
         id: printipk
         run: |
-          tree $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/aarch64_cortex-a53
+          tree $GITHUB_WORKSPACE/openwrt-sdk/bin
 
       - name: Artifact
         uses: actions/upload-artifact@main
@@ -82,22 +82,22 @@ jobs:
             ./buildsource
             $GITHUB_WORKSPACE/openwrt-sdk/.config
 
-      - name: Rebase
-        if: ${{ inputs.isRebase }}
-        run: |
-          git config --global user.email ${{ secrets.EMAIL }}
-          git config --global user.name ${{ secrets.NAME }}
-          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
-          cd Openwrt-Packages
+      # - name: Rebase
+      #   if: ${{ inputs.isRebase }}
+      #   run: |
+      #     git config --global user.email ${{ secrets.EMAIL }}
+      #     git config --global user.name ${{ secrets.NAME }}
+      #     git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+      #     cd Openwrt-Packages
 
-          git checkout --orphan latest_branch
-          git add -A
+      #     git checkout --orphan latest_branch
+      #     git add -A
 
-          git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
+      #     git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
 
-          git branch -D Packages
-          git branch -m Packages
-          git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
+      #     git branch -D Packages
+      #     git branch -m Packages
+      #     git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
 
       - name: Commit packages
         if: ${{ inputs.packages }} && !${{ inputs.isRebase }}
