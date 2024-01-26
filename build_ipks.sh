@@ -3,9 +3,9 @@
 
 echo PKGNAME: "$PKGNAME"
 
-[ -n "${PKGNAME}" ] && PKGNAME="luci-app-alist"
+# [ -n "${PKGNAME}" ] && PKGNAME="luci-app-alist"
 
-echo PKGNAME: "$PKGNAME"
+# echo PKGNAME: "$PKGNAME"
 
 WORKDIR="$(pwd)"
 
