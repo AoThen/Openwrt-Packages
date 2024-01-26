@@ -16,13 +16,17 @@ env:
   IsRebase: false
   onlya: false
 
+permissions:
+  contents: write # for Git to git push
+
 jobs:
   packages:
     runs-on: ubuntu-latest
     steps:
-      - name: Sleep Random Time
-        run: sleep $(shuf -i 10-60 -n 1)
+      # - name: Sleep Random Time
+      #   run: sleep $(shuf -i 10-60 -n 1)
       - uses: actions/checkout@main
+
       - name: Rebase
         if: env.IsRebase == 'true'
         run: |
@@ -111,6 +115,7 @@ jobs:
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
+          git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" main
 
 
 

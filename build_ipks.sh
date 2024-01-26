@@ -1,24 +1,28 @@
 #!/bin/sh
 
-EMAIL=${EMAIL:-"AoThen@GitHub.com"}
+
+echo PKGNAME: "$PKGNAME"
+
+[ -n "${PKGNAME}" ] && PKGNAME="luci-app-alist"
+
 echo PKGNAME: "$PKGNAME"
 
 WORKDIR="$(pwd)"
 
-sudo -E apt-get update
-sudo -E apt-get install git  asciidoc bash bc binutils bzip2 fastjar flex gawk gcc genisoimage gettext git intltool jikespg libgtk2.0-dev libncurses5-dev libssl-dev make mercurial patch perl-modules python2.7-dev rsync ruby sdcc subversion unzip util-linux wget xsltproc zlib1g-dev zlib1g-dev golang -y
+# sudo -E apt-get update
+# sudo -E apt-get install git  asciidoc bash bc binutils bzip2 fastjar flex gawk gcc genisoimage gettext git intltool jikespg libgtk2.0-dev libncurses5-dev libssl-dev make mercurial patch perl-modules python2.7-dev rsync ruby sdcc subversion unzip util-linux wget xsltproc zlib1g-dev zlib1g-dev golang -y
 
-sudo -E apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
-git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
-libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
-libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 \
-python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
-uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+# sudo -E apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+# bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
+# git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
+# libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
+# libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 \
+# python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
+# uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
 
 git config --global user.email "${EMAIL}"
-git config --global user.name "AoThen"
+git config --global user.name "${NAME}"
 [ -n "${PASSWORD}" ] && git config --global user.password "${PASSWORD}"
 
 mkdir -p  ${WORKDIR}/buildsource
@@ -31,24 +35,23 @@ mkdir -p  ${WORKDIR}/buildsource
 # cd  ${WORKDIR}/buildsource
 
 
-# git clone  --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages.git -b main passwall_packages
-# git clone  --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages.git -b main passwall_packages
 
-
-# cd  ${WORKDIR}
-
-
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
-
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 # cd openwrt-sdk
 
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+cd openwrt-sdk
 
 
 
 
 case "$PKGNAME" in
+	"alist" |\
+	"luci-app-alist" )
+
+		git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
+		
+	;;
 	"mosdns" |\
 	"luci-app-mosdns" )
 
@@ -85,11 +88,6 @@ case "$PKGNAME" in
 esac
 
 
-
-# echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
-# echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
-# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
-
 # ./scripts/feeds clean -a
 ./scripts/feeds update -a
 ./scripts/feeds install -a
@@ -97,11 +95,10 @@ esac
 rm -rf feeds/packages/lang/golang
 git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
 
+
+
 # ./scripts/feeds update packages
 # 更新go版本
-
-# rm -rf ./package/feeds/packages/lang/golang
-# svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./package/feeds/packages/lang/golang
 
 # rm -rf ./feeds/packages/lang/golang
 # svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
@@ -120,19 +117,25 @@ make defconfig
 # make download -j8 V=s
 
 case "$PKGNAME" in
+	"alist" |\
+	"luci-app-alist" )
+
+		make ./package/alist/luci-app-alist/luci-app-alist/compile V=s -j1
+		
+	;;
 	"mosdns" |\
 	"luci-app-mosdns" )
 
-	make ./package/feeds/luci/luci-base/compile V=s -j1
-	make ./package/mosdns/luci-app-mosdns/compile V=s -j1
-	find bin/packages -type f -name "*.ipk"
+		make ./package/feeds/luci/luci-base/compile V=s -j1
+		make ./package/mosdns/luci-app-mosdns/compile V=s -j1
+		# find bin -type f -name "*.ipk"
 		
 	;;
 	"NetSpeedTest" |\
 	"luci-app-NetSpeedTest" )
 
 		make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
-		find bin/packages -type f -name "*.ipk"
+		# find bin/packages -type f -name "*.ipk"
 	;;
 	"smartdns" |\
 	"luci-app-smartdns" )
@@ -140,7 +143,7 @@ case "$PKGNAME" in
 		make V=s ./package/feeds/smartdns/smartdns/compile
 		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
 
-        find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
+        # find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
 	;;
 	"openclash" |\
 	"luci-app-openclash" )
@@ -148,17 +151,17 @@ case "$PKGNAME" in
         make ./package/feeds/luci/luci-base/compile V=s -j1
         # make -j1 V=s
         make V=s ./package/feeds/openclash/luci-app-openclash/compile
-        find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
+        # find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
 	;;
 	"passwall2" |\
 	"luci-app-passwall2" )
 		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
-        find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
+        # find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
 	;;
 	"passwall" |\
 	"luci-app-passwall" )
 		make V=s ./package/feeds/passwall/luci-app-passwall/compile
-        find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
+        # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
 	;;
 	"passwall_packages" |\
 	"passwall_packages" )
@@ -172,21 +175,15 @@ case "$PKGNAME" in
             make V=s ./package/feeds/passwall_packages/$pkg/compile
         done
         
-        find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
+        # find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
 	;;
 	*)
 esac
 
 
-
-
 #优先使用多线程编译，出错则使用单线程并输出详细信息
 # make -j$(nproc) ||  make -j1 V=s
 
+find . -name "*.ipk" -print
 
-find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
-
-# rm -rf feeds/packages/lang/golang
-# git clone  --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
-
-
+find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
