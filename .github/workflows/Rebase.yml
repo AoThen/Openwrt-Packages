@@ -7,6 +7,10 @@ on:
         required: false
         type: boolean
         default: true
+      rbranch:
+        required: true
+        type: string
+        default: "feeds"
 
 jobs:
   build_package:
@@ -20,7 +24,7 @@ jobs:
         run: |
           git config --global user.email ${{ secrets.EMAIL }}
           git config --global user.name ${{ secrets.NAME }}
-          git clone -b Packages https://github.com/AoThen/Openwrt-Packages --single-branch
+          git clone -b ${{ inputs.rbranch }} https://github.com/AoThen/Openwrt-Packages --single-branch
           cd Openwrt-Packages
 
           git checkout --orphan latest_branch
@@ -30,9 +34,9 @@ jobs:
 
           git commit -m "Rebase update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)"
 
-          git branch -D Packages
-          git branch -m Packages
-          git push -f "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
+          git branch -D ${{ inputs.rbranch }}
+          git branch -m ${{ inputs.rbranch }}
+          git push -f "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" ${{ inputs.rbranch }}
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main

@@ -92,7 +92,7 @@ jobs:
           cd Openwrt-Packages
           rm -rf ${{ inputs.pkgname }}
           mkdir ${{ inputs.pkgname }}
-          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ inputs.pkgname }}/
+          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/aarch64_cortex-a53/* ${{ inputs.pkgname }}/
 
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")

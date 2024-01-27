@@ -5,6 +5,9 @@ for https://github.com/AoThen/Actions-GL-MT2500
 编译通过
 openclash
 luci-app-passwall
+luci-app-passwall2
+passwall_packages
+
 
 
 ## 编译包源
