@@ -113,18 +113,17 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/
 
 # make savedefconfig
 
-# cp -f defconfig/mt7981-ax3000.config .config
-echo CONFIG_ALL=y >.config
-make ARCH=aarch64 defconfig
-# make defconfig
+cp -f defconfig/mt7981-ax6000.config .config
+# echo CONFIG_ALL=y >.config
+# make ARCH=aarch64 defconfig
+make defconfig
 #下载包
 make download -j$(nproc)
 
 
-
 case "$PKGNAME" in
 	"luci-theme-argon" )
-		make -j$(nproc) ||  make -j1 V=s
+
 		make ./package/luci-theme-argon/compile V=s -j1
 		
 	;;
@@ -178,6 +177,8 @@ case "$PKGNAME" in
 	"passwall_packages" |\
 	"passwall_packages" )
 		pkgs=$(ls ./package/feeds/pspackages)
+
+		make -j$(nproc) ||  make -j1 V=s
 
         # 遍历所有包名
         for pkg in $pkgs

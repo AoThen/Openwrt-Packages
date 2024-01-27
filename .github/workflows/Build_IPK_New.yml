@@ -8,7 +8,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-theme-argon"
+        default: "passwall_packages"
         options:
           - openclash
           - passwall
