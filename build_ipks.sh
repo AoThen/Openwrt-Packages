@@ -134,7 +134,7 @@ case "$PKGNAME" in
 	"NetSpeedTest" |\
 	"luci-app-NetSpeedTest" )
 
-		make ./package/netspeedtest/compile V=s -j1
+		make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
 		# find bin/packages -type f -name "*.ipk"
 	;;
 	"smartdns" |\
