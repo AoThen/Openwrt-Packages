@@ -113,7 +113,7 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/
 
 # make savedefconfig
 
-cp -f defconfig/mt7981-ax6000.config .config
+cp -f defconfig/mt7981-ax3000.config .config
 # echo CONFIG_ALL=y >.config
 # make ARCH=aarch64 defconfig
 make defconfig
