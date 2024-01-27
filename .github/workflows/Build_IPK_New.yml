@@ -15,10 +15,10 @@ on:
           - passwall
           - passwall2
           - passwall_packages
-          - smartdns
-          - NetSpeedTest
           - luci-app-mosdns
           - luci-app-alist
+          - NetSpeedTest
+          - smartdns
       packages:
         required: false
         type: boolean
@@ -92,7 +92,7 @@ jobs:
           cd Openwrt-Packages
           rm -rf ${{ inputs.pkgname }}
           mkdir ${{ inputs.pkgname }}
-          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/aarch64_cortex-a53/* ${{ inputs.pkgname }}/
+          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/* ${{ inputs.pkgname }}/
 
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")

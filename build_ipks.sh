@@ -36,11 +36,11 @@ mkdir -p  ${WORKDIR}/buildsource
 
 
 
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
-
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 # cd openwrt-sdk
+
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+cd openwrt-sdk
 
 
 
