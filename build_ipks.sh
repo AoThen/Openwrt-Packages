@@ -178,7 +178,7 @@ case "$PKGNAME" in
 	"passwall_packages" )
 		pkgs=$(ls ./package/feeds/pspackages)
 
-		make -j$(nproc) ||  make -j1 V=s
+		# make -j$(nproc) ||  make -j1 V=s
 
         # 遍历所有包名
         for pkg in $pkgs
