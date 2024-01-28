@@ -35,19 +35,20 @@ mkdir -p ${WORKDIR}/buildsource
 # git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 
 
-git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
-cp -f MT2500-3.config openwrt-sdk/.config
+# git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
+# cp -f MT2500-3.config openwrt-sdk/.config
 
 
-# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
-# cp -f MT2500.config openwrt-sdk/.config
+git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+cp -f MT2500.config openwrt-sdk/.config
 cd openwrt-sdk
 
 case "$PKGNAME" in
 "ALLAPP")
-	echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
-	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
+	# echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+	# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
 	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+	git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
 	;;
 "luci-theme-argon")
