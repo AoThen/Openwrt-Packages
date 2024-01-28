@@ -58,7 +58,10 @@ case "$PKGNAME" in
 
 		# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
 		echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
-		git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+
+		echo "src-git cdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >> "feeds.conf.default"
+
+		# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 		
 	;;
 	"alist" |\
@@ -138,8 +141,10 @@ make download -j$(nproc)
 case "$PKGNAME" in
 	"luci-app-cloudflarespeedtest" )
 
-	make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
-	make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
+	make -j$(nproc) ||  make -j1 V=s
+
+	# make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
+	# make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
 
 	;;
 	"luci-theme-argon" )
