@@ -32,13 +32,12 @@ mkdir -p ${WORKDIR}/buildsource
 # mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
 
-# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-# cd openwrt-sdk
+git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+cp -f MT2500-2.config openwrt-sdk/.config
 
-git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
 
-cp -f MT2500.config openwrt-sdk/.config
-
+# git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+# cp -f MT2500.config openwrt-sdk/.config
 cd openwrt-sdk
 
 case "$PKGNAME" in
@@ -56,8 +55,7 @@ case "$PKGNAME" in
 
 	# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
 	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
-
-	echo "src-git cdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+	echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 
 	# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
@@ -218,6 +216,6 @@ esac
 #优先使用多线程编译，出错则使用单线程并输出详细信息
 # make -j$(nproc) ||  make -j1 V=s
 
-find . -name "*.ipk" -print
+# find . -name "*.ipk" -print
 
-find . -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \;
+# find . -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \;

@@ -73,10 +73,17 @@ jobs:
           chmod +x ./build_ipks.sh
           ./build_ipks.sh
 
-      - name: print
+      - name: Copy
+        id: copyipks
+        run: |
+          # tree $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/
+          find $GITHUB_WORKSPACE/openwrt-sdk/bin -name "*.ipk" -exec cp -f {} "./buildsource" \;
+
+      - name: Print
         id: printipk
         run: |
-          tree $GITHUB_WORKSPACE/openwrt-sdk
+          # tree $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/
+          find . -name "*.ipk" -print
 
       - name: Artifact
         uses: actions/upload-artifact@main
@@ -96,7 +103,7 @@ jobs:
           cd Openwrt-Packages
           rm -rf ${{ inputs.pkgname }}
           mkdir ${{ inputs.pkgname }}
-          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/packages* ${{ inputs.pkgname }}/
+          cp -rf $GITHUB_WORKSPACE/openwrt-sdk/bin/packages/* ${{ inputs.pkgname }}/
 
           git add .
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
