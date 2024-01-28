@@ -8,13 +8,14 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-app-cloudflarespeedtest"
+        default: "ALLAPP"
         options:
           - openclash
           - passwall
           - passwall2
           - passwall_packages
           - luci-theme-argon
+          - ALLAPP
           - luci-app-cloudflarespeedtest
           - luci-app-mosdns
           - luci-app-alist
@@ -75,7 +76,7 @@ jobs:
       - name: print
         id: printipk
         run: |
-          tree $GITHUB_WORKSPACE/openwrt-sdk/bin
+          tree $GITHUB_WORKSPACE/openwrt-sdk
 
       - name: Artifact
         uses: actions/upload-artifact@main
@@ -84,7 +85,6 @@ jobs:
           name: ${{ inputs.pkgname }}
           path: |
             ./buildsource
-            $GITHUB_WORKSPACE/openwrt-sdk/.config
 
 
       - name: Commit packages

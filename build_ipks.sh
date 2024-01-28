@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 echo PKGNAME: "$PKGNAME"
 
 # [ -n "${PKGNAME}" ] && PKGNAME="luci-app-alist"
@@ -20,12 +19,11 @@ WORKDIR="$(pwd)"
 # python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
 # uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
 
-
 git config --global user.email "${EMAIL}"
 git config --global user.name "${NAME}"
 [ -n "${PASSWORD}" ] && git config --global user.password "${PASSWORD}"
 
-mkdir -p  ${WORKDIR}/buildsource
+mkdir -p ${WORKDIR}/buildsource
 # mkdir -p  ${WORKDIR}/buildsource/NetSpeedTest
 # mkdir -p  ${WORKDIR}/buildsource/openclash
 # mkdir -p  ${WORKDIR}/buildsource/smartdns
@@ -33,8 +31,6 @@ mkdir -p  ${WORKDIR}/buildsource
 # mkdir -p  ${WORKDIR}/buildsource/luci-app-passwall2
 # mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
-
-
 
 # git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 # cd openwrt-sdk
@@ -45,66 +41,62 @@ cp -f MT2500.config openwrt-sdk/.config
 
 cd openwrt-sdk
 
-
-
-
 case "$PKGNAME" in
-	"luci-theme-argon" )
+"luci-theme-argon")
 
-		git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
-		
-	;;
-	"luci-app-cloudflarespeedtest" )
+	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 
-		# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
-		echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
+	;;
+"luci-app-cloudflarespeedtest")
 
-		echo "src-git cdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >> "feeds.conf.default"
+	# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
+	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
 
-		# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
-		
-	;;
-	"alist" |\
-	"luci-app-alist" )
+	echo "src-git cdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 
-		git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
-		
-	;;
-	"mosdns" |\
-	"luci-app-mosdns" )
+	# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
-		git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
-		git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
-		
 	;;
-	"NetSpeedTest" |\
-	"luci-app-NetSpeedTest" )
-		git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
+"alist" | \
+	"luci-app-alist")
+
+	git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
+
 	;;
-	"smartdns" |\
-	"luci-app-smartdns" )
-		echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
-		echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
+"mosdns" | \
+	"luci-app-mosdns")
+
+	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+
 	;;
-	"openclash" |\
-	"luci-app-openclash" )
-		echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
+"NetSpeedTest" | \
+	"luci-app-NetSpeedTest")
+	git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
 	;;
-	"passwall2" |\
-	"luci-app-passwall2" )
-		echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> "feeds.conf.default"
+"smartdns" | \
+	"luci-app-smartdns")
+	echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
+	echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
 	;;
-	"passwall" |\
-	"luci-app-passwall" )
-		echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+"openclash" | \
+	"luci-app-openclash")
+	echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
 	;;
-	"passwall_packages" |\
-	"passwall_packages" )
-		echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+"passwall2" | \
+	"luci-app-passwall2")
+	echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >>"feeds.conf.default"
 	;;
-	*)
+"passwall" | \
+	"luci-app-passwall")
+	echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >>"feeds.conf.default"
+	;;
+"passwall_packages" | \
+	"passwall_packages")
+	echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
+	;;
+*) ;;
 esac
-
 
 # ./scripts/feeds clean -a
 ./scripts/feeds update -a
@@ -112,7 +104,6 @@ esac
 
 rm -rf feeds/packages/lang/golang
 git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/packages/lang/golang
-
 
 # ./scripts/feeds update packages
 # 更新go版本
@@ -137,91 +128,91 @@ make defconfig
 #下载包
 make download -j$(nproc)
 
-
 case "$PKGNAME" in
-	"luci-app-cloudflarespeedtest" )
+"ALLAPP")
 
-	make -j$(nproc) ||  make -j1 V=s
+	make -j$(nproc) || make -j1 V=s
+	;;
 
-	# make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
-	# make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
+"luci-app-cloudflarespeedtest")
+
+	make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
+	make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
 
 	;;
-	"luci-theme-argon" )
-		# make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
-		make ./package/luci-theme-argon/compile V=s -j1
-		
-	;;
-	"alist" |\
-	"luci-app-alist" )
+"luci-theme-argon")
+	# make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
+	make ./package/luci-theme-argon/compile V=s -j1
 
-		make ./package/alist/luci-app-alist/compile V=s -j1
-		
 	;;
-	"mosdns" |\
-	"luci-app-mosdns" )
+"alist" | \
+	"luci-app-alist")
 
-		make ./package/feeds/luci/luci-base/compile V=s -j1
+	make ./package/alist/luci-app-alist/compile V=s -j1
 
-		make ./package/mosdns/luci-app-mosdns/compile V=s -j1
-		# find bin -type f -name "*.ipk"
-		
 	;;
-	"NetSpeedTest" |\
-	"luci-app-NetSpeedTest" )
+"mosdns" | \
+	"luci-app-mosdns")
 
-		make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
-		# find bin/packages -type f -name "*.ipk"
-	;;
-	"smartdns" |\
-	"luci-app-smartdns" )
+	make ./package/feeds/luci/luci-base/compile V=s -j1
 
-		make V=s ./package/feeds/smartdns/smartdns/compile
-		make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+	make ./package/mosdns/luci-app-mosdns/compile V=s -j1
+	# find bin -type f -name "*.ipk"
 
-        # find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \; 
 	;;
-	"openclash" |\
-	"luci-app-openclash" )
-		#修复openclash编译报错bash: po2lmo: command not found
-        make ./package/feeds/luci/luci-base/compile V=s -j1
-        # make -j1 V=s
-        make V=s ./package/feeds/openclash/luci-app-openclash/compile
-        # find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \; 
-	;;
-	"passwall2" |\
-	"luci-app-passwall2" )
-		make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
-        # find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \; 
-	;;
-	"passwall" |\
-	"luci-app-passwall" )
-		make V=s ./package/feeds/passwall/luci-app-passwall/compile
-        # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \; 
-	;;
-	"passwall_packages" |\
-	"passwall_packages" )
-		pkgs=$(ls ./package/feeds/pspackages)
+"NetSpeedTest" | \
+	"luci-app-NetSpeedTest")
 
-		# make -j$(nproc) ||  make -j1 V=s
-
-        # 遍历所有包名
-        for pkg in $pkgs
-        do
-            # 编译每个包
-            echo $pkg
-            make V=s ./package/feeds/pspackages/$pkg/compile
-        done
-        
-        # find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \; 
+	make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
+	# find bin/packages -type f -name "*.ipk"
 	;;
-	*)
+"smartdns" | \
+	"luci-app-smartdns")
+
+	make V=s ./package/feeds/smartdns/smartdns/compile
+	make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+
+	# find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \;
+	;;
+"openclash" | \
+	"luci-app-openclash")
+	#修复openclash编译报错bash: po2lmo: command not found
+	make ./package/feeds/luci/luci-base/compile V=s -j1
+	# make -j1 V=s
+	make V=s ./package/feeds/openclash/luci-app-openclash/compile
+	# find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \;
+	;;
+"passwall2" | \
+	"luci-app-passwall2")
+	make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
+	# find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \;
+	;;
+"passwall" | \
+	"luci-app-passwall")
+	make V=s ./package/feeds/passwall/luci-app-passwall/compile
+	# find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
+	;;
+"passwall_packages" | \
+	"passwall_packages")
+	pkgs=$(ls ./package/feeds/pspackages)
+
+	# make -j$(nproc) ||  make -j1 V=s
+
+	# 遍历所有包名
+	for pkg in $pkgs; do
+		# 编译每个包
+		echo $pkg
+		make V=s ./package/feeds/pspackages/$pkg/compile
+	done
+
+	# find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \;
+	;;
+*) ;;
 esac
-
 
 #优先使用多线程编译，出错则使用单线程并输出详细信息
 # make -j$(nproc) ||  make -j1 V=s
 
 find . -name "*.ipk" -print
 
-find . -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \; 
+find . -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource" \;
