@@ -110,7 +110,7 @@ esac
 ./scripts/feeds install -a
 
 rm -rf feeds/packages/lang/golang
-git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/packages/lang/golang
+git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
 
 # ./scripts/feeds update packages
 # 更新go版本
