@@ -42,7 +42,8 @@ cd openwrt-sdk
 
 case "$PKGNAME" in
 "ALLAPP")
-	echo "src-git cdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+	echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
 	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 
 	;;
