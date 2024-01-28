@@ -8,13 +8,14 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-theme-argon"
+        default: "luci-app-cloudflarespeedtest"
         options:
           - openclash
           - passwall
           - passwall2
           - passwall_packages
           - luci-theme-argon
+          - luci-app-cloudflarespeedtest
           - luci-app-mosdns
           - luci-app-alist
           - NetSpeedTest

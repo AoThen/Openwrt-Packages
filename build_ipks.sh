@@ -51,6 +51,13 @@ case "$PKGNAME" in
 		git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 		
 	;;
+	"luci-app-cloudflarespeedtest" )
+
+		# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
+		echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >> "feeds.conf.default"
+		git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+		
+	;;
 	"alist" |\
 	"luci-app-alist" )
 
@@ -114,7 +121,10 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/
 # make savedefconfig
 
 cp -f defconfig/mt7981-ax3000.config .config
-# echo CONFIG_ALL=y >.config
+
+echo '' >> .config
+echo 'CONFIG_ALL=y' >> .config
+
 # make ARCH=aarch64 defconfig
 make defconfig
 #下载包
@@ -122,8 +132,14 @@ make download -j$(nproc)
 
 
 case "$PKGNAME" in
-	"luci-theme-argon" )
+	"luci-app-cloudflarespeedtest" )
 
+	make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
+	make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
+
+	;;
+	"luci-theme-argon" )
+		make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
 		make ./package/luci-theme-argon/compile V=s -j1
 		
 	;;
