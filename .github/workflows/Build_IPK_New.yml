@@ -59,7 +59,7 @@ jobs:
           sudo chown $USER:$GROUPS /workdir
 
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@main
 
       - name: build ipk
         id: build
