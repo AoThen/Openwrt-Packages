@@ -74,7 +74,10 @@ case "$PKGNAME" in
 "mosdns" | \
 	"luci-app-mosdns")
 
+	find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+	find ./ | grep Makefile | grep mosdns | xargs rm -f
 	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 
 	;;
@@ -110,8 +113,8 @@ esac
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# rm -rf feeds/packages/lang/golang
-# git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
+rm -rf feeds/packages/lang/golang
+git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
 
 # ./scripts/feeds update packages
 # 更新go版本
@@ -163,8 +166,8 @@ case "$PKGNAME" in
 	"luci-app-mosdns")
 
 	# make ./package/feeds/luci/luci-base/compile V=s -j1
-	rm -rf feeds/packages/net/v2ray-geodata
-	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+	# rm -rf feeds/packages/net/v2ray-geodata
+	# git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 	make -j$(nproc) || make -j1 V=s
 	# make ./package/mosdns/luci-app-mosdns/compile V=s -j1
