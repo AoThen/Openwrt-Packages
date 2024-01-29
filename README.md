@@ -7,7 +7,13 @@ for https://github.com/AoThen/Actions-GL-MT2500
 - luci-app-passwall
 - luci-app-passwall2
 - passwall_packages
+- ALLAPP
 
+待测试
+- luci-app-mosdns
+- luci-app-alist
+- NetSpeedTest
+- smartdns
 
 新主题
 https://github.com/derisamedia/luci-theme-alpha

@@ -48,7 +48,7 @@ case "$PKGNAME" in
 	# echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 	# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
 	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
-	git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+	git clone --depth 1 https://github.com/AoThen/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
 	;;
 "luci-theme-argon")
@@ -60,7 +60,7 @@ case "$PKGNAME" in
 
 	# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
 	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
-	echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+	echo "src-git lucicdnspeedtest https://github.com/AoThen/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 
 	# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
@@ -162,7 +162,7 @@ case "$PKGNAME" in
 "mosdns" | \
 	"luci-app-mosdns")
 
-	make ./package/feeds/luci/luci-base/compile V=s -j1
+	# make ./package/feeds/luci/luci-base/compile V=s -j1
 
 	make ./package/mosdns/luci-app-mosdns/compile V=s -j1
 	# find bin -type f -name "*.ipk"
