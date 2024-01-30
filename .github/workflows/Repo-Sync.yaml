@@ -25,7 +25,6 @@ jobs:
     steps:
       # - name: Sleep Random Time
       #   run: sleep $(shuf -i 10-60 -n 1)
-      - uses: actions/checkout@main
 
       - name: Rebase
         if: env.IsRebase == 'true'
@@ -101,23 +100,18 @@ jobs:
           rm -rf luci-theme-argon
           git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
 
-
           rm -rf luci-app-argon-config
           git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
 
           rm -rf luci-app-cloudflarespeedtest
           git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest luci-app-cloudflarespeedtest
 
-
           rm -rf cdnspeedtest
           git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git cdnspeedtest
 
 
-          # 删除 .github 文件夹
           find . -type d -name ".github" -exec rm -rf {} +
-
-          # 删除 .git 文件夹
-          find . -type d -name ".git" -exec rm -rf {} +
+          find ./* -maxdepth 1 -type d -name ".git" -exec rm -rf {} +
 
 
           git add ./
