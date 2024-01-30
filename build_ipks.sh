@@ -47,8 +47,13 @@ case "$PKGNAME" in
 "ALLAPP")
 	# echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 	# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
-	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+	# git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 	git clone --depth 1 https://github.com/AoThen/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+	# find ./ | grep Makefile | grep mosdns | xargs rm -f
+	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+	# git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+
 
 	;;
 "luci-theme-argon")
@@ -74,7 +79,7 @@ case "$PKGNAME" in
 "mosdns" | \
 	"luci-app-mosdns")
 
-	find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
 	find ./ | grep Makefile | grep mosdns | xargs rm -f
 	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata

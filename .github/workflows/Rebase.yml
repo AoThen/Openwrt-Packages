@@ -8,10 +8,12 @@ on:
         type: boolean
         default: true
       rbranch:
+        type: choice
         required: true
-        type: string
-        default: "feeds"
-
+        default: "Packages"
+        options:
+          - feeds
+          - Packages
 jobs:
   build_package:
     permissions:

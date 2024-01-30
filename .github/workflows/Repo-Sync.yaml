@@ -82,27 +82,21 @@ jobs:
 
           rm -rf openwrt-alist
           git clone --depth 1 https://github.com/sbwml/luci-app-alist openwrt-alist
-          rm -rf openwrt-alist/.git
 
           rm -rf helloworld
           git clone --depth 1 https://github.com/fw876/helloworld.git helloworld
-          rm -rf helloworld/.git
 
           rm -rf passwall_packages
           git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages  passwall_packages
-          rm -rf passwall_packages/.git
 
           rm -rf passwall_luci
           git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
-          rm -rf passwall_luci/.git
 
           rm -rf luci-app-mosdns
           git clone --depth 1 https://github.com/sbwml/luci-app-mosdns.git  luci-app-mosdns
-          rm -rf luci-app-mosdns/.git
 
           rm -rf netspeedtest
           git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git  netspeedtest
-          rm -rf netspeedtest/.git
 
           rm -rf luci-theme-argon
           git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argon
@@ -110,12 +104,26 @@ jobs:
 
           rm -rf luci-app-argon-config
           git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config.git luci-app-argon-config
-          rm -rf luci-app-argon-config/.git
+
+          rm -rf luci-app-cloudflarespeedtest
+          git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest luci-app-cloudflarespeedtest
+
+
+          rm -rf cdnspeedtest
+          svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest   cdnspeedtest
+
+
+          # 删除 .github 文件夹
+          find . -type d -name ".github" -exec rm -rf {} +
+
+          # 删除 .git 文件夹
+          find . -type d -name ".git" -exec rm -rf {} +
+
 
           git add ./
           Emoji=("🎉" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
-          git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" main
+          git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" feeds
 
 
 
@@ -128,24 +136,6 @@ jobs:
 # rm -rf luci-app-broadbandacc
 # svn export https://github.com/AoThen/luci-app-broadbandacc      luci-app-broadbandacc
 
-# rm -rf netspeedtest
-# svn export https://github.com/sirpdboy/netspeedtest      netspeedtest
-
-# rm -rf luci-app-cloudflarespeedtest
-# svn export https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest     /applications/luci-app-cloudflarespeedtest
-
-# luci-app-cloudflarespeedtest
-
-# rm -rf cdnspeedtest
-# svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest     /cdnspeedtest
-# cdnspeedtest
-
-
-
-
-
-# rm -rf custom
-# svn export https://github.com/AoThen/Actions-GL-MT2500/trunk/custom custom
 
 # rm -rf luci-app-vssr
 # git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
