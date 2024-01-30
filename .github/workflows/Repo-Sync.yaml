@@ -110,7 +110,7 @@ jobs:
 
 
           rm -rf cdnspeedtest
-          svn export https://github.com/immortalwrt-collections/openwrt-cdnspeedtest   cdnspeedtest
+          git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git cdnspeedtest
 
 
           # 删除 .github 文件夹
