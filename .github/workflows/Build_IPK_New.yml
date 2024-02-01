@@ -6,14 +6,15 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-app-mosdns"
+        default: "luci-app-adguardhome"
         options:
+          - luci-app-adguardhome
+          - ALLAPP
           - openclash
           - passwall
           - passwall2
           - passwall_packages
           - luci-theme-argon
-          - ALLAPP
           - luci-app-cloudflarespeedtest
           - luci-app-mosdns
           - luci-app-alist
@@ -27,10 +28,7 @@ on:
         required: false
         type: boolean
         default: true
-      isRebase:
-        required: false
-        type: boolean
-        default: false
+
 
 jobs:
   build_package:
@@ -91,7 +89,7 @@ jobs:
             ./buildsource
 
       - name: Commit packages
-        if: ${{ inputs.packages }} && !${{ inputs.isRebase }}
+        if: ${{ inputs.packages }}
         run: |
           git config --local user.email ${{ secrets.EMAIL }}
           git config --local user.name ${{ secrets.NAME }}
@@ -105,14 +103,6 @@ jobs:
           Emoji=("🎉" "✨" "🎁" "🎈" "🎄" "🍓" "🍕" "🍉" "🌴" "🚀" "⛅" "🌈" "❤️")
           git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]}update at $(TZ='Asia/Shanghai' date +%Y-%m-%d)${Emoji[$[$RANDOM % ${#Emoji[@]}]]}"
           git push "https://${{ secrets.NAME }}:${{ github.token }}@github.com/${{ github.repository }}.git" Packages
-
-      # - name: Delete workflow runs
-      #   uses: Mattraks/delete-workflow-runs@v2
-      #   with:
-      #     token: ${{ github.token }}
-      #     repository: ${{ github.repository }}
-      #     retain_days: 30
-      #     keep_minimum_runs: 8
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main

@@ -44,6 +44,11 @@ cp -f MT2500.config openwrt-sdk/.config
 cd openwrt-sdk
 
 case "$PKGNAME" in
+"luci-app-adguardhome")
+
+	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
+
+	;;
 "ALLAPP")
 	# echo "src-git lucicdnspeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 	# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
@@ -149,7 +154,11 @@ case "$PKGNAME" in
 
 	make -j$(nproc) || make -j1 V=s
 	;;
+"luci-app-adguardhome")
 
+	make ./package/luci-app-adguardhome/compile -j$(nproc) || make package/luci-app-adguardhome/compile -j1 V=sc
+
+	;;
 "luci-app-cloudflarespeedtest")
 
 	make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
