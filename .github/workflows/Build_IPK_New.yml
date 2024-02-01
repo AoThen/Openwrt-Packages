@@ -6,18 +6,18 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-app-adguardhome"
+        default: "ALLAPP"
         options:
-          - luci-app-adguardhome
           - ALLAPP
           - openclash
           - passwall
           - passwall2
           - passwall_packages
-          - luci-theme-argon
-          - luci-app-cloudflarespeedtest
           - luci-app-mosdns
           - luci-app-alist
+          - luci-theme-argon
+          - luci-app-adguardhome
+          - luci-app-cloudflarespeedtest
           - NetSpeedTest
           - smartdns
       packages:

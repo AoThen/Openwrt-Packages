@@ -54,6 +54,7 @@ case "$PKGNAME" in
 	# echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
 	# git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 	git clone --depth 1 https://github.com/AoThen/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
 	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
 	# find ./ | grep Makefile | grep mosdns | xargs rm -f
 	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
