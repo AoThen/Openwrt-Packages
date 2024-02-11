@@ -101,6 +101,7 @@ case "$PKGNAME" in
 "openclash" | \
 	"luci-app-openclash")
 	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
 	echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
 	;;
 "passwall2" | \
