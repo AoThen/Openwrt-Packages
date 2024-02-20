@@ -32,7 +32,7 @@ mkdir -p ${WORKDIR}/buildsource
 # mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
 
-# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
 
 # git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
 # cp -f MT2500-3.config openwrt-sdk/.config
@@ -63,6 +63,11 @@ case "$PKGNAME" in
 "luci-theme-argon")
 
 	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+
+	;;
+"luci-app-netspeedtest")
+
+	git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
 
 	;;
 "luci-app-cloudflarespeedtest")
@@ -168,6 +173,10 @@ case "$PKGNAME" in
 "luci-theme-argon")
 	# make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
 	make ./package/luci-theme-argon/compile V=s -j1
+
+	;;
+"luci-app-netspeedtest")
+	make ./package/luci-app-netspeedtest/compile V=s -j1
 
 	;;
 "alist" | \

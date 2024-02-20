@@ -17,6 +17,7 @@ on:
           - luci-app-alist
           - luci-theme-argon
           - luci-app-adguardhome
+          - luci-app-netspeedtest
           - luci-app-cloudflarespeedtest
           - NetSpeedTest
           - smartdns
