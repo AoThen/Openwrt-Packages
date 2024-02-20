@@ -33,6 +33,7 @@ mkdir -p ${WORKDIR}/buildsource
 # cd  ${WORKDIR}/buildsource
 
 git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+cd openwrt-sdk
 
 # git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
 # cp -f MT2500-3.config openwrt-sdk/.config
