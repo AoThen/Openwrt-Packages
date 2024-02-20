@@ -147,7 +147,7 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/
 # cp -f defconfig/mt7981-ax3000.config .config
 
 # echo '' >> .config
-# echo 'CONFIG_ALL=y' >> .config
+echo 'CONFIG_ALL=y' >> .config
 
 # make ARCH=aarch64 defconfig
 make defconfig
