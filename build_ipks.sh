@@ -41,11 +41,6 @@ mkdir -p ${WORKDIR}/buildsource
 
 
 case "$PKGNAME" in
-"luci-app-adguardhome")
-
-	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
-
-	;;
 "ALLAPP")
 
 	git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
@@ -61,17 +56,34 @@ case "$PKGNAME" in
 	# git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 	;;
+"luci-app-adguardhome")
+
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
+
+	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
+
+	;;
 "luci-theme-argon")
+
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
 
 	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 
 	;;
 "luci-app-netspeedtest")
 
+	git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
+	cd openwrt-sdk
+
 	git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
 
 	;;
 "luci-app-cloudflarespeedtest")
+
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
 
 	# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
 	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
@@ -83,11 +95,17 @@ case "$PKGNAME" in
 "alist" | \
 	"luci-app-alist")
 
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
+
 	git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
 
 	;;
 "mosdns" | \
 	"luci-app-mosdns")
+
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
 
 	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
 	find ./ | grep Makefile | grep mosdns | xargs rm -f
