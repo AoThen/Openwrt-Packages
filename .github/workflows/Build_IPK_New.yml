@@ -6,7 +6,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "ALLAPP"
+        default: "NetSpeedTest"
         options:
           - ALLAPP
           - openclash
@@ -18,8 +18,8 @@ on:
           - luci-theme-argon
           - luci-app-adguardhome
           - luci-app-netspeedtest
-          - luci-app-cloudflarespeedtest
           - NetSpeedTest
+          - luci-app-cloudflarespeedtest
           - smartdns
       packages:
         required: false

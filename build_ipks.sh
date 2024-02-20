@@ -32,8 +32,8 @@ mkdir -p ${WORKDIR}/buildsource
 # mkdir -p  ${WORKDIR}/buildsource/passwall_packages
 # cd  ${WORKDIR}/buildsource
 
-git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-cd openwrt-sdk
+# git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+# cd openwrt-sdk
 
 # git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
 # cp -f MT2500-3.config openwrt-sdk/.config
@@ -95,8 +95,9 @@ case "$PKGNAME" in
 	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 	;;
-"NetSpeedTest" | \
-	"luci-app-NetSpeedTest")
+"NetSpeedTest")
+	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+	cd openwrt-sdk
 	git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
 	;;
 "smartdns" | \
@@ -198,8 +199,7 @@ case "$PKGNAME" in
 	# find bin -type f -name "*.ipk"
 
 	;;
-"NetSpeedTest" | \
-	"luci-app-NetSpeedTest")
+"NetSpeedTest")
 
 	make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
 	# find bin/packages -type f -name "*.ipk"
