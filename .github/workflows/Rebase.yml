@@ -29,9 +29,9 @@ jobs:
           git config --global user.name ${{ secrets.NAME }}
           git clone -b ${{ inputs.rbranch }} https://github.com/AoThen/Openwrt-Packages --single-branch
 
-          fdupes -d ~/Openwrt-Packages
-
           cd Openwrt-Packages
+
+          fdupes -r -dN .
 
           git checkout --orphan latest_branch
 
