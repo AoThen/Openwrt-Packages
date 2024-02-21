@@ -28,7 +28,7 @@ on:
       artifact:
         required: false
         type: boolean
-        default: true
+        default: false
       UseCache:
         required: false
         type: boolean
@@ -71,7 +71,7 @@ jobs:
           key: openwrt-sdk-21.02
 
       - name: Initialization environment
-        if: steps.cache-sdk.outputs.cache-hit != 'true' || ${{ inputs.UseCache }} == 'false'
+        if: steps.cache-sdk.outputs.cache-hit != 'true' || ${{ inputs.UseCache }} != 'true'
         run: |
           rm -rf openwrt-sdk
           git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk

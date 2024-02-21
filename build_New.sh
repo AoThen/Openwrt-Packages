@@ -38,113 +38,111 @@ mkdir -p ${WORKDIR}/buildsource
 # git clone  --depth 1 https://github.com/openwrt/openwrt.git -b openwrt-21.02  openwrt-sdk
 # cp -f MT2500-3.config openwrt-sdk/.config
 
-
-
 case "$PKGNAME" in
 "ALLAPP")
 
     rm -rf openwrt-sdk
-	git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
-	cp -f MT2500.config openwrt-sdk/.config
-	cd openwrt-sdk
-	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
-	# git clone --depth 1 https://github.com/AoThen/luci-theme-edge.git package/luci-theme-edge
-	git clone --depth 1 https://github.com/AoThen/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
-	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
-	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
-	# find ./ | grep Makefile | grep mosdns | xargs rm -f
-	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
-	# git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+    git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+    cp -f MT2500.config openwrt-sdk/.config
+    cd openwrt-sdk
+    git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+    # git clone --depth 1 https://github.com/AoThen/luci-theme-edge.git package/luci-theme-edge
+    git clone --depth 1 https://github.com/AoThen/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+    git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
+    # find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+    # find ./ | grep Makefile | grep mosdns | xargs rm -f
+    git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+    # git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-	;;
+    ;;
 "luci-app-adguardhome")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
+    git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
 
-	;;
+    ;;
 "luci-theme-argon")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
+    git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 
-	;;
+    ;;
 "luci-app-netspeedtest")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
+    git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
 
-	;;
+    ;;
 "luci-app-cloudflarespeedtest")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	# git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
-	echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
-	echo "src-git lucicdnspeedtest https://github.com/AoThen/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
+    # git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
+    echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
+    echo "src-git lucicdnspeedtest https://github.com/AoThen/luci-app-cloudflarespeedtest.git" >>"feeds.conf.default"
 
-	# git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
+    # git clone --depth 1 https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git package/luci-app-cloudflarespeedtest
 
-	;;
+    ;;
 "alist" | \
-	"luci-app-alist")
+    "luci-app-alist")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
+    git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
 
-	;;
+    ;;
 "mosdns" | \
-	"luci-app-mosdns")
+    "luci-app-mosdns")
 
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
 
-	# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
-	find ./ | grep Makefile | grep mosdns | xargs rm -f
-	git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
-	git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+    # find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+    find ./ | grep Makefile | grep mosdns | xargs rm -f
+    git clone --depth 1 https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+    git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-	;;
+    ;;
 "NetSpeedTest")
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
-	git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
-	;;
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
+    git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
+    ;;
 "smartdns" | \
-	"luci-app-smartdns")
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
-    
-	echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
-	echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
-	;;
+    "luci-app-smartdns")
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
+
+    echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
+    echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
+    ;;
 "openclash" | \
-	"luci-app-openclash")
-	git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
-	cd openwrt-sdk
-	echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
-	;;
+    "luci-app-openclash")
+    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    cd openwrt-sdk
+    echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
+    ;;
 "passwall2" | \
-	"luci-app-passwall2")
-	echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >>"feeds.conf.default"
-	;;
+    "luci-app-passwall2")
+    echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >>"feeds.conf.default"
+    ;;
 "passwall" | \
-	"luci-app-passwall")
-	echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >>"feeds.conf.default"
-	;;
+    "luci-app-passwall")
+    echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >>"feeds.conf.default"
+    ;;
 "passwall_packages" | \
-	"passwall_packages")
-	echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
-	;;
+    "passwall_packages")
+    echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
+    ;;
 *) ;;
 esac
 
@@ -167,145 +165,144 @@ git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/
 
 # make savedefconfig
 
-
 case "$PKGNAME" in
 "ALLAPP")
 
     #下载包
     make download -j$(nproc)
 
-	make -j$(nproc) || make -j1 V=s
-	;;
+    make -j$(nproc) || make -j1 V=s
+    ;;
 "luci-app-adguardhome")
 
-    echo 'CONFIG_ALL=y' >> .config
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
 
-	make ./package/luci-app-adguardhome/compile -j$(nproc) || make package/luci-app-adguardhome/compile -j1 V=sc
+    make ./package/luci-app-adguardhome/compile -j$(nproc) || make package/luci-app-adguardhome/compile -j1 V=sc
 
-	;;
+    ;;
 "luci-app-cloudflarespeedtest")
 
-    echo 'CONFIG_ALL=y' >> .config
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
 
-	make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
-	make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
+    make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
+    make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
 
-	;;
+    ;;
 "luci-theme-argon")
-	# make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
-    echo 'CONFIG_ALL=y' >> .config
+    # make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make ./package/luci-theme-argon/compile V=s -j1
+    make ./package/luci-theme-argon/compile V=s -j1
 
-	;;
+    ;;
 "luci-app-netspeedtest")
-    echo 'CONFIG_ALL=y' >> .config
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make ./package/luci-app-netspeedtest/compile V=s -j1
+    make ./package/luci-app-netspeedtest/compile V=s -j1
 
-	;;
+    ;;
 "alist" | \
-	"luci-app-alist")
-    echo 'CONFIG_ALL=y' >> .config
+    "luci-app-alist")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make ./package/alist/luci-app-alist/compile V=s -j1
+    make ./package/alist/luci-app-alist/compile V=s -j1
 
-	;;
+    ;;
 "mosdns" | \
-	"luci-app-mosdns")
-    echo 'CONFIG_ALL=y' >> .config
+    "luci-app-mosdns")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	# make ./package/feeds/luci/luci-base/compile V=s -j1
-	# rm -rf feeds/packages/net/v2ray-geodata
-	# git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+    # make ./package/feeds/luci/luci-base/compile V=s -j1
+    # rm -rf feeds/packages/net/v2ray-geodata
+    # git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-	make -j$(nproc) || make -j1 V=s
-	# make ./package/mosdns/luci-app-mosdns/compile V=s -j1
-	# find bin -type f -name "*.ipk"
+    make -j$(nproc) || make -j1 V=s
+    # make ./package/mosdns/luci-app-mosdns/compile V=s -j1
+    # find bin -type f -name "*.ipk"
 
-	;;
+    ;;
 "NetSpeedTest")
-    echo 'CONFIG_ALL=y' >> .config
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
-	# find bin/packages -type f -name "*.ipk"
-	;;
+    make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
+    # find bin/packages -type f -name "*.ipk"
+    ;;
 "smartdns" | \
-	"luci-app-smartdns")
-    echo 'CONFIG_ALL=y' >> .config
+    "luci-app-smartdns")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make V=s ./package/feeds/smartdns/smartdns/compile
-	make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
+    make V=s ./package/feeds/smartdns/smartdns/compile
+    make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
 
-	# find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \;
-	;;
+    # find bin -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/smartdns" \;
+    ;;
 "openclash" | \
-	"luci-app-openclash")
-    echo 'CONFIG_ALL=y' >> .config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
-	#修复openclash编译报错bash: po2lmo: command not found
-	make ./package/feeds/luci/luci-base/compile V=s -j1
-	# make -j1 V=s
-	make V=s ./package/feeds/openclash/luci-app-openclash/compile
-	# find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \;
-	;;
+    "luci-app-openclash")
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
+    #修复openclash编译报错bash: po2lmo: command not found
+    make ./package/feeds/luci/luci-base/compile V=s -j1
+    # make -j1 V=s
+    make V=s ./package/feeds/openclash/luci-app-openclash/compile -j$(nproc)
+    # find bin/packages/aarch64_cortex-a53/openclash -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/openclash" \;
+    ;;
 "passwall2" | \
-	"luci-app-passwall2")
-    echo 'CONFIG_ALL=y' >> .config
+    "luci-app-passwall2")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
-	# find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \;
-	;;
+    make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
+    # find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \;
+    ;;
 "passwall" | \
-	"luci-app-passwall")
-    echo 'CONFIG_ALL=y' >> .config
+    "luci-app-passwall")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	make V=s ./package/feeds/passwall/luci-app-passwall/compile
-	# find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
-	;;
+    make V=s ./package/feeds/passwall/luci-app-passwall/compile
+    # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
+    ;;
 "passwall_packages" | \
-	"passwall_packages")
-    echo 'CONFIG_ALL=y' >> .config
+    "passwall_packages")
+    echo 'CONFIG_ALL=y' >>.config
     make defconfig
     #下载包
     make download -j$(nproc)
-	pkgs=$(ls ./package/feeds/pspackages)
+    pkgs=$(ls ./package/feeds/pspackages)
 
-	# make -j$(nproc) ||  make -j1 V=s
+    # make -j$(nproc) ||  make -j1 V=s
 
-	# 遍历所有包名
-	for pkg in $pkgs; do
-		# 编译每个包
-		echo $pkg
-		make V=s ./package/feeds/pspackages/$pkg/compile
-	done
+    # 遍历所有包名
+    for pkg in $pkgs; do
+        # 编译每个包
+        echo $pkg
+        make V=s ./package/feeds/pspackages/$pkg/compile
+    done
 
-	# find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \;
-	;;
+    # find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \;
+    ;;
 *) ;;
 esac
 
