@@ -6,7 +6,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "NetSpeedTest"
+        default: "luci-app-netspeedtest"
         options:
           - ALLAPP
           - openclash
@@ -29,7 +29,10 @@ on:
         required: false
         type: boolean
         default: true
-
+      UseCache:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build_package:
@@ -59,6 +62,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
+
+      - name: Cache openwrt SDK
+        id: cache-sdk
+        uses: actions/cache@main
+        with:
+          path: openwrt-sdk
+          key: openwrt-sdk-21.02
+
+      - name: Initialization environment
+        if: steps.cache-sdk.outputs.cache-hit != 'true' || ${{ inputs.UseCache }} == 'false'
+        run: |
+          rm -rf openwrt-sdk
+          git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
+          cd openwrt-sdk
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          echo 'CONFIG_ALL=y' >> .config
+          make defconfig
+          make download -j$(nproc)
+
       - name: build ipk
         id: build
         env:
@@ -67,8 +90,8 @@ jobs:
           NAME: ${{ secrets.NAME }}
         run: |
           cd $GITHUB_WORKSPACE
-          chmod +x ./build_ipks.sh
-          ./build_ipks.sh
+          chmod +x ./build_New.sh
+          ./build_New.sh
 
       - name: Print
         id: printipk
