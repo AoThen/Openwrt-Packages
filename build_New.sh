@@ -57,7 +57,7 @@ case "$PKGNAME" in
     ;;
 "luci-app-adguardhome")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
@@ -65,7 +65,7 @@ case "$PKGNAME" in
     ;;
 "luci-theme-argon")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
@@ -73,7 +73,7 @@ case "$PKGNAME" in
     ;;
 "luci-app-netspeedtest")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
@@ -81,7 +81,7 @@ case "$PKGNAME" in
     ;;
 "luci-app-cloudflarespeedtest")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     # git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
@@ -94,7 +94,7 @@ case "$PKGNAME" in
 "alist" | \
     "luci-app-alist")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
@@ -103,7 +103,7 @@ case "$PKGNAME" in
 "mosdns" | \
     "luci-app-mosdns")
 
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     # find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
@@ -113,13 +113,13 @@ case "$PKGNAME" in
 
     ;;
 "NetSpeedTest")
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
     git clone --depth 1 https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
     ;;
 "smartdns" | \
     "luci-app-smartdns")
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
 
     echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
@@ -127,20 +127,23 @@ case "$PKGNAME" in
     ;;
 "openclash" | \
     "luci-app-openclash")
-    git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
+    # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
     cd openwrt-sdk
     echo 'src-git openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
     ;;
 "passwall2" | \
     "luci-app-passwall2")
+    cd openwrt-sdk
     echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >>"feeds.conf.default"
     ;;
 "passwall" | \
     "luci-app-passwall")
+    cd openwrt-sdk
     echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >>"feeds.conf.default"
     ;;
 "passwall_packages" | \
     "passwall_packages")
+    cd openwrt-sdk
     echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
     ;;
 *) ;;

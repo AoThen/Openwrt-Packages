@@ -71,7 +71,7 @@ jobs:
           key: openwrt-sdk-21.02
 
       - name: Initialization environment
-        if: steps.cache-sdk.outputs.cache-hit != 'true' || ${{ inputs.UseCache }} != 'true'
+        if: ${{ steps.cache-sdk.outputs.cache-hit != 'true' || inputs.UseCache != 'true' }}
         run: |
           rm -rf openwrt-sdk
           git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
@@ -82,16 +82,16 @@ jobs:
           make defconfig
           make download -j$(nproc)
 
-      - name: build ipk
-        id: build
-        env:
-          PKGNAME: ${{ inputs.pkgname }}
-          EMAIL: ${{ secrets.EMAIL }}
-          NAME: ${{ secrets.NAME }}
-        run: |
-          cd $GITHUB_WORKSPACE
-          chmod +x ./build_New.sh
-          ./build_New.sh
+      # - name: build ipk
+      #   id: build
+      #   env:
+      #     PKGNAME: ${{ inputs.pkgname }}
+      #     EMAIL: ${{ secrets.EMAIL }}
+      #     NAME: ${{ secrets.NAME }}
+      #   run: |
+      #     cd $GITHUB_WORKSPACE
+      #     chmod +x ./build_New.sh
+      #     ./build_New.sh
 
       - name: Print
         id: printipk
