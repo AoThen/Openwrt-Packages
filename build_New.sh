@@ -180,20 +180,20 @@ case "$PKGNAME" in
     ;;
 "luci-app-adguardhome")
 
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
 
     make ./package/luci-app-adguardhome/compile -j$(nproc) || make package/luci-app-adguardhome/compile -j1 V=sc
 
     ;;
 "luci-app-cloudflarespeedtest")
 
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
 
     make ./package/feeds/cdnspeedtest/cdnspeedtest/compile -j$(nproc) || make package/feeds/cdnspeedtest/cdnspeedtest/compile -j1 V=sc
     make ./package/luci-app-cloudflarespeedtest/compile V=s -j$(nproc)
@@ -201,36 +201,36 @@ case "$PKGNAME" in
     ;;
 "luci-theme-argon")
     # make toolchain/compile  V=s -j$(nproc) || make toolchain/compile V=s -j1
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make ./package/luci-theme-argon/compile V=s -j1
 
     ;;
 "luci-app-netspeedtest")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make ./package/luci-app-netspeedtest/compile V=s -j1
 
     ;;
 "alist" | \
     "luci-app-alist")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make ./package/alist/luci-app-alist/compile V=s -j1
 
     ;;
 "mosdns" | \
     "luci-app-mosdns")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     # make ./package/feeds/luci/luci-base/compile V=s -j1
     # rm -rf feeds/packages/net/v2ray-geodata
     # git clone --depth 1 https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
@@ -241,19 +241,19 @@ case "$PKGNAME" in
 
     ;;
 "NetSpeedTest")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make ./package/netspeedtest/luci-app-netspeedtest/compile V=s -j1
     # find bin/packages -type f -name "*.ipk"
     ;;
 "smartdns" | \
     "luci-app-smartdns")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make V=s ./package/feeds/smartdns/smartdns/compile
     make V=s ./package/feeds/luci-app-smartdns/luci-app-smartdns/compile
 
@@ -273,28 +273,27 @@ case "$PKGNAME" in
     ;;
 "passwall2" | \
     "luci-app-passwall2")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make V=s ./package/feeds/passwall2/luci-app-passwall2/compile
     # find bin/packages/aarch64_cortex-a53 -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall2" \;
     ;;
 "passwall" | \
     "luci-app-passwall")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     make V=s ./package/feeds/passwall/luci-app-passwall/compile
     # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
     ;;
-"passwall_packages" | \
-    "passwall_packages")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
-    #下载包
-    make download -j$(nproc)
+"passwall_packages")
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
+    # #下载包
+    # make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
 
     # make -j$(nproc) ||  make -j1 V=s
