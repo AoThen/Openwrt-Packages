@@ -1,0 +1,509 @@
+Package: cgi-io
+Version: 2022-08-10-901b0f04-21
+Depends: libc, libubox20210516, libubus20210630
+Source: feeds/packages/net/cgi-io
+SourceName: cgi-io
+License: GPL-2.0-or-later
+Section: net
+SourceDateEpoch: 1660168492
+Maintainer: John Crispin <blogic@openwrt.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 9439
+Filename: cgi-io_2022-08-10-901b0f04-21_aarch64_cortex-a53.ipk
+Size: 10241
+SHA256sum: b04ed1318a3f3307d4b596bbb9eb52079bc8cdb52e70f8efd0e7e40573cf09e4
+Description:  This package contains an cgi utility that is useful for up/downloading files
+
+Package: htop
+Version: 3.2.1-20
+Depends: libc, libncurses6
+Source: feeds/packages/admin/htop
+SourceName: htop
+License: GPL-2.0-or-later
+LicenseFiles: COPYING
+Section: admin
+SourceDateEpoch: 1655927595
+CPE-ID: cpe:/a:htop:htop
+Maintainer: Etienne CHAMPETIER <champetier.etienne@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 104194
+Filename: htop_3.2.1-20_aarch64_cortex-a53.ipk
+Size: 105110
+SHA256sum: 2e1cd37ccf1d6111e21d6062f8c25e4b952f49c965897ea88383b65e3875cc03
+Description:  Htop is an ncursed-based process viewer similar to top, but
+ it allows to scroll the list vertically and horizontally to
+ see all processes and their full command lines.
+
+Package: iptables-mod-iface
+Version: 3.21-1
+Depends: libc, iptables, kmod-ipt-iface
+Source: feeds/packages/net/xtables-addons
+SourceName: iptables-mod-iface
+License: GPL-2.0
+Section: net
+SourceDateEpoch: 1669193453
+Maintainer: Jo-Philipp Wich <jo@mein.io>
+Architecture: aarch64_cortex-a53
+Installed-Size: 2810
+Filename: iptables-mod-iface_3.21-1_aarch64_cortex-a53.ipk
+Size: 3568
+SHA256sum: f8c64a901d22563e3fbd2e7069bb86e4bbe39809121c3f4c2e9b6b3e73605d37
+Description:  iface iptables extension
+
+Package: iptables-mod-ipmark
+Version: 3.21-1
+Depends: libc, iptables, kmod-ipt-ipmark
+Source: feeds/packages/net/xtables-addons
+SourceName: iptables-mod-ipmark
+License: GPL-2.0
+Section: net
+SourceDateEpoch: 1669193453
+Maintainer: Jo-Philipp Wich <jo@mein.io>
+Architecture: aarch64_cortex-a53
+Installed-Size: 2195
+Filename: iptables-mod-ipmark_3.21-1_aarch64_cortex-a53.ipk
+Size: 2942
+SHA256sum: b735822daec758a93e1f1a4c926355a520cfdd56e92dc5efd78ce09b6e66e2e7
+Description:  IPMARK iptables extension
+
+Package: iptables-mod-ipv4options
+Version: 3.21-1
+Depends: libc, iptables, kmod-ipt-ipv4options
+Source: feeds/packages/net/xtables-addons
+SourceName: iptables-mod-ipv4options
+License: GPL-2.0
+Section: net
+SourceDateEpoch: 1669193453
+Maintainer: Jo-Philipp Wich <jo@mein.io>
+Architecture: aarch64_cortex-a53
+Installed-Size: 2250
+Filename: iptables-mod-ipv4options_3.21-1_aarch64_cortex-a53.ipk
+Size: 2998
+SHA256sum: dd7e786005505a9757cea343e4c93116b6171473ed7fef95e5b6749080ead62e
+Description:  ipv4options iptables extension
+
+Package: iptables-mod-proto
+Version: 3.21-1
+Depends: libc, iptables, kmod-ipt-proto
+Source: feeds/packages/net/xtables-addons
+SourceName: iptables-mod-proto
+License: GPL-2.0
+Section: net
+SourceDateEpoch: 1669193453
+Maintainer: Jo-Philipp Wich <jo@mein.io>
+Architecture: aarch64_cortex-a53
+Installed-Size: 1607
+Filename: iptables-mod-proto_3.21-1_aarch64_cortex-a53.ipk
+Size: 2391
+SHA256sum: e2535d1a3ebd1d6e0ee6093e71ac5af0ad16fd181c5fbf32fbbad9a2259549d3
+Description:  PROTO iptables extension
+
+Package: ksmbd-server
+Version: 3.4.5-3
+Depends: libc, kmod-fs-ksmbd, libnl-core200, libnl-genl200
+Source: feeds/packages/net/ksmbd-tools
+SourceName: ksmbd-server
+License: GPL-2.0-or-later
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1662818751
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 63049
+Filename: ksmbd-server_3.4.5-3_aarch64_cortex-a53.ipk
+Size: 63942
+SHA256sum: d444796330efefa2c3da42956785e62f0ca27596ada3df7e015ef9d3cdccdb9b
+Description:  installs: ksmbd.mountd
+ 
+ This provides the basic fileserver service and is the minimum needed to serve 'guest only' file shares or use a existing user database file ksmbdpwd.db.
+
+Package: ksmbd-utils
+Version: 3.4.5-3
+Depends: libc
+Source: feeds/packages/net/ksmbd-tools
+SourceName: ksmbd-utils
+License: GPL-2.0-or-later
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1662818751
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 32227
+Filename: ksmbd-utils_3.4.5-3_aarch64_cortex-a53.ipk
+Size: 33093
+SHA256sum: d26cc227bb87a62075f5b9f8f70e79987b756b718c365f6bdfeaa55a35587044
+Description:  installs: ksmbd.adduser (ksmbd.addshare)
+ 
+ Tool needed to create the ksmbdpwd.db, to manage per user share passwords.
+ NOTE: Not needed for 'guest only' shares.
+
+Package: libcap-ng
+Version: 0.8.1-1
+Depends: libc
+Source: feeds/packages/libs/libcap-ng
+SourceName: libcap-ng
+License: GPL-2.0-or-later LGPL-2.1-or-later
+LicenseFiles: License
+Section: libs
+SourceDateEpoch: 1606286568
+Maintainer: Lucian CRISTIAN <lucian.cristian@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 7942
+Filename: libcap-ng_0.8.1-1_aarch64_cortex-a53.ipk
+Size: 8734
+SHA256sum: 3ef65b8170e9e4d5effd26c0775d5c3198cfc3b34d128caa6e130958892dd994
+Description:  POSIX capabilities library library
+
+Package: libcbor0
+Version: 0.8.0-1
+Depends: libc
+Provides: libcbor
+Source: feeds/packages/libs/libcbor
+SourceName: libcbor
+License: GPL-3.0-or-later
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1609973585
+ABIVersion: 0
+Maintainer: Linos Giannopoulos <linosgian00+openwrt@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 20222
+Filename: libcbor0_0.8.0-1_aarch64_cortex-a53.ipk
+Size: 21016
+SHA256sum: e8e81309c6852849ef20c050f8ce15f87892612ea4ea7838581c3e7b4ba91ab0
+Description:  libcbor is a C library for parsing and generating CBOR, the general-purpose schema-less binary data format.
+
+Package: libevdev
+Version: 1.13.0-1
+Depends: libc
+Source: feeds/packages/libs/libevdev
+SourceName: libevdev
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1665689787
+Maintainer: Daniel Golle <daniel@makrotopia.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 32484
+Filename: libevdev_1.13.0-1_aarch64_cortex-a53.ipk
+Size: 33028
+SHA256sum: 2dcae6518763b3741d2075be4888b64e13b0b594bc9cc04a9c499d5089c92715
+Description:  libevdev is a wrapper library for evdev devices. it moves the common
+ tasks when dealing with evdev devices into a library and provides a
+ library interface to the callers, thus avoiding erroneous ioctls, etc.
+ 
+ The eventual goal is that libevdev wraps all ioctls available to
+ evdev devices, thus making direct access unnecessary.
+
+Package: libfido2-1
+Version: 1.6.0-1
+Depends: libc, libcbor0, libopenssl1.1, libudev
+Provides: libfido2
+Source: feeds/packages/libs/libfido2
+SourceName: libfido2
+License: GPL-3.0-or-later
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1653484955
+ABIVersion: -1
+Maintainer: Linos Giannopoulos <linosgian00+openwrt@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 56436
+Filename: libfido2-1_1.6.0-1_aarch64_cortex-a53.ipk
+Size: 57415
+SHA256sum: e79ed7dbefc33d105195fb98348ac7311811620dece4901d214c3f9514603458
+Description:  libfido2 provides library functionality and command-line tools to communicate with a FIDO device over USB, and to verify attestation and assertion signatures.
+ 
+ libfido2 supports the FIDO U2F (CTAP 1) and FIDO 2.0 (CTAP 2) protocols.
+
+Package: libopenssl-afalg_sync
+Version: 1.2.0-beta.1-1
+Depends: libc, libopenssl1.1, libopenssl-conf, kmod-crypto-user
+Conflicts: libopenssl-afalg
+Source: feeds/packages/libs/afalg_engine
+SourceName: libopenssl-afalg_sync
+License: Apache-2.0
+LicenseFiles: LICENSE
+Section: libs
+SourceDateEpoch: 1580395319
+Maintainer: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 8096
+Filename: libopenssl-afalg_sync_1.2.0-beta.1-1_aarch64_cortex-a53.ipk
+Size: 9057
+SHA256sum: 4e8815fe03bff8942f2272b606e47de6f83f5d4157ae4212033069dda05e6cb7
+Description:  This is an alternate AF_ALG engine for openssl, based on the devcrypto
+ engine, but using the AF_ALG interface instead of /dev/crypto
+ 
+ It is different than the AF_ALG engine that ships with OpenSSL:
+ - it is faster
+ - it uses sync calls, instead of async
+ - it suports more algorithms
+
+Package: libpcre2
+Version: 10.36-1
+Depends: libc
+Source: feeds/packages/libs/pcre2
+SourceName: libpcre2
+License: BSD-3-Clause
+LicenseFiles: LICENCE
+Section: libs
+SourceDateEpoch: 1607997754
+CPE-ID: cpe:/a:pcre:pcre
+Maintainer: Shane Peelar <lookatyouhacker@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 110189
+Filename: libpcre2_10.36-1_aarch64_cortex-a53.ipk
+Size: 110959
+SHA256sum: 83d3fa955e775ee5e21b3f540f2dfde5396a1bb50c023710da3584189da01906
+Description:  A Perl Compatible Regular Expression library
+
+Package: libudev-zero
+Version: 1.0.1-1
+Depends: libc, libevdev
+Conflicts: libudev, eudev, udev
+Provides: libudev
+Source: feeds/packages/libs/libudev-zero
+SourceName: libudev-zero
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1665689841
+Maintainer: Daniel Golle <daniel@makrotopia.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 10643
+Filename: libudev-zero_1.0.1-1_aarch64_cortex-a53.ipk
+Size: 11413
+SHA256sum: 6d81df5aac0d063460774c60ac888eea6c3db9cfee16a72edb748a93fa692422
+Description:  Drop-in replacement for libudev
+
+Package: lua-cjson
+Version: 2.1.0-2
+Depends: libc, lua
+Source: feeds/packages/lang/lua-cjson
+SourceName: lua-cjson
+License: MIT
+LicenseFiles: LICENSE
+Section: lang
+SourceDateEpoch: 1570903294
+Maintainer: Dirk Chang <dirk@kooiot.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 12649
+Filename: lua-cjson_2.1.0-2_aarch64_cortex-a53.ipk
+Size: 13426
+SHA256sum: 9d5a911b0a3d3143d0ca9cde44d524b68d3ee49bb63e343db9cc3b4157bf6f12
+Description:  Lua CJSON is a fast JSON encoding/parsing module for Lua.
+
+Package: miniupnpd
+Version: 2.0.20170421-4
+Depends: libc, iptables, libip4tc2, libip6tc2, ip6tables, libuuid1
+Source: feeds/packages/net/miniupnpd
+SourceName: miniupnpd
+License: BSD-3-Clause
+LicenseFiles: LICENSE
+Section: net
+SourceDateEpoch: 1682748893
+CPE-ID: cpe:/a:miniupnp_project:miniupnpd
+Architecture: aarch64_cortex-a53
+Installed-Size: 61462
+Filename: miniupnpd_2.0.20170421-4_aarch64_cortex-a53.ipk
+Size: 62369
+SHA256sum: 975b4b1fcdc994cfe697092878b3aab04852f83dd35bc0e815e7a493ec263ce2
+Description:  Lightweight UPnP IGD, NAT-PMP & PCP daemon
+
+Package: nano
+Version: 7.2-2
+Depends: libc, libncurses6
+Source: feeds/packages/utils/nano
+SourceName: nano
+License: GPL-3.0-or-later
+LicenseFiles: COPYING
+Section: utils
+SourceDateEpoch: 1680716906
+CPE-ID: cpe:/a:gnu:nano
+Maintainer: Hannu Nyman <hannu.nyman@iki.fi>
+Architecture: aarch64_cortex-a53
+Installed-Size: 73206
+Filename: nano_7.2-2_aarch64_cortex-a53.ipk
+Size: 74144
+SHA256sum: 5111c178ce591a16322db7c36948db6c06b846dbe926b5bce371aed4fb0bf3cc
+Description:  Nano is a small and simple text editor for use on the terminal.
+ 
+ Nano started as an enhanced clone of the Pico text editor.
+ Nowadays Nano wants to be a generally useful editor with sensible
+ defaults (linewise scrolling, no automatic line breaking).
+ 
+ Nano is an official GNU package.
+
+Package: openssh-keygen
+Version: 8.4p1-4
+Depends: libc, libopenssl1.1, zlib
+Source: feeds/packages/net/openssh
+SourceName: openssh-keygen
+License: BSD ISC
+LicenseFiles: LICENCE
+Section: net
+SourceDateEpoch: 1609973585
+CPE-ID: cpe:/a:openssh:openssh
+Maintainer: Peter Wagner <tripolar@gmx.at>
+Architecture: aarch64_cortex-a53
+Installed-Size: 192793
+Filename: openssh-keygen_8.4p1-4_aarch64_cortex-a53.ipk
+Size: 193181
+SHA256sum: 32a103cb4762f9fad54497b81f386e243dfa7cb1b2deb239c83c054e09728abd
+Description:  OpenSSH keygen.
+
+Package: openssh-sftp-server
+Version: 8.4p1-4
+Depends: libc, libopenssl1.1, zlib
+Source: feeds/packages/net/openssh
+SourceName: openssh-sftp-server
+License: BSD ISC
+LicenseFiles: LICENCE
+Section: net
+SourceDateEpoch: 1609973585
+CPE-ID: cpe:/a:openssh:openssh
+Maintainer: Peter Wagner <tripolar@gmx.at>
+Architecture: aarch64_cortex-a53
+Installed-Size: 50969
+Filename: openssh-sftp-server_8.4p1-4_aarch64_cortex-a53.ipk
+Size: 51747
+SHA256sum: 85990bdde3d1924619daa3f1cc9ce79e54b4a822bed0380b093464594165a297
+Description:  OpenSSH SFTP server.
+
+Package: p910nd
+Version: 0.97-9
+Depends: libc
+Source: feeds/packages/net/p910nd
+SourceName: p910nd
+License: GPLv2
+LicenseFiles: COPYING
+Section: net
+Require-User: p910nd=393:lp=7
+SourceDateEpoch: 1606376827
+Maintainer: Philipp Kerling <pkerling@casix.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 7209
+Filename: p910nd_0.97-9_aarch64_cortex-a53.ipk
+Size: 8220
+SHA256sum: 98430fb5bcf5b70f3a1f9a6473b5a776d6258167774ac61440d756478380ff50
+Description:  p910nd is a small daemon that copies any data received on
+ the port it is listening on to the corresponding printer
+ port. It is primarily intended for diskless Linux hosts
+ running as printer drivers but there is no reason why it
+ could not be used on diskful hosts. Port 9100 is copied
+ to /dev/lp0, 9101 to /dev/lp1 and 9102 to /dev/lp2. The
+ default is port 9100 to /dev/lp0.
+
+Package: usbids
+Version: 0.359-1
+Depends: libc
+Source: feeds/packages/utils/hwdata
+SourceName: usbids
+License: GPL-2.0-or-later  XFree86-1.0
+LicenseFiles: LICENSE
+Section: utils
+SourceDateEpoch: 1651680722
+Architecture: aarch64_cortex-a53
+Installed-Size: 251058
+Filename: usbids_0.359-1_aarch64_cortex-a53.ipk
+Size: 251536
+SHA256sum: 8d6908d2ebc8b50967307bb5acf21da50dad1cecfddf2ec1be63bdc7bffbde78
+Description:  USB ID list
+
+Package: usbutils
+Version: 013-2
+Depends: libc, libusb-1.0-0, libudev, usbids, librt, libpthread
+Source: feeds/packages/utils/usbutils
+SourceName: usbutils
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: utils
+SourceDateEpoch: 1609784864
+Maintainer: Felix Fietkau <nbd@nbd.name>
+Architecture: aarch64_cortex-a53
+Installed-Size: 55342
+Filename: usbutils_013-2_aarch64_cortex-a53.ipk
+Size: 56074
+SHA256sum: 41b95ec5d71e08f76abefa74a076ff563a7247d821d4a812f75cb2ffaf013a35
+Description:  USB devices listing utilities
+
+Package: wget-ssl
+Version: 1.21.4-1
+Depends: libc, libpcre2, zlib, libopenssl1.1, librt
+Provides: gnu-wget, wget
+Alternatives: 300:/usr/bin/wget:/usr/libexec/wget-ssl, 300:/usr/bin/wget-ssl:/usr/libexec/wget-ssl
+Source: feeds/packages/net/wget
+SourceName: wget-ssl
+License: GPL-3.0-or-later
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1696386710
+CPE-ID: cpe:/a:gnu:wget
+Architecture: aarch64_cortex-a53
+Installed-Size: 218572
+Filename: wget-ssl_1.21.4-1_aarch64_cortex-a53.ipk
+Size: 219223
+SHA256sum: 0d338726587c898fb45a2453458494226a50c42f970459e28dd4c55fe1f90504
+Description:  Wget is a network utility to retrieve files from the Web using http
+ and ftp, the two most widely used Internet protocols. It works
+ non-interactively, so it will work in the background, after having
+ logged off. The program supports recursive retrieval of web-authoring
+ pages as well as ftp sites -- you can use wget to make mirrors of
+ archives and home pages or to travel the Web like a WWW robot.
+ This package is built with SSL support.
+
+Package: wsdd2
+Version: 2021-08-09-bcc51c3e-4
+Depends: libc
+Source: feeds/packages/net/wsdd2
+SourceName: wsdd2
+License: GPL-3.0-only
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1684657273
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 19594
+Filename: wsdd2_2021-08-09-bcc51c3e-4_aarch64_cortex-a53.ipk
+Size: 20551
+SHA256sum: 72e47cec4adc41c4fac2078dd03f10dad77333194b9231b8a3716fde6db53ba7
+Description:  Web Services for Devices or Web Services on Devices (WSD),
+ is a Microsoft API to simplify programming connections to web service
+ enabled devices, such as printers, scanners and file shares.
+ 
+ This daemon advertises and responds to probe requests from Windows clients looking for file shares.
+ It also implements LLMNR multicast name lookup services.
+
+Package: zoneinfo-asia
+Version: 2023c-1
+Depends: libc
+Source: feeds/packages/utils/zoneinfo
+SourceName: zoneinfo-asia
+License: Public Domain
+Section: utils
+SourceDateEpoch: 1680715787
+Maintainer: Vladimir Ulrich <admin@evl.su>
+Architecture: aarch64_cortex-a53
+Installed-Size: 30546
+Filename: zoneinfo-asia_2023c-1_aarch64_cortex-a53.ipk
+Size: 30911
+SHA256sum: 33548c66a186de9f0125ceccce7385d6a18ca6461820607250f2ae5171e89958
+Description:  Zone Information (Asia)
+
+Package: zoneinfo-core
+Version: 2023c-1
+Depends: libc
+Source: feeds/packages/utils/zoneinfo
+SourceName: zoneinfo-core
+License: Public Domain
+Section: utils
+SourceDateEpoch: 1680715787
+Maintainer: Vladimir Ulrich <admin@evl.su>
+Architecture: aarch64_cortex-a53
+Installed-Size: 20448
+Filename: zoneinfo-core_2023c-1_aarch64_cortex-a53.ipk
+Size: 20832
+SHA256sum: b38a9410cb95d685abd2eda2cc1cd04923bfe2db7ca8726efa9866df6b5b6940
+Description:  Zone Information (core)
+

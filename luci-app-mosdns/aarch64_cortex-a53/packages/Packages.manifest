@@ -1,0 +1,165 @@
+Package: cgi-io
+Version: 2022-08-10-901b0f04-21
+Depends: libc, libubox20210516, libubus20210630
+Source: feeds/packages/net/cgi-io
+SourceName: cgi-io
+License: GPL-2.0-or-later
+Section: net
+SourceDateEpoch: 1660168492
+Maintainer: John Crispin <blogic@openwrt.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 9439
+Filename: cgi-io_2022-08-10-901b0f04-21_aarch64_cortex-a53.ipk
+Size: 10241
+SHA256sum: b04ed1318a3f3307d4b596bbb9eb52079bc8cdb52e70f8efd0e7e40573cf09e4
+Description:  This package contains an cgi utility that is useful for up/downloading files
+
+Package: curl
+Version: 7.83.1-20
+Depends: libc, libcurl
+Source: feeds/packages/net/curl
+SourceName: curl
+License: MIT
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1697090345
+CPE-ID: cpe:/a:haxx:libcurl
+Maintainer: Stan Grishin <stangri@melmac.ca>
+Architecture: aarch64_cortex-a53
+Installed-Size: 57434
+Filename: curl_7.83.1-20_aarch64_cortex-a53.ipk
+Size: 58282
+SHA256sum: c04c383e24539003271f68a436e299909a9f6875969457ac776351c8a82281fb
+Description:  A client-side URL transfer utility
+
+Package: gdisk
+Version: 1.0.6-1
+Depends: libc, libstdcpp6, libuuid1
+Source: feeds/packages/utils/gptfdisk
+SourceName: gdisk
+License: GPL-2.0-or-later
+LicenseFiles: COPYING
+Section: utils
+SourceDateEpoch: 1610924628
+Maintainer: Alif M. Ahmad <alive4ever@live.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 59340
+Filename: gdisk_1.0.6-1_aarch64_cortex-a53.ipk
+Size: 60151
+SHA256sum: 40b40484673282e63db5d22a694f7cea3f509f5f13aab2c3017a14c398bee971
+Description:  gdisk is GPT aware disk partitioning tool, with interactive UI.
+
+Package: libcurl4
+Version: 7.83.1-20
+Depends: libc, libopenssl1.1, libpthread, libnghttp2-14, ca-bundle
+Provides: libcurl
+Source: feeds/packages/net/curl
+SourceName: libcurl
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1697090345
+ABIVersion: 4
+CPE-ID: cpe:/a:haxx:libcurl
+Maintainer: Stan Grishin <stangri@melmac.ca>
+Architecture: aarch64_cortex-a53
+Installed-Size: 193873
+Filename: libcurl4_7.83.1-20_aarch64_cortex-a53.ipk
+Size: 194705
+SHA256sum: c31916257dbd885f3d0c4a5f675a9af5e7fc566d1aa6a6d94dd0c719a3d78990
+Description:  A client-side URL transfer library
+
+Package: libnghttp2-14
+Version: 1.43.0-1
+Depends: libc
+Provides: libnghttp2
+Source: feeds/packages/libs/nghttp2
+SourceName: libnghttp2
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1612720536
+ABIVersion: -14
+Maintainer: Hans Dedecker <dedeckeh@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 70999
+Filename: libnghttp2-14_1.43.0-1_aarch64_cortex-a53.ipk
+Size: 70311
+SHA256sum: dea32a551f94276208f25df6d2e9434d598c3340fbed2a5cf27e3fdca93b79fc
+Description:  C library implementing the framing layer of the HTTP/2 protocol. It can be used to build a HTTP/2-capable HTTP client or server
+
+Package: libpcre2
+Version: 10.36-1
+Depends: libc
+Source: feeds/packages/libs/pcre2
+SourceName: libpcre2
+License: BSD-3-Clause
+LicenseFiles: LICENCE
+Section: libs
+SourceDateEpoch: 1607997754
+CPE-ID: cpe:/a:pcre:pcre
+Maintainer: Shane Peelar <lookatyouhacker@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 110189
+Filename: libpcre2_10.36-1_aarch64_cortex-a53.ipk
+Size: 110959
+SHA256sum: 83d3fa955e775ee5e21b3f540f2dfde5396a1bb50c023710da3584189da01906
+Description:  A Perl Compatible Regular Expression library
+
+Package: wget-ssl
+Version: 1.21.4-1
+Depends: libc, libpcre2, zlib, libopenssl1.1, librt
+Provides: gnu-wget, wget
+Alternatives: 300:/usr/bin/wget:/usr/libexec/wget-ssl, 300:/usr/bin/wget-ssl:/usr/libexec/wget-ssl
+Source: feeds/packages/net/wget
+SourceName: wget-ssl
+License: GPL-3.0-or-later
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1696386710
+CPE-ID: cpe:/a:gnu:wget
+Architecture: aarch64_cortex-a53
+Installed-Size: 218587
+Filename: wget-ssl_1.21.4-1_aarch64_cortex-a53.ipk
+Size: 219229
+SHA256sum: 1c5197b82ab13a87566f6ef53f11065ccedcac6185b44802c5ce6d793d5fbf33
+Description:  Wget is a network utility to retrieve files from the Web using http
+ and ftp, the two most widely used Internet protocols. It works
+ non-interactively, so it will work in the background, after having
+ logged off. The program supports recursive retrieval of web-authoring
+ pages as well as ftp sites -- you can use wget to make mirrors of
+ archives and home pages or to travel the Web like a WWW robot.
+ This package is built with SSL support.
+
+Package: zoneinfo-asia
+Version: 2023c-1
+Depends: libc
+Source: feeds/packages/utils/zoneinfo
+SourceName: zoneinfo-asia
+License: Public Domain
+Section: utils
+SourceDateEpoch: 1680715787
+Maintainer: Vladimir Ulrich <admin@evl.su>
+Architecture: aarch64_cortex-a53
+Installed-Size: 30546
+Filename: zoneinfo-asia_2023c-1_aarch64_cortex-a53.ipk
+Size: 30911
+SHA256sum: 33548c66a186de9f0125ceccce7385d6a18ca6461820607250f2ae5171e89958
+Description:  Zone Information (Asia)
+
+Package: zoneinfo-core
+Version: 2023c-1
+Depends: libc
+Source: feeds/packages/utils/zoneinfo
+SourceName: zoneinfo-core
+License: Public Domain
+Section: utils
+SourceDateEpoch: 1680715787
+Maintainer: Vladimir Ulrich <admin@evl.su>
+Architecture: aarch64_cortex-a53
+Installed-Size: 20448
+Filename: zoneinfo-core_2023c-1_aarch64_cortex-a53.ipk
+Size: 20832
+SHA256sum: b38a9410cb95d685abd2eda2cc1cd04923bfe2db7ca8726efa9866df6b5b6940
+Description:  Zone Information (core)
+
