@@ -6,7 +6,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "luci-app-netspeedtest"
+        default: "openclash"
         options:
           - ALLAPP
           - openclash
@@ -14,12 +14,12 @@ on:
           - passwall2
           - passwall_packages
           - luci-app-mosdns
-          - luci-app-alist
           - luci-theme-argon
           - luci-app-adguardhome
           - luci-app-netspeedtest
-          - NetSpeedTest
           - luci-app-cloudflarespeedtest
+          - luci-app-alist
+          - NetSpeedTest
           - smartdns
       packages:
         required: false
@@ -108,7 +108,7 @@ jobs:
 
       - name: Artifact
         uses: actions/upload-artifact@main
-        if: ${{ inputs.packages }}
+        if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.pkgname }}
           path: |
