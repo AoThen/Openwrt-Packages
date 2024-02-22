@@ -145,12 +145,16 @@ case "$PKGNAME" in
     ;;
 "passwall_packages" | \
     "passwall_packages")
-
+    cd ..
+    rm -rf openwrt-sdk
+    git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+    cp -f MT2500.config openwrt-sdk/.config
+    cd openwrt-sdk
     echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
 
-    sudo apt install gcc-10 g++-10
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
-    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+    # sudo apt install gcc-10 g++-10
+    # sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+    # sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
     ./scripts/feeds clean -a
     ;;
 *) ;;
@@ -295,8 +299,8 @@ case "$PKGNAME" in
     # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
     ;;
 "passwall_packages")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
     # #下载包
     make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
