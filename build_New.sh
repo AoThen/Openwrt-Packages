@@ -291,8 +291,8 @@ case "$PKGNAME" in
     # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
     ;;
 "passwall_packages")
-    echo 'CONFIG_ALL=y' >>.config
-    make defconfig
+    # echo 'CONFIG_ALL=y' >>.config
+    # make defconfig
     # #下载包
     # make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
@@ -301,12 +301,9 @@ case "$PKGNAME" in
 
     # 遍历所有包名
     for pkg in $pkgs; do
-        if [ "$pkg" == "sing-box" ]; then
-            continue
-        fi
         # 编译每个包
         echo $pkg
-        make V=s ./package/feeds/pspackages/$pkg/compile
+        make ./package/feeds/pspackages/$pkg/compile -j$(nproc) || make ./package/feeds/pspackages/$pkg/compile -j1 V=sc || echo "Error building $pkg"
     done
 
     # find bin/packages/aarch64_cortex-a53/passwall_packages -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/passwall_packages" \;
