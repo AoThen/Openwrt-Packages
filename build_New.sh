@@ -164,8 +164,8 @@ esac
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-rm -rf feeds/packages/lang/golang
-git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/packages/lang/golang
+# rm -rf feeds/packages/lang/golang
+# git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/packages/lang/golang
 
 # ./scripts/feeds update packages
 # 更新go版本
@@ -302,7 +302,7 @@ case "$PKGNAME" in
     echo 'CONFIG_ALL=y' >>.config
     make defconfig
     # #下载包
-    make download -j$(nproc)
+    # make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
 
     # make -j$(nproc) ||  make -j1 V=s
