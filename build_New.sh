@@ -145,11 +145,11 @@ case "$PKGNAME" in
     ;;
 "passwall_packages" | \
     "passwall_packages")
-    cd ..
-    rm -rf openwrt-sdk
-    git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+    # cd ..
+    # rm -rf openwrt-sdk
+    # git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
     # cp -f MT2500.config openwrt-sdk/.config
-    cd openwrt-sdk
+    # cd openwrt-sdk
     echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
 
     # sudo apt install gcc-10 g++-10

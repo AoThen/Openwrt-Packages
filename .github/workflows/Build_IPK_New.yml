@@ -29,10 +29,13 @@ on:
         required: false
         type: boolean
         default: false
-      # UseCache:
-      #   required: false
-      #   type: boolean
-      #   default: true
+      UseCache:
+        type: choice
+        required: true
+        default: "mt"
+        options:
+          - mt
+          - hanwckf
 
 jobs:
   build_package:
@@ -69,12 +72,23 @@ jobs:
         uses: actions/cache@main
         with:
           path: openwrt-sdk
-          key: openwrt-sdk-21.02
+          key: ${{ inputs.UseCache }}
 
 #steps.cache-sdk.outputs.cache-hit != 'true' || inputs.UseCache != 'true' 
+      - name: download openwrt-sdk
+        if:  ${{ steps.cache-sdk.outputs.cache-hit != 'true' && inputs.UseCache == 'hanwckf' }}
+        run: |
+          rm -rf openwrt-sdk
+          git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+          cd openwrt-sdk
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          echo 'CONFIG_ALL=y' >> .config
+          make defconfig
+          make download -j$(nproc)
 
       - name: download openwrt-sdk
-        if: steps.cache-sdk.outputs.cache-hit != 'true'
+        if:  ${{ steps.cache-sdk.outputs.cache-hit != 'true' && inputs.UseCache == 'mt' }}
         run: |
           rm -rf openwrt-sdk
           git clone  --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git  openwrt-sdk
