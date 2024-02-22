@@ -148,7 +148,7 @@ case "$PKGNAME" in
     cd ..
     rm -rf openwrt-sdk
     git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
-    cp -f MT2500.config openwrt-sdk/.config
+    # cp -f MT2500.config openwrt-sdk/.config
     cd openwrt-sdk
     echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
 
@@ -299,8 +299,8 @@ case "$PKGNAME" in
     # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
     ;;
 "passwall_packages")
-    # echo 'CONFIG_ALL=y' >>.config
-    # make defconfig
+    echo 'CONFIG_ALL=y' >>.config
+    make defconfig
     # #下载包
     make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
