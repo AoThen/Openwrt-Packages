@@ -61,14 +61,12 @@ case "$PKGNAME" in
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
 
-
     git clone --depth 1 https://github.com/AoThen/luci-app-adguardhome.git package/luci-app-adguardhome
 
     ;;
 "luci-theme-argon")
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
-
 
     git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
 
@@ -77,14 +75,12 @@ case "$PKGNAME" in
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
 
-
     git clone --depth 1 https://github.com/AoThen/luci-app-netspeedtest.git package/luci-app-netspeedtest
 
     ;;
 "luci-app-cloudflarespeedtest")
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
-
 
     # git clone --depth 1 https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git package/openwrt-cdnspeedtest
     echo "src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git" >>"feeds.conf.default"
@@ -98,7 +94,6 @@ case "$PKGNAME" in
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
 
-
     git clone --depth 1 https://github.com/sbwml/luci-app-alist package/alist
 
     ;;
@@ -106,7 +101,6 @@ case "$PKGNAME" in
     "luci-app-mosdns")
 
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
-
 
     # find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
     find ./ | grep Makefile | grep mosdns | xargs rm -f
@@ -122,7 +116,6 @@ case "$PKGNAME" in
 "smartdns" | \
     "luci-app-smartdns")
     # git clone --depth 1 https://github.com/AoThen/openwrt-sdk-mt7981.git openwrt-sdk
-
 
     echo 'src-git smartdns https://github.com/pymumu/openwrt-smartdns' >>feeds.conf.default
     echo 'src-git luci-app-smartdns https://github.com/pymumu/luci-app-smartdns' >>feeds.conf.default
@@ -159,7 +152,6 @@ case "$PKGNAME" in
     ;;
 *) ;;
 esac
-
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
@@ -309,6 +301,9 @@ case "$PKGNAME" in
 
     # 遍历所有包名
     for pkg in $pkgs; do
+        if [ "$pkg" == "sing-box" ]; then
+            continue
+        fi
         # 编译每个包
         echo $pkg
         make V=s ./package/feeds/pspackages/$pkg/compile
