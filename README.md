@@ -6,10 +6,10 @@ for https://github.com/AoThen/Actions-GL-MT2500
 - openclash
 - luci-app-passwall
 - luci-app-passwall2
-- passwall_packages
-- ALLAPP
 
 待测试
+- passwall_packages
+- ALLAPP
 - luci-app-mosdns
 - luci-app-alist
 - NetSpeedTest

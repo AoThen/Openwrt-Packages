@@ -36,6 +36,7 @@ on:
 
 jobs:
   build_package:
+    name: ${{ inputs.pkgname }} build
     permissions:
       actions: write #  to cancel/stop running workflows (styfle/cancel-workflow-action)
       contents: write #  to create release tags (cycjimmy/semantic-release-action)

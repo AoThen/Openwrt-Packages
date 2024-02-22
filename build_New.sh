@@ -43,8 +43,8 @@ case "$PKGNAME" in
 "ALLAPP")
 
     cd ..
-    rm -rf openwrt-sdk
-    git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
+    # rm -rf openwrt-sdk
+    # git clone --depth=1 https://github.com/hanwckf/immortalwrt-mt798x.git openwrt-sdk
     cp -f MT2500.config openwrt-sdk/.config
     cd openwrt-sdk
     git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon
@@ -147,16 +147,21 @@ case "$PKGNAME" in
     "passwall_packages")
 
     echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >>"feeds.conf.default"
+
+    sudo apt install gcc-10 g++-10
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+    ./scripts/feeds clean -a
     ;;
 *) ;;
 esac
 
-# ./scripts/feeds clean -a
+
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
 rm -rf feeds/packages/lang/golang
-git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 20.x feeds/packages/lang/golang
+git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 21.x feeds/packages/lang/golang
 
 # ./scripts/feeds update packages
 # 更新go版本
@@ -290,10 +295,10 @@ case "$PKGNAME" in
     # find bin/packages/aarch64_cortex-a53/passwall -type f -name "*.ipk" -exec cp -f {} "${WORKDIR}/buildsource/luci-app-passwall" \;
     ;;
 "passwall_packages")
-    # echo 'CONFIG_ALL=y' >>.config
-    # make defconfig
+    echo 'CONFIG_ALL=y' >>.config
+    make defconfig
     # #下载包
-    # make download -j$(nproc)
+    make download -j$(nproc)
     pkgs=$(ls ./package/feeds/pspackages)
 
     # make -j$(nproc) ||  make -j1 V=s
