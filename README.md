@@ -9,7 +9,7 @@ for https://github.com/AoThen/Actions-GL-MT2500
 
 待测试
 - passwall_packages
-- ALLAPP
+- ALLAPP (hanwckf)
 - luci-app-mosdns
 - luci-app-alist
 - NetSpeedTest

@@ -6,7 +6,7 @@ on:
       pkgname:
         type: choice
         required: true
-        default: "openclash"
+        default: "passwall_packages"
         options:
           - ALLAPP
           - openclash
@@ -32,7 +32,7 @@ on:
       UseCache:
         type: choice
         required: true
-        default: "mt"
+        default: "hanwckf"
         options:
           - mt
           - hanwckf
