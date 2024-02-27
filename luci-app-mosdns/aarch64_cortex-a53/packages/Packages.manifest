@@ -1,3 +1,53 @@
+Package: attr
+Version: 2.4.48-2
+Depends: libc, libattr
+Source: feeds/packages/utils/attr
+SourceName: attr
+License: GPL-2.0-or-later
+LicenseFiles: doc/COPYING
+Section: utils
+SourceDateEpoch: 1614187565
+Maintainer: Maxim Storchak <m.storchak@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 12859
+Filename: attr_2.4.48-2_aarch64_cortex-a53.ipk
+Size: 13614
+SHA256sum: 2cefedaa692b8bd3dde4aa8e89432f12fc5daf6345b6e9e930838abe297790b0
+Description:  Extended attributes support
+ This package provides xattr manipulation utilities
+ - attr
+ - getfattr
+ - setfattr
+
+Package: avahi-dbus-daemon
+Version: 0.8-8
+Depends: libc, libavahi-dbus-support, libexpat, librt, libdaemon
+Provides: avahi-daemon
+Source: feeds/packages/libs/avahi
+SourceName: avahi-dbus-daemon
+License: LGPL-2.1-or-later
+LicenseFiles: LICENSE
+Section: net
+SourceDateEpoch: 1686461958
+CPE-ID: cpe:/a:avahi:avahi
+Maintainer: Ted Hess <thess@kitschensync.net>
+Architecture: aarch64_cortex-a53
+Installed-Size: 40568
+Filename: avahi-dbus-daemon_0.8-8_aarch64_cortex-a53.ipk
+Size: 41787
+SHA256sum: 186f10a1e4ed3df77c49feb4222b255678a446a252c693c4f572532532a1954e
+Description:  Avahi is an mDNS/DNS-SD (aka RendezVous/Bonjour/ZeroConf)
+ implementation (library). It facilitates
+ service discovery on a local network -- this means that
+ you can plug your laptop or computer into a network and
+ instantly be able to view other people who you can chat with,
+ find printers to print to or find files being shared.
+ This kind of technology is already found in MacOS X
+ (branded 'Rendezvous', 'Bonjour' and sometimes 'ZeroConf')
+ and is very convenient.
+ .
+ This package contains an mDNS/DNS-SD daemon.
+
 Package: cgi-io
 Version: 2022-08-10-901b0f04-21
 Depends: libc, libubox20210516, libubus20210630
@@ -14,23 +64,21 @@ Size: 10241
 SHA256sum: b04ed1318a3f3307d4b596bbb9eb52079bc8cdb52e70f8efd0e7e40573cf09e4
 Description:  This package contains an cgi utility that is useful for up/downloading files
 
-Package: curl
-Version: 7.83.1-20
-Depends: libc, libcurl
-Source: feeds/packages/net/curl
-SourceName: curl
-License: MIT
-LicenseFiles: COPYING
-Section: net
-SourceDateEpoch: 1697090345
-CPE-ID: cpe:/a:haxx:libcurl
-Maintainer: Stan Grishin <stangri@melmac.ca>
+Package: dbus
+Version: 1.13.12-1
+Depends: libc, libexpat, libdbus
+Source: feeds/packages/utils/dbus
+SourceName: dbus
+License: AFL-2.1
+Section: utils
+SourceDateEpoch: 1591128979
+CPE-ID: cpe:/a:freedesktop:dbus
 Architecture: aarch64_cortex-a53
-Installed-Size: 57434
-Filename: curl_7.83.1-20_aarch64_cortex-a53.ipk
-Size: 58282
-SHA256sum: c04c383e24539003271f68a436e299909a9f6875969457ac776351c8a82281fb
-Description:  A client-side URL transfer utility
+Installed-Size: 119137
+Filename: dbus_1.13.12-1_aarch64_cortex-a53.ipk
+Size: 119813
+SHA256sum: 90802aea52f2a0520f968178ab8f18c260e7392e209c851ec53731a53730b97a
+Description:  Simple interprocess messaging system (daemon)
 
 Package: gdisk
 Version: 1.0.6-1
@@ -49,44 +97,216 @@ Size: 60151
 SHA256sum: 40b40484673282e63db5d22a694f7cea3f509f5f13aab2c3017a14c398bee971
 Description:  gdisk is GPT aware disk partitioning tool, with interactive UI.
 
-Package: libcurl4
-Version: 7.83.1-20
-Depends: libc, libopenssl1.1, libpthread, libnghttp2-14, ca-bundle
-Provides: libcurl
-Source: feeds/packages/net/curl
-SourceName: libcurl
-License: MIT
-LicenseFiles: COPYING
-Section: libs
-SourceDateEpoch: 1697090345
-ABIVersion: 4
-CPE-ID: cpe:/a:haxx:libcurl
-Maintainer: Stan Grishin <stangri@melmac.ca>
-Architecture: aarch64_cortex-a53
-Installed-Size: 193873
-Filename: libcurl4_7.83.1-20_aarch64_cortex-a53.ipk
-Size: 194705
-SHA256sum: c31916257dbd885f3d0c4a5f675a9af5e7fc566d1aa6a6d94dd0c719a3d78990
-Description:  A client-side URL transfer library
-
-Package: libnghttp2-14
-Version: 1.43.0-1
+Package: libattr
+Version: 2.4.48-2
 Depends: libc
-Provides: libnghttp2
-Source: feeds/packages/libs/nghttp2
-SourceName: libnghttp2
+Source: feeds/packages/utils/attr
+SourceName: libattr
+License: LGPL-2.1-or-later
+LicenseFiles: doc/COPYING.LGPL
+Section: libs
+SourceDateEpoch: 1614187565
+Maintainer: Maxim Storchak <m.storchak@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 6877
+Filename: libattr_2.4.48-2_aarch64_cortex-a53.ipk
+Size: 7688
+SHA256sum: c06c6d86f422faca37a2fa359c54f6ed53293b5f0d614975015a77803a83d683
+Description:  Extended attributes support
+ This package provides libattr
+
+Package: libavahi-client
+Version: 0.8-8
+Depends: libc, avahi-dbus-daemon
+Source: feeds/packages/libs/avahi
+SourceName: libavahi-client
+License: LGPL-2.1-or-later
+LicenseFiles: LICENSE
+Section: libs
+SourceDateEpoch: 1686461958
+CPE-ID: cpe:/a:avahi:avahi
+Maintainer: Ted Hess <thess@kitschensync.net>
+Architecture: aarch64_cortex-a53
+Installed-Size: 19308
+Filename: libavahi-client_0.8-8_aarch64_cortex-a53.ipk
+Size: 20493
+SHA256sum: f536cf065a31337e5095ad7f1ccd3d76c2a953669efb6bc0951c403b0e41e5db
+Description:  Avahi is an mDNS/DNS-SD (aka RendezVous/Bonjour/ZeroConf)
+ implementation (library). It facilitates
+ service discovery on a local network -- this means that
+ you can plug your laptop or computer into a network and
+ instantly be able to view other people who you can chat with,
+ find printers to print to or find files being shared.
+ This kind of technology is already found in MacOS X
+ (branded 'Rendezvous', 'Bonjour' and sometimes 'ZeroConf')
+ and is very convenient.
+ .
+ This packages adds the libavahi-client library.
+ It also automatically adds the required
+ libavahi-dbus-support and the avahi-dbus-daemon packages.
+ For more information please see the avahi documentation.
+
+Package: libavahi-dbus-support
+Version: 0.8-8
+Depends: libc, dbus
+Provides: libavahi
+Source: feeds/packages/libs/avahi
+SourceName: libavahi-dbus-support
+License: LGPL-2.1-or-later
+LicenseFiles: LICENSE
+Section: libs
+SourceDateEpoch: 1686461958
+CPE-ID: cpe:/a:avahi:avahi
+Maintainer: Ted Hess <thess@kitschensync.net>
+Architecture: aarch64_cortex-a53
+Installed-Size: 82154
+Filename: libavahi-dbus-support_0.8-8_aarch64_cortex-a53.ipk
+Size: 83454
+SHA256sum: 3cd457fcc11bca278dca338c100bfde990bba151b64e83bdd246156b88d4a54a
+Description:  Avahi is an mDNS/DNS-SD (aka RendezVous/Bonjour/ZeroConf)
+ implementation (library). It facilitates
+ service discovery on a local network -- this means that
+ you can plug your laptop or computer into a network and
+ instantly be able to view other people who you can chat with,
+ find printers to print to or find files being shared.
+ This kind of technology is already found in MacOS X
+ (branded 'Rendezvous', 'Bonjour' and sometimes 'ZeroConf')
+ and is very convenient.
+ .
+ The libavahi package contains the mDNS/DNS-SD shared libraries,
+ used by other programs. Specifically, it provides
+ libavahi-core and libavahi-common libraries.
+ .
+ The libavahi-dbus-support package enables
+ D-Bus support in avahi, needed to support
+ the libavahi-client library and avahi-utils.
+ .
+ Selecting this package modifies the build configuration
+ so that avahi packages are built with support for D-BUS enabled;
+ it does not generate a separate binary of its own.
+ It also automatically adds the D-Bus package to the build.
+ libavahi-dbus-support is selected automatically if you select
+ libavahi-client or avahi-utils.
+
+Package: libcap
+Version: 2.43-1
+Depends: libc
+Source: feeds/packages/libs/libcap
+SourceName: libcap
+License: GPL-2.0-only
+LicenseFiles: License
+Section: libs
+SourceDateEpoch: 1614187565
+Maintainer: Paul Wassi <p.wassi@gmx.at>
+Architecture: aarch64_cortex-a53
+Installed-Size: 12280
+Filename: libcap_2.43-1_aarch64_cortex-a53.ipk
+Size: 13007
+SHA256sum: a1c51aded04c847d2d15fcea5d84d90ddd6cffe381f89452f8d9ff4910f12c02
+Description:  Linux capabilities library library
+
+Package: libdaemon
+Version: 0.14-5
+Depends: libc
+Source: feeds/packages/libs/libdaemon
+SourceName: libdaemon
+Section: libs
+SourceDateEpoch: 1614187565
+Maintainer: Ted Hess <thess@kitschensync.net>
+Architecture: aarch64_cortex-a53
+Installed-Size: 9531
+Filename: libdaemon_0.14-5_aarch64_cortex-a53.ipk
+Size: 10611
+SHA256sum: 9090fde0761e1c06246645eeff33b3a291862591576f5820edaca3446ad1fc65
+Description:  libdaemon is a lightweight C library that eases the writing of UNIX daemons.
+ It consists of the following parts:
+ - A wrapper around fork() which does the correct daemonization procedure of a process
+ - A wrapper around syslog() for simpler and compatible log output to Syslog or STDERR
+ - An API for writing PID files
+ - An API for serializing UNIX signals into a pipe for usage with select() or poll()
+ - An API for running subprocesses with STDOUT and STDERR redirected to syslog
+ 
+ APIs like these are used in most daemon software available. It is not that
+ simple to get it done right and code duplication is not a goal.
+
+Package: libdbus
+Version: 1.13.12-1
+Depends: libc, libpthread
+Source: feeds/packages/utils/dbus
+SourceName: libdbus
+License: AFL-2.1
+Section: utils
+SourceDateEpoch: 1591128979
+CPE-ID: cpe:/a:freedesktop:dbus
+Architecture: aarch64_cortex-a53
+Installed-Size: 132024
+Filename: libdbus_1.13.12-1_aarch64_cortex-a53.ipk
+Size: 132713
+SHA256sum: c85ca3fe2399c63eb86c8659e4fa8a4977b91378e23c0dd2f2ca82843bcde28c
+Description:  Simple interprocess messaging system (library)
+
+Package: libevdev
+Version: 1.13.0-1
+Depends: libc
+Source: feeds/packages/libs/libevdev
+SourceName: libevdev
 License: MIT
 LicenseFiles: COPYING
 Section: libs
-SourceDateEpoch: 1612720536
-ABIVersion: -14
-Maintainer: Hans Dedecker <dedeckeh@gmail.com>
+SourceDateEpoch: 1665689787
+Maintainer: Daniel Golle <daniel@makrotopia.org>
 Architecture: aarch64_cortex-a53
-Installed-Size: 70999
-Filename: libnghttp2-14_1.43.0-1_aarch64_cortex-a53.ipk
-Size: 70311
-SHA256sum: dea32a551f94276208f25df6d2e9434d598c3340fbed2a5cf27e3fdca93b79fc
-Description:  C library implementing the framing layer of the HTTP/2 protocol. It can be used to build a HTTP/2-capable HTTP client or server
+Installed-Size: 32484
+Filename: libevdev_1.13.0-1_aarch64_cortex-a53.ipk
+Size: 33028
+SHA256sum: 2dcae6518763b3741d2075be4888b64e13b0b594bc9cc04a9c499d5089c92715
+Description:  libevdev is a wrapper library for evdev devices. it moves the common
+ tasks when dealing with evdev devices into a library and provides a
+ library interface to the callers, thus avoiding erroneous ioctls, etc.
+ 
+ The eventual goal is that libevdev wraps all ioctls available to
+ evdev devices, thus making direct access unnecessary.
+
+Package: libexpat
+Version: 2.2.10-2
+Depends: libc
+Source: feeds/packages/libs/expat
+SourceName: libexpat
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1645664409
+CPE-ID: cpe:/a:libexpat:expat
+Maintainer: Ted Hess <thess@kitschensync.net>
+Architecture: aarch64_cortex-a53
+Installed-Size: 45580
+Filename: libexpat_2.2.10-2_aarch64_cortex-a53.ipk
+Size: 46361
+SHA256sum: 9507171178205b128a6566d90130c664a9dca3a556950b48fcf0ddca8a855578
+Description:  A fast, non-validating, stream-oriented XML parsing library.
+
+Package: libgnutls
+Version: 3.7.1-2
+Depends: libc, libnettle8, libgmp10, kmod-cryptodev, libatomic1
+Source: feeds/packages/libs/gnutls
+SourceName: libgnutls
+License: LGPL-2.1-or-later
+Section: libs
+SourceDateEpoch: 1639488196
+CPE-ID: cpe:/a:gnu:gnutls
+Maintainer: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 894210
+Filename: libgnutls_3.7.1-2_aarch64_cortex-a53.ipk
+Size: 893510
+SHA256sum: a864fccc1c26906e4e373c88bcd4513dc02f2b5198e0bed26b430384c392e696
+Description:  GnuTLS is a secure communications library implementing the SSL, TLS
+ and DTLS protocols and technologies around them. It provides a simple
+ C language application programming interface (API) to access the secure
+ communications protocols as well as APIs to parse and write X.509, PKCS12,
+ OpenPGP and other required structures. It is aimed to be portable and
+ efficient with focus on security and interoperability.
+ This package contains the GnuTLS shared library, needed by other programs.
 
 Package: libpcre2
 Version: 10.36-1
@@ -105,6 +325,179 @@ Filename: libpcre2_10.36-1_aarch64_cortex-a53.ipk
 Size: 110959
 SHA256sum: 83d3fa955e775ee5e21b3f540f2dfde5396a1bb50c023710da3584189da01906
 Description:  A Perl Compatible Regular Expression library
+
+Package: libtasn1
+Version: 4.16.0-1
+Depends: libc
+Source: feeds/packages/libs/libtasn1
+SourceName: libtasn1
+License: LGPL-2.1-or-later
+LicenseFiles: COPYING.LIB
+Section: libs
+SourceDateEpoch: 1590370659
+CPE-ID: cpe:/a:gnu:libtasn1
+Maintainer: Nikos Mavrogiannopoulos <n.mavrogiannopoulos@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 32604
+Filename: libtasn1_4.16.0-1_aarch64_cortex-a53.ipk
+Size: 33433
+SHA256sum: 465a0d6d56e3f5dc56a756724c66cf92b3ba935954b048c8c1b10fa1c5d1947f
+Description:  This is a library for Abstract Syntax Notation One (ASN.1) and
+ Distinguish Encoding Rules (DER) manipulation.
+
+Package: libtirpc
+Version: 1.3.2-1
+Depends: libc, libpthread
+Source: feeds/packages/libs/libtirpc
+SourceName: libtirpc
+License: BSD-3-Clause
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1625943293
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 66305
+Filename: libtirpc_1.3.2-1_aarch64_cortex-a53.ipk
+Size: 67087
+SHA256sum: 9f86775caa6873c3cbea4535ad7685bb543fa96ae6bfad531c4eaa9f35ea00de
+Description:  Library TI RPC for RPC bindings
+
+Package: libudev-zero
+Version: 1.0.1-1
+Depends: libc, libevdev
+Conflicts: libudev, eudev, udev
+Provides: libudev
+Source: feeds/packages/libs/libudev-zero
+SourceName: libudev-zero
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1665689841
+Maintainer: Daniel Golle <daniel@makrotopia.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 10643
+Filename: libudev-zero_1.0.1-1_aarch64_cortex-a53.ipk
+Size: 11413
+SHA256sum: 6d81df5aac0d063460774c60ac888eea6c3db9cfee16a72edb748a93fa692422
+Description:  Drop-in replacement for libudev
+
+Package: liburing
+Version: 0.7-2
+Depends: libc
+Source: feeds/packages/libs/liburing
+SourceName: liburing
+License: MIT
+LicenseFiles: COPYING
+Section: libs
+SourceDateEpoch: 1674372964
+Maintainer: Christian Lachner <gladiac@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 4595
+Filename: liburing_0.7-2_aarch64_cortex-a53.ipk
+Size: 5492
+SHA256sum: d2ec1bdd73e2064e40d2b37098a0fb579266a1948d9b7d3b7eb41cacceb44023
+Description:  liburing provides helpers to setup and teardown io_uring instances,
+ and also a simplified interface for applications that don't need
+ (or want) to deal with the full kernel side implementation.
+ For more info on io_uring, please see: https://kernel.dk/io_uring.pdf
+
+Package: p910nd
+Version: 0.97-9
+Depends: libc
+Source: feeds/packages/net/p910nd
+SourceName: p910nd
+License: GPLv2
+LicenseFiles: COPYING
+Section: net
+Require-User: p910nd=393:lp=7
+SourceDateEpoch: 1606376827
+Maintainer: Philipp Kerling <pkerling@casix.org>
+Architecture: aarch64_cortex-a53
+Installed-Size: 7209
+Filename: p910nd_0.97-9_aarch64_cortex-a53.ipk
+Size: 8220
+SHA256sum: 98430fb5bcf5b70f3a1f9a6473b5a776d6258167774ac61440d756478380ff50
+Description:  p910nd is a small daemon that copies any data received on
+ the port it is listening on to the corresponding printer
+ port. It is primarily intended for diskless Linux hosts
+ running as printer drivers but there is no reason why it
+ could not be used on diskful hosts. Port 9100 is copied
+ to /dev/lp0, 9101 to /dev/lp1 and 9102 to /dev/lp2. The
+ default is port 9100 to /dev/lp0.
+
+Package: samba4-libs
+Version: 4.14.12-2
+Depends: libc, libtirpc, libreadline8, libpopt0, libcap, zlib, libgnutls, libtasn1, libuuid1, libopenssl1.1, libpthread, liburing, attr, libavahi-client
+Source: feeds/packages/net/samba4
+SourceName: samba4-libs
+License: GPL-3.0-only
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1670367370
+CPE-ID: cpe:/a:samba:samba
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 8033914
+Filename: samba4-libs_4.14.12-2_aarch64_cortex-a53.ipk
+Size: 7983210
+SHA256sum: e17ffb94ff48c1f537a5fd9862f721cb1dcf5d25168d56c9e2019eef707a0755
+Description:  Samba 4.14.12 libs
+
+Package: samba4-server
+Version: 4.14.12-2
+Depends: libc, samba4-libs
+Conflicts: samba36-server
+Source: feeds/packages/net/samba4
+SourceName: samba4-server
+License: GPL-3.0-only
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1670367370
+CPE-ID: cpe:/a:samba:samba
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 252711
+Filename: samba4-server_4.14.12-2_aarch64_cortex-a53.ipk
+Size: 253653
+SHA256sum: 681927cda57e9ad870317b8b923a95ad13c30aa37e4e9b2ed9a6f246f35b0e94
+Description:  installs: smbd (nmbd) smbpasswd pdbedit testparm (nmblookup) (smbcacls sharesec)
+ (samba samba-tool ntlm_auth samba-gpupdate samba_dnsupdate samba_kcc samba_spnupdate samba_upgradedns samba_downgrade_db)
+ 
+ This provides the basic fileserver service and is the minimum needed to serve file shares.
+ HINT: https://fitzcarraldoblog.wordpress.com/2016/10/17/a-correct-method-of-configuring-samba-for-browsing-smb-shares-in-a-home-network/
+
+Package: usbids
+Version: 0.359-1
+Depends: libc
+Source: feeds/packages/utils/hwdata
+SourceName: usbids
+License: GPL-2.0-or-later  XFree86-1.0
+LicenseFiles: LICENSE
+Section: utils
+SourceDateEpoch: 1651680722
+Architecture: aarch64_cortex-a53
+Installed-Size: 251058
+Filename: usbids_0.359-1_aarch64_cortex-a53.ipk
+Size: 251536
+SHA256sum: 8d6908d2ebc8b50967307bb5acf21da50dad1cecfddf2ec1be63bdc7bffbde78
+Description:  USB ID list
+
+Package: usbutils
+Version: 013-2
+Depends: libc, libusb-1.0-0, libudev, usbids, librt, libpthread
+Source: feeds/packages/utils/usbutils
+SourceName: usbutils
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: utils
+SourceDateEpoch: 1609784864
+Maintainer: Felix Fietkau <nbd@nbd.name>
+Architecture: aarch64_cortex-a53
+Installed-Size: 55342
+Filename: usbutils_013-2_aarch64_cortex-a53.ipk
+Size: 56074
+SHA256sum: 41b95ec5d71e08f76abefa74a076ff563a7247d821d4a812f75cb2ffaf013a35
+Description:  USB devices listing utilities
 
 Package: wget-ssl
 Version: 1.21.4-1
@@ -130,6 +523,28 @@ Description:  Wget is a network utility to retrieve files from the Web using htt
  pages as well as ftp sites -- you can use wget to make mirrors of
  archives and home pages or to travel the Web like a WWW robot.
  This package is built with SSL support.
+
+Package: wsdd2
+Version: 2021-08-09-bcc51c3e-4
+Depends: libc
+Source: feeds/packages/net/wsdd2
+SourceName: wsdd2
+License: GPL-3.0-only
+LicenseFiles: COPYING
+Section: net
+SourceDateEpoch: 1684657273
+Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
+Architecture: aarch64_cortex-a53
+Installed-Size: 19594
+Filename: wsdd2_2021-08-09-bcc51c3e-4_aarch64_cortex-a53.ipk
+Size: 20551
+SHA256sum: 72e47cec4adc41c4fac2078dd03f10dad77333194b9231b8a3716fde6db53ba7
+Description:  Web Services for Devices or Web Services on Devices (WSD),
+ is a Microsoft API to simplify programming connections to web service
+ enabled devices, such as printers, scanners and file shares.
+ 
+ This daemon advertises and responds to probe requests from Windows clients looking for file shares.
+ It also implements LLMNR multicast name lookup services.
 
 Package: zoneinfo-asia
 Version: 2023c-1

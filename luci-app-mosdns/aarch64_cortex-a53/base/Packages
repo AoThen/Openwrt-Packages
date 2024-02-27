@@ -6,11 +6,38 @@ Section: net
 Architecture: all
 Installed-Size: 1706
 Filename: 6in4_26_all.ipk
-Size: 2524
-SHA256sum: 30e5d9e2201e720af568f0a13eb54a5a1db207f47bffced81f34ef330b2c2388
+Size: 2528
+SHA256sum: c25683168a2aadceab65e63a2cb1496b13c3e5785a228f5b2e3125500521fb65
 Description:  Provides support for 6in4 tunnels in /etc/config/network.
  Refer to http://wiki.openwrt.org/doc/uci/network for
  configuration details.
+
+Package: blkid
+Version: 2.36.1-2
+Depends: libc, libblkid1, libuuid1
+License: GPL-2.0
+Section: utils
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 42907
+Filename: blkid_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 43819
+SHA256sum: 7dd99cc6d4251c8373dbb57c9604d416b07e036cd9c51f7a953708271ddc09c6
+Description:  The blkid program is the command-line interface to working with the libblkid
+ library.
+
+Package: blockdev
+Version: 2.36.1-2
+Depends: libc, librt
+License: GPL-2.0
+Section: utils
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 22097
+Filename: blockdev_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 22923
+SHA256sum: a421e388ed77366e9fa0f6f1835210eb75e130d6c5f4229c1a09bca7cc42bd85
+Description:  The blockdev program is the command-line interface to call block device ioctls.
 
 Package: busybox
 Version: 1.33.2-1
@@ -21,10 +48,10 @@ Section: base
 CPE-ID: cpe:/a:busybox:busybox
 Essential: yes
 Architecture: aarch64_cortex-a53
-Installed-Size: 236949
+Installed-Size: 236953
 Filename: busybox_1.33.2-1_aarch64_cortex-a53.ipk
-Size: 237419
-SHA256sum: 2a7f5cba9128ea07573143db4bda6f2a33e3910758cd77a3881ac5843667adcc
+Size: 237437
+SHA256sum: 384bbcab07312bc513ab81fbcda8ebfdee32e6dfa0d49981a4b023313c9bfe25
 Description:  The Swiss Army Knife of embedded Linux.
  It slices, it dices, it makes Julian Fries.
 
@@ -34,11 +61,23 @@ Depends: libc
 Provides: ca-certs
 Section: base
 Architecture: all
-Installed-Size: 123484
+Installed-Size: 123482
 Filename: ca-bundle_20230311-1_all.ipk
-Size: 124293
-SHA256sum: 2c5e422f958979bf00e4a2f247d7d227a5b89ebb0af4743e7972e6426e7fc537
+Size: 124291
+SHA256sum: d053d6e5cea7cfb9f418de04b358ae2cbc4cc4316c07057d4a773a6e5d254871
 Description:  System CA certificates as a bundle
+
+Package: ca-certificates
+Version: 20230311-1
+Depends: libc
+Provides: ca-certs
+Section: base
+Architecture: all
+Installed-Size: 133824
+Filename: ca-certificates_20230311-1_all.ipk
+Size: 134580
+SHA256sum: af4c0aa1470dab0d37363493b6713decc1207b7b31855667778c3a7dce83fe7c
+Description:  System CA certificates
 
 Package: default-settings-chn
 Version: 1.1-1
@@ -46,10 +85,10 @@ Depends: libc, default-settings, luci-i18n-base-zh-cn
 License: GPL-3.0
 Section: luci
 Architecture: all
-Installed-Size: 8718
+Installed-Size: 8712
 Filename: default-settings-chn_1.1-1_all.ipk
-Size: 9486
-SHA256sum: a5a0d4e739b4c7d289a394327540abfa8c1480d94d7c7d5c15d8c66933cc0edd
+Size: 9484
+SHA256sum: 91b0d126a33a5057edf86104de210b32843642ffb12bed6d6c0e93a4052d025d
 Description:  LuCI support for Default Settings (Optimize for CHN users)
 
 Package: default-settings
@@ -58,10 +97,10 @@ Depends: libc, luci-lib-base
 License: GPL-3.0
 Section: luci
 Architecture: all
-Installed-Size: 545
+Installed-Size: 542
 Filename: default-settings_1.1-1_all.ipk
-Size: 1265
-SHA256sum: 289db84f0c3b05b089842972966936b65c5b42e751040968fa74f2f18dbc52e8
+Size: 1262
+SHA256sum: c7a45d415ede73df8e05b2cae248f6fb853d2546bad7b4b7fb846a253200b461
 Description:  LuCI support for Default Settings
 
 Package: dnsmasq-full
@@ -74,12 +113,52 @@ CPE-ID: cpe:/a:thekelleys:dnsmasq
 Architecture: aarch64_cortex-a53
 Installed-Size: 182498
 Filename: dnsmasq-full_2.85-1_aarch64_cortex-a53.ipk
-Size: 183363
-SHA256sum: aa6105f7503cf1f8f5e352dd72f5bdee7e04736682573bc8d4fb70c66991a0f9
+Size: 183330
+SHA256sum: 71ac2f6ae9a10e5480f93bcf0e70d2fe3c27ec9d39b91a84aa1e0f093d4b56e0
 Description:  It is intended to provide coupled DNS and DHCP service to a LAN.
  
  This is a fully configurable variant with DHCPv4, DHCPv6, DNSSEC, Authoritative DNS
  and IPset, Conntrack support & NO_ID enabled by default.
+
+Package: e2fsprogs
+Version: 1.45.6-2
+Depends: libc, libuuid1, libext2fs2
+License: GPL-2.0
+Section: utils
+CPE-ID: cpe:/a:e2fsprogs_project:e2fsprogs
+Architecture: aarch64_cortex-a53
+Installed-Size: 184576
+Filename: e2fsprogs_1.45.6-2_aarch64_cortex-a53.ipk
+Size: 185443
+SHA256sum: 677446907642cd3e23a6dfbb30cf4d3406349b1bffb96eaf97212930d5ab10e5
+Description:  This package contains essential ext2 filesystem utilities which consists of
+ e2fsck, mke2fs and most of the other core ext2 filesystem utilities.
+
+Package: f2fsck
+Version: 1.14.0-1
+Depends: libc, libf2fs6
+Conflicts: f2fsck-selinux
+License: GPL-2.0-only
+Section: utils
+Architecture: aarch64_cortex-a53
+Installed-Size: 79396
+Filename: f2fsck_1.14.0-1_aarch64_cortex-a53.ipk
+Size: 80265
+SHA256sum: 25201f6bd846f0f5ac11d026754b52d68df372efbcced5db40dca75a5108f9af
+Description:  Utility for checking/repairing a Flash-Friendly File System (F2FS)
+
+Package: fdisk
+Version: 2.36.1-2
+Depends: libc, libblkid1, libsmartcols1, libfdisk1, libncursesw6
+License: GPL-2.0
+Section: utils
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 54055
+Filename: fdisk_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 54950
+SHA256sum: 1e07f8c283592eada2c3a982431891248bfaeb8eb403694f82bbb4f4ebec74ff
+Description:  a menu-driven program for creation and manipulation of partition tables
 
 Package: firewall
 Version: 2021-03-23-61db17ed-2
@@ -87,10 +166,10 @@ Depends: libc, libubox20210516, libubus20210630, libuci20130104, libip4tc2, libi
 License: ISC
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 53557
+Installed-Size: 53558
 Filename: firewall_2021-03-23-61db17ed-2_aarch64_cortex-a53.ipk
-Size: 54342
-SHA256sum: c89fcb4410c9ccead144a542cb4139746faaed2ce39290d77d65618576610df9
+Size: 54336
+SHA256sum: 144c7f117eed588c28cad5a5ad8b14bbbcce7494b739ef99ec1e0d79a7351c1a
 Description:  This package provides a config-compatible C implementation of the UCI firewall.
 
 Package: getrandom
@@ -101,9 +180,37 @@ Section: base
 Architecture: aarch64_cortex-a53
 Installed-Size: 1639
 Filename: getrandom_2020-10-25-9ef88681-2_aarch64_cortex-a53.ipk
-Size: 2416
-SHA256sum: ccab11df82561cf6444fb5f361d4e221ed1e3c5934f3f568734a058913742f21
+Size: 2414
+SHA256sum: bd94d03b67d60c51ac75beb991230fbdd8d054f4dad517fa8c2089912e87076a
 Description:  OpenWrt getrandom system helper
+
+Package: ip-full
+Version: 5.11.0-3
+Depends: libc, libnl-tiny2022-05-17, libbpf0
+Provides: ip
+Alternatives: 300:/sbin/ip:/usr/libexec/ip-full
+License: GPL-2.0
+Section: net
+CPE-ID: cpe:/a:iproute2_project:iproute2
+Architecture: aarch64_cortex-a53
+Installed-Size: 210953
+Filename: ip-full_5.11.0-3_aarch64_cortex-a53.ipk
+Size: 211675
+SHA256sum: a01a34d4d5703d6128350be8908ca04a7c27bd2ed9be7d2279db20723c2f72ff
+Description:  Routing control utility (full)
+
+Package: ipset
+Version: 7.6-1
+Depends: libc, kmod-ipt-ipset, libmnl0, libipset13
+License: GPL-2.0
+Section: net
+CPE-ID: cpe:/a:netfilter:ipset
+Architecture: aarch64_cortex-a53
+Installed-Size: 1334
+Filename: ipset_7.6-1_aarch64_cortex-a53.ipk
+Size: 2140
+SHA256sum: 8a81bb3af5e859fa3ebd01df8005e8d8ba27fb344cc34c2e9e5492a6a0ce18a2
+Description:  IPset administration utility
 
 Package: iptables-mod-fullconenat
 Version: 2019-10-21-0cf3b48f-1
@@ -111,10 +218,10 @@ Depends: libc, iptables, kmod-ipt-fullconenat
 License: GPL-2.0
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 2478
+Installed-Size: 2476
 Filename: iptables-mod-fullconenat_2019-10-21-0cf3b48f-1_aarch64_cortex-a53.ipk
-Size: 3255
-SHA256sum: ed49c177a309fb656a85aa72d692e132f6c38cb98cc06a0105ed5fff4714bffb
+Size: 3251
+SHA256sum: c0890f805e64174d6ab5dfc6150182415be110a1def2bb58106be13a178e6951
 Description:  FULLCONENAT iptables extension
 
 Package: ipv6helper
@@ -123,10 +230,10 @@ Depends: libc, luci-proto-ipv6, wget-ssl, libip6tc2, ip6tables, ip6tables-mod-na
 License: GPLv3
 Section: ipv6
 Architecture: all
-Installed-Size: 586
+Installed-Size: 584
 Filename: ipv6helper_1.0-4_all.ipk
-Size: 1407
-SHA256sum: 1c779aedb67cc51a343c7ad0868b1ec65ed5e574921b6fd5e3233bcee40fab67
+Size: 1405
+SHA256sum: 33784e2338f0945cb851a14f6234e3d1ce957c842f08cb5fd553db067ec8d89e
 Description:  IPv6 Helper and Dynamic Update he.net of ip
 
 Package: jshn
@@ -137,8 +244,8 @@ Section: utils
 Architecture: aarch64_cortex-a53
 Installed-Size: 6718
 Filename: jshn_2021-05-16-b14c4688-2_aarch64_cortex-a53.ipk
-Size: 7524
-SHA256sum: 24a418fcefe0564db887855d5b160675562b64354cd75713e29c0e0ef067e7d2
+Size: 7522
+SHA256sum: b06ff043262958f412a9fdda1bfe8b438143aea54f1f11ddef180b696fbb69d8
 Description:  Library for parsing and generating JSON from shell scripts
 
 Package: jsonfilter
@@ -149,9 +256,27 @@ Section: base
 Architecture: aarch64_cortex-a53
 Installed-Size: 10393
 Filename: jsonfilter_2018-02-04-c7e938d6-1_aarch64_cortex-a53.ipk
-Size: 11129
-SHA256sum: 61f4d7e4c4cb56922823a0c3fc1c0fa30284804037118445fa64533568038872
+Size: 11140
+SHA256sum: eb6e20cda0a402e6b75ae79f1d0fd01f9820db4c07ef2deef143598b3e9f4d3c
 Description:  OpenWrt JSON filter utility
+
+Package: libblkid1
+Version: 2.36.1-2
+Depends: libc, libuuid1
+Provides: libblkid
+License: GPL-2.0
+Section: libs
+ABIVersion: 1
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 130923
+Filename: libblkid1_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 131814
+SHA256sum: 4631d167a7bf61cd1552576904e23e132271000f7822820599e51be8e8a62182
+Description:  The libblkid library is used to identify block devices (disks) as to their
+ content (e.g. filesystem type, partitions) as well as extracting additional
+ information such as filesystem labels/volume names, partitions, unique
+ identifiers/serial numbers...
 
 Package: libblobmsg-json20210516
 Version: 2021-05-16-b14c4688-2
@@ -163,9 +288,69 @@ ABIVersion: 20210516
 Architecture: aarch64_cortex-a53
 Installed-Size: 4047
 Filename: libblobmsg-json20210516_2021-05-16-b14c4688-2_aarch64_cortex-a53.ipk
-Size: 4818
-SHA256sum: 15af29c8cb97274ab5dc57b04c539bac4fc3ebbbbfe5c04c3eba331b59a5c1cf
+Size: 4816
+SHA256sum: c8723bd94a601408cbbd69f195db1268c0ad104ee916f5fff32fcd10f7df2b7f
 Description:  blobmsg <-> json conversion library
+
+Package: libbpf0
+Version: 5.10.10-2
+Depends: libc, libelf1
+Provides: libbpf
+License: LGPL-2.1 OR BSD-2-Clause
+Section: libs
+ABIVersion: 0
+Architecture: aarch64_cortex-a53
+Installed-Size: 95371
+Filename: libbpf0_5.10.10-2_aarch64_cortex-a53.ipk
+Size: 96217
+SHA256sum: 12ff991b1991974e2bf8feca1b80058b3ca4413e73992dc18991c6ee8edf218f
+Description:  libbpf is a library for loading eBPF programs and reading and manipulating eBPF objects from user-space.
+
+Package: libcomerr0
+Version: 1.45.6-2
+Depends: libc, libuuid1
+Provides: libcomerr
+License: GPL-2.0
+Section: libs
+ABIVersion: 0
+CPE-ID: cpe:/a:e2fsprogs_project:e2fsprogs
+Architecture: aarch64_cortex-a53
+Installed-Size: 4223
+Filename: libcomerr0_1.45.6-2_aarch64_cortex-a53.ipk
+Size: 5027
+SHA256sum: cd1a05b333726c1cbc650b7e4d9da60b635ca648cb06ee3405e614ae4e0e0d36
+Description:  This package contains libcom_err, the common error description library
+ bundled with e2fsprogs.
+
+Package: libelf1
+Version: 0.180-1
+Depends: libc, zlib
+Provides: libelf, libelf11
+License: GPL-3.0-or-later
+Section: libs
+ABIVersion: 1
+CPE-ID: cpe:/a:elfutils_project:elfutils
+Architecture: aarch64_cortex-a53
+Installed-Size: 41002
+Filename: libelf1_0.180-1_aarch64_cortex-a53.ipk
+Size: 41900
+SHA256sum: 26b28d1981db173ed74f4d88b5948b90eccd106f9f1310cb9503f61efc416c20
+Description:  ELF manipulation libraries (libelf)
+
+Package: libext2fs2
+Version: 1.45.6-2
+Depends: libc, libuuid1, libblkid1, libss2, libcomerr0
+Provides: libext2fs
+License: GPL-2.0
+Section: libs
+ABIVersion: 2
+CPE-ID: cpe:/a:e2fsprogs_project:e2fsprogs
+Architecture: aarch64_cortex-a53
+Installed-Size: 181182
+Filename: libext2fs2_1.45.6-2_aarch64_cortex-a53.ipk
+Size: 181757
+SHA256sum: 630c46ed9b43c3af5d8a0f9c8416473a62347f34af6e6fe79eb465880b9c3e11
+Description:  libext2fs is a library which can access ext2, ext3 and ext4 filesystems.
 
 Package: libf2fs6
 Version: 1.14.0-1
@@ -176,11 +361,26 @@ License: GPL-2.0-only
 Section: libs
 ABIVersion: 6
 Architecture: aarch64_cortex-a53
-Installed-Size: 41746
+Installed-Size: 41740
 Filename: libf2fs6_1.14.0-1_aarch64_cortex-a53.ipk
-Size: 42505
-SHA256sum: cc071abb7ee8a8c7ae519cd41c65e60564b3d1a4a4bfce8ece0bd9887b3339e0
+Size: 42490
+SHA256sum: 32d293fcfd1f83bc82265024c76fd809f0270510ecd4a64ec89f686c3e4543e3
 Description:  Library for Flash-Friendly File System (F2FS) tools
+
+Package: libfdisk1
+Version: 2.36.1-2
+Depends: libc, libuuid1, libblkid1
+Provides: libfdisk
+License: GPL-2.0
+Section: libs
+ABIVersion: 1
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 161915
+Filename: libfdisk1_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 162734
+SHA256sum: 12e7b488145a766218b3fdf7d74fbd0f5965081536f0b0360aac3d4ec1db5703
+Description:  The libfdisk library is used for manipulating with partition tables.
 
 Package: libgmp10
 Version: 6.2.1-1
@@ -191,12 +391,27 @@ Section: libs
 ABIVersion: 10
 CPE-ID: cpe:/a:gmplib:gmp
 Architecture: aarch64_cortex-a53
-Installed-Size: 221216
+Installed-Size: 221215
 Filename: libgmp10_6.2.1-1_aarch64_cortex-a53.ipk
-Size: 222071
-SHA256sum: 6c9fc37f4861b073fc9a9a1b1cf647a5505d4903883e23e22d3fff8a22c6a451
+Size: 222080
+SHA256sum: 01273db716a14a8e7ce85430a08beb21cd024df27599aa6dd3f6c1655c950294
 Description:  GMP is a free library for arbitrary precision arithmetic, operating on
  signed integers, rational numbers, and floating point numbers.
+
+Package: libipset13
+Version: 7.6-1
+Depends: libc, kmod-ipt-ipset, libmnl0
+Provides: libipset
+License: GPL-2.0
+Section: net
+ABIVersion: 13
+CPE-ID: cpe:/a:netfilter:ipset
+Architecture: aarch64_cortex-a53
+Installed-Size: 47325
+Filename: libipset13_7.6-1_aarch64_cortex-a53.ipk
+Size: 47981
+SHA256sum: 382b459eddf9f333414fc6c6bba88f230dc439ae98a0a51ee692c88d57bc6351
+Description:  IPset administration utility
 
 Package: libiwinfo-data
 Version: 2022-09-22-4a43b0d4-1
@@ -206,8 +421,8 @@ Section: opt
 Architecture: aarch64_cortex-a53
 Installed-Size: 2141
 Filename: libiwinfo-data_2022-09-22-4a43b0d4-1_aarch64_cortex-a53.ipk
-Size: 2910
-SHA256sum: af238aab2833efc426ea517e5b66ecd155c78032255624ca4defa500e68f8252
+Size: 2919
+SHA256sum: 88006f9efaff5827a2877f9bcfd8f2f82482f1a064d093d52fb5c294dd4abb9d
 Description:  libiwinfo Lua binding
 
 Package: libiwinfo-lua
@@ -216,10 +431,10 @@ Depends: libc, libiwinfo20210430, liblua5.1.5
 License: GPL-2.0
 Section: lang
 Architecture: aarch64_cortex-a53
-Installed-Size: 7642
+Installed-Size: 7643
 Filename: libiwinfo-lua_2022-09-22-4a43b0d4-1_aarch64_cortex-a53.ipk
-Size: 8440
-SHA256sum: bd483327be308fb8f281fa4b58bad8c4a83499948aa10f7f4c175a54e8278b2b
+Size: 8441
+SHA256sum: a1005d18ccb2573dc5cfe8dcefd74bda25267ec7c52d8f2edb95941b324ed7b9
 Description:  This is the Lua binding for the iwinfo library. It provides access to all enabled
  backends.
 
@@ -231,10 +446,10 @@ License: GPL-2.0
 Section: libs
 ABIVersion: 20210430
 Architecture: aarch64_cortex-a53
-Installed-Size: 34036
+Installed-Size: 34045
 Filename: libiwinfo20210430_2022-09-22-4a43b0d4-1_aarch64_cortex-a53.ipk
-Size: 34922
-SHA256sum: 481311f0e0feb8d5590d17f2499f06b358663b74277c6dd15a843a73ac063155
+Size: 34919
+SHA256sum: ccfe84fdd882cf7b6f416759ae81a5b375131be7e399cad5f34944f4ad5ea7a7
 Description:  Wireless information library with simplified API for nl80211
  and wext driver interfaces.
 
@@ -249,8 +464,8 @@ CPE-ID: cpe:/a:json-c_project:json-c
 Architecture: aarch64_cortex-a53
 Installed-Size: 29173
 Filename: libjson-c5_0.15-2_aarch64_cortex-a53.ipk
-Size: 29959
-SHA256sum: b39842879b3d4fd6db1ee39bc735531a5938ad178ba1f5b657e2f525af5c652d
+Size: 29964
+SHA256sum: fc0f6cb553128cd4e19de18f659f767f44edf22c59306cbde63bb49bafe35ed0
 Description:  This package contains a library for javascript object notation backends.
 
 Package: libjson-script20210516
@@ -263,9 +478,24 @@ ABIVersion: 20210516
 Architecture: aarch64_cortex-a53
 Installed-Size: 5557
 Filename: libjson-script20210516_2021-05-16-b14c4688-2_aarch64_cortex-a53.ipk
-Size: 6318
-SHA256sum: 1f6dd5f3fbfd931af29a2b769c38e802c104ebfc673fb5699f0aa28913f07981
+Size: 6325
+SHA256sum: 7cc9b278ba9aeffbbaf2654486e91b752db43145dc284de9498ac6f6694dc1a5
 Description:  Minimalistic JSON based scripting engine
+
+Package: libltdl7
+Version: 2.4.6-2
+Depends: libc
+Provides: libltdl
+License: GPL-2.0+
+Section: libs
+ABIVersion: 7
+CPE-ID: cpe:/a:gnu:libtool
+Architecture: aarch64_cortex-a53
+Installed-Size: 15214
+Filename: libltdl7_2.4.6-2_aarch64_cortex-a53.ipk
+Size: 15973
+SHA256sum: 06d8c59926d1660577bfc32f8776386bdd70b8527fc8f62cfc4a1eebd36ec3c7
+Description:  A generic dynamic object loading library
 
 Package: liblua5.1.5
 Version: 5.1.5-9
@@ -276,14 +506,47 @@ Section: libs
 ABIVersion: 5.1.5
 CPE-ID: cpe:/a:lua:lua
 Architecture: aarch64_cortex-a53
-Installed-Size: 77927
+Installed-Size: 77928
 Filename: liblua5.1.5_5.1.5-9_aarch64_cortex-a53.ipk
-Size: 78862
-SHA256sum: 2461c660d1bc74b154e67147e958b94aa8ad4ea0364984c9edbaa2b5d36fba14
+Size: 78852
+SHA256sum: 56399c932b3a2dc62c6ce8234e98fd2b88480f9ef40f505dbd7af3f288ff5862
 Description:  Lua is a powerful light-weight programming language designed for extending 
  applications. Lua is also frequently used as a general-purpose, stand-alone 
  language. Lua is free software.
  This package contains the Lua shared libraries, needed by other programs.
+
+Package: liblua5.3-5.3
+Version: 5.3.5-4
+Depends: libc
+Provides: liblua5.3
+License: MIT
+Section: libs
+ABIVersion: -5.3
+CPE-ID: cpe:/a:lua:lua
+Architecture: aarch64_cortex-a53
+Installed-Size: 94951
+Filename: liblua5.3-5.3_5.3.5-4_aarch64_cortex-a53.ipk
+Size: 95727
+SHA256sum: 687017842856b9ddfce34b366886e011c640063a7ee1e6d3c816e3d6b9fcdd94
+Description:  
+ This package contains the Lua shared libraries, needed by other programs.
+
+Package: libmbedtls12
+Version: 2.16.12-1
+Depends: libc
+Provides: libmbedtls
+License: GPL-2.0-or-later
+Section: libs
+ABIVersion: 12
+CPE-ID: cpe:/a:arm:mbed_tls
+Architecture: aarch64_cortex-a53
+Installed-Size: 199460
+Filename: libmbedtls12_2.16.12-1_aarch64_cortex-a53.ipk
+Size: 200165
+SHA256sum: 0097dfd4a9fb3e4c00d944661d967b84c7b64b32c111f0f75e0fe3280c1227b9
+Description:  The aim of the mbedtls project is to provide a quality, open-source
+ cryptographic library written in C and targeted at embedded systems.
+ This package contains the mbedtls library.
 
 Package: libmnl0
 Version: 1.0.5-1
@@ -293,10 +556,10 @@ License: LGPL-2.1+
 Section: libs
 ABIVersion: 0
 Architecture: aarch64_cortex-a53
-Installed-Size: 7324
+Installed-Size: 7323
 Filename: libmnl0_1.0.5-1_aarch64_cortex-a53.ipk
 Size: 8595
-SHA256sum: 61b8012ee3d269c991b77f77b2440867b180c8e563764e365e51194e64c44c21
+SHA256sum: 9ece894f42f4c7096c95c898c5faac147154bf4906b566654a37e5540f5416fd
 Description:  libmnl is a minimalistic user-space library oriented to Netlink developers.
  There are a lot of common tasks in parsing, validating, constructing of
  both the Netlink header and TLVs that are repetitive and easy to get wrong.
@@ -319,6 +582,20 @@ Description:  libmnl is a minimalistic user-space library oriented to Netlink de
  is reduced, i.e. the library provides many helpers, but the programmer is not
  forced to use them.
 
+Package: libncurses6
+Version: 6.2-3
+Depends: libc, terminfo
+Provides: libncursesw, libncurses, libncursesw6
+License: MIT
+Section: libs
+ABIVersion: 6
+Architecture: aarch64_cortex-a53
+Installed-Size: 184654
+Filename: libncurses6_6.2-3_aarch64_cortex-a53.ipk
+Size: 183907
+SHA256sum: 50df24981b8c8d535ed04e65dec69fc49cf26bdb3e94666677e0c6fe920c1790
+Description:  Terminal handling library (Unicode)
+
 Package: libnetfilter-conntrack3
 Version: 1.0.8-1
 Depends: libc, libnfnetlink0, kmod-nf-conntrack-netlink, libmnl0
@@ -330,8 +607,8 @@ CPE-ID: cpe:/a:netfilter:libnetfilter_conntrack
 Architecture: aarch64_cortex-a53
 Installed-Size: 38827
 Filename: libnetfilter-conntrack3_1.0.8-1_aarch64_cortex-a53.ipk
-Size: 39792
-SHA256sum: 73c60d6e1d1972e12b6bf1d231720098279317fecc7b119e0becdecade9b9dc2
+Size: 39796
+SHA256sum: dafdacc36b25d495d099a5921c09af6b12ee2362988201a1184c97ab835a4f4f
 Description:  libnetfilter_conntrack is a userspace library providing a programming
  interface (API) to the in-kernel connection tracking state table. The
  library libnetfilter_conntrack has been previously known as
@@ -348,8 +625,8 @@ ABIVersion: 8
 Architecture: aarch64_cortex-a53
 Installed-Size: 314915
 Filename: libnettle8_3.6-1_aarch64_cortex-a53.ipk
-Size: 315031
-SHA256sum: 30fa802b5e9b6f79138108a26fb82b9200af24ac11937c78d6c1bf736e2ca361
+Size: 315010
+SHA256sum: ecda91a502ed785dcfd105f851482a7af6be48ec580f45a2c43eb91522e6d50d
 Description:  GNU crypto library
 
 Package: libnfnetlink0
@@ -360,10 +637,10 @@ License: GPL-2.0+
 Section: libs
 ABIVersion: 0
 Architecture: aarch64_cortex-a53
-Installed-Size: 10622
+Installed-Size: 10621
 Filename: libnfnetlink0_1.0.2-1_aarch64_cortex-a53.ipk
-Size: 11557
-SHA256sum: 9d2a3b7eac4f3c1f9d2e3ae96a83f1946bf52bc8a6760e45ce06eba2e41e0ee6
+Size: 11559
+SHA256sum: c79f4c68d60eb71b25285efcbc5b1ded14174c7193c637d2e344e5532f39b2e9
 Description:  libnfnetlink is is the low-level library for netfilter related kernel/userspace communication.
  It provides a generic messaging infrastructure for in-kernel netfilter subsystems
  (such as nfnetlink_log, nfnetlink_queue, nfnetlink_conntrack) and their respective users
@@ -377,10 +654,10 @@ License: LGPL-2.1
 Section: libs
 ABIVersion: 2022-05-17
 Architecture: aarch64_cortex-a53
-Installed-Size: 16966
+Installed-Size: 16965
 Filename: libnl-tiny2022-05-17_2022-05-17-b5b2ba09-1_aarch64_cortex-a53.ipk
-Size: 17732
-SHA256sum: 235bdacfba9dc1981a608d7bf07bdc3721c71d4f9968804f7aa7f84b37b1d2a6
+Size: 17719
+SHA256sum: c7b0d205f353ed69a8430aeda10efe0bb20fe3c37a1e808b6b492efdc0a21068
 Description:  This package contains a stripped down version of libnl
 
 Package: libopenssl-conf
@@ -390,10 +667,10 @@ License: OpenSSL
 Section: libs
 CPE-ID: cpe:/a:openssl:openssl
 Architecture: aarch64_cortex-a53
-Installed-Size: 4784
+Installed-Size: 4782
 Filename: libopenssl-conf_1.1.1w-1_aarch64_cortex-a53.ipk
-Size: 5794
-SHA256sum: 837af0d68dac5d3ed02df29198941f792536a131166437ba19be45421a722e3e
+Size: 5788
+SHA256sum: 73d84c72b4be69daa0007abb4129f9202281b985b10394c8c40c5153c7d58015
 Description:  The OpenSSL Project is a collaborative effort to develop a robust,
  commercial-grade, full-featured, and Open Source toolkit implementing the
  Transport Layer Security (TLS) protocol as well as a full-strength
@@ -409,15 +686,94 @@ Section: libs
 ABIVersion: 1.1
 CPE-ID: cpe:/a:openssl:openssl
 Architecture: aarch64_cortex-a53
-Installed-Size: 1510485
+Installed-Size: 1510481
 Filename: libopenssl1.1_1.1.1w-1_aarch64_cortex-a53.ipk
-Size: 1501968
-SHA256sum: 48b8f0275caee0a2c1851751315d7548f85cbb30586c13d37ee42adb058794d2
+Size: 1501957
+SHA256sum: 3785390fd17e1777a5ef6a80c4240d03f46b6e97f14560c51a474facabf773f6
 Description:  The OpenSSL Project is a collaborative effort to develop a robust,
  commercial-grade, full-featured, and Open Source toolkit implementing the
  Transport Layer Security (TLS) protocol as well as a full-strength
  general-purpose cryptography library.
  This package contains the OpenSSL shared libraries, needed by other programs.
+
+Package: libpcre
+Version: 8.44-3
+Depends: libc
+License: BSD-3-Clause
+Section: libs
+CPE-ID: cpe:/a:pcre:pcre
+Architecture: aarch64_cortex-a53
+Installed-Size: 81051
+Filename: libpcre_8.44-3_aarch64_cortex-a53.ipk
+Size: 81905
+SHA256sum: a6659de08fd8f0e848c2e085a03c79bf638ae51e4dc4fff01f45ced862b5cc3b
+Description:  A Perl Compatible Regular Expression library
+
+Package: libpopt0
+Version: 1.16-2
+Depends: libc
+Provides: libpopt
+License: MIT
+Section: libs
+ABIVersion: 0
+CPE-ID: cpe:/a:popt_project:popt
+Architecture: aarch64_cortex-a53
+Installed-Size: 19465
+Filename: libpopt0_1.16-2_aarch64_cortex-a53.ipk
+Size: 20233
+SHA256sum: 65742a54809304ab6a75ba041ec284fd729eeae7cb58fb2d2994c3d60b3b79af
+Description:  A command line option parsing library
+
+Package: libreadline8
+Version: 8.1-1
+Depends: libc, libncursesw6
+Provides: libreadline
+License: GPL-3.0-or-later
+Section: libs
+ABIVersion: 8
+CPE-ID: cpe:/a:gnu:readline
+Architecture: aarch64_cortex-a53
+Installed-Size: 141111
+Filename: libreadline8_8.1-1_aarch64_cortex-a53.ipk
+Size: 141140
+SHA256sum: 96b7f73304e37d2033967a9c13051dbe461db38b62ce60fa69ec275d826e9d81
+Description:  The Readline library provides a set of functions for use by applications
+ that allow users to edit command lines as they are typed in. Both Emacs
+ and vi editing modes are available. The Readline library includes
+ additional functions to maintain a list of previously-entered command
+ lines, to recall and perhaps reedit those lines, and perform csh-like
+ history expansion on previous commands.
+
+Package: libsmartcols1
+Version: 2.36.1-2
+Depends: libc, librt
+Provides: libsmartcols
+License: GPL-2.0
+Section: libs
+ABIVersion: 1
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 88451
+Filename: libsmartcols1_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 89293
+SHA256sum: 6816bfa1ac100c7f8af2d24f10b8e64d3c4c74f76645877913639edfda95fd2d
+Description:  The smartcols library is used to print tables and trees in a pretty way.
+
+Package: libss2
+Version: 1.45.6-2
+Depends: libc, libcomerr0
+Provides: libss
+License: GPL-2.0
+Section: libs
+ABIVersion: 2
+CPE-ID: cpe:/a:e2fsprogs_project:e2fsprogs
+Architecture: aarch64_cortex-a53
+Installed-Size: 9138
+Filename: libss2_1.45.6-2_aarch64_cortex-a53.ipk
+Size: 9959
+SHA256sum: aea1a616c48f4798594b3102f5729b40a8fabbad5cab830151154114025be11c
+Description:  This pacakge contains libss, a command-line interface parsing library
+ bundled with e2fsprogs.
 
 Package: libubox20210516
 Version: 2021-05-16-b14c4688-2
@@ -427,10 +783,10 @@ License: ISC
 Section: libs
 ABIVersion: 20210516
 Architecture: aarch64_cortex-a53
-Installed-Size: 24316
+Installed-Size: 24319
 Filename: libubox20210516_2021-05-16-b14c4688-2_aarch64_cortex-a53.ipk
-Size: 25018
-SHA256sum: 1e81f3fe44c0567f5eaba721ba17d62eb8323a6e8a40bc89315ce2cc147bbbaf
+Size: 25034
+SHA256sum: a823ee947137b41a99edbf21776205bd3b819f544e8aa78c293db3943b7fd98a
 Description:  Basic utility library
 
 Package: libubus-lua
@@ -439,10 +795,10 @@ Depends: libc, libubus20210630, liblua5.1.5
 License: LGPL-2.1
 Section: libs
 Architecture: aarch64_cortex-a53
-Installed-Size: 7281
+Installed-Size: 7283
 Filename: libubus-lua_2021-06-30-4fc532c8-2_aarch64_cortex-a53.ipk
-Size: 8084
-SHA256sum: 70f291dd68482f5c380194c03b8aa009de164f323fc72f57a3835c6029563206
+Size: 8090
+SHA256sum: 0fd9d0b724b38a9ce61801aeb8e766f7b297f4b1cc2cbaa82031ea0cec79754b
 Description:  Lua binding for the OpenWrt RPC client
 
 Package: libubus20210630
@@ -453,11 +809,23 @@ License: LGPL-2.1
 Section: libs
 ABIVersion: 20210630
 Architecture: aarch64_cortex-a53
-Installed-Size: 11552
+Installed-Size: 11554
 Filename: libubus20210630_2021-06-30-4fc532c8-2_aarch64_cortex-a53.ipk
-Size: 12345
-SHA256sum: 5795d486478bc71a546fae37577782fec995df5e21c4c1bc577f02441ace5ed8
+Size: 12351
+SHA256sum: 844dcb4032c71ef592f4e431b2759e9943009d4f89ad7353c7f9970e2b88880d
 Description:  OpenWrt RPC client library
+
+Package: libuci-lua
+Version: 2021-04-14-4b3db117-5
+Depends: libc, libuci20130104, liblua5.1.5
+License: LGPL-2.1
+Section: libs
+Architecture: aarch64_cortex-a53
+Installed-Size: 7301
+Filename: libuci-lua_2021-04-14-4b3db117-5_aarch64_cortex-a53.ipk
+Size: 8087
+SHA256sum: c54407aa8c653bfa6acae2441ff3e90e908be1b2a8d2fa0f0a8ceaa7d0e5fc39
+Description:  Lua plugin for UCI
 
 Package: libuci20130104
 Version: 2021-04-14-4b3db117-5
@@ -467,10 +835,10 @@ License: LGPL-2.1
 Section: libs
 ABIVersion: 20130104
 Architecture: aarch64_cortex-a53
-Installed-Size: 18177
+Installed-Size: 18178
 Filename: libuci20130104_2021-04-14-4b3db117-5_aarch64_cortex-a53.ipk
-Size: 18966
-SHA256sum: 917aa97af2f39dd33f1f763e206a273f51e2baacb2df8598f541e977cdd240a5
+Size: 18965
+SHA256sum: 8446398d6cf541e305aad15c8bf3beab6d6dec9689c772a58c20047528142932
 Description:  C library for the Unified Configuration Interface (UCI)
 
 Package: libuclient20201210
@@ -481,11 +849,26 @@ License: ISC
 Section: libs
 ABIVersion: 20201210
 Architecture: aarch64_cortex-a53
-Installed-Size: 11123
+Installed-Size: 11120
 Filename: libuclient20201210_2023-04-13-007d9454-1_aarch64_cortex-a53.ipk
-Size: 11914
-SHA256sum: 4bc5eabf09ef79221f614c832e2f8566017ef8aa2dc581a009b8db70d31d9317
+Size: 11910
+SHA256sum: 5c59b2b41aff9d043ae6471964b5d4692fe995da8f2328f061d10d737910c940
 Description:  HTTP/1.1 client library
+
+Package: libusb-1.0-0
+Version: 1.0.24-1
+Depends: libc, libpthread, librt
+Provides: libusb-1.0
+License: LGPL-2.1-or-later
+Section: libs
+ABIVersion: -0
+Architecture: aarch64_cortex-a53
+Installed-Size: 33728
+Filename: libusb-1.0-0_1.0.24-1_aarch64_cortex-a53.ipk
+Size: 34662
+SHA256sum: 6be06341ee7369885c964e90d7541780da6cd3cfa4a670cc18780d7802d772a0
+Description:  libusb is a C library that gives applications easy access to USB devices on
+ many different operating systems.
 
 Package: libustream-openssl20201210
 Version: 2022-12-08-9217ab46-1
@@ -495,10 +878,10 @@ License: ISC
 Section: libs
 ABIVersion: 20201210
 Architecture: aarch64_cortex-a53
-Installed-Size: 4911
+Installed-Size: 4909
 Filename: libustream-openssl20201210_2022-12-08-9217ab46-1_aarch64_cortex-a53.ipk
-Size: 5694
-SHA256sum: e824d859187a4ad21d0f0f3e298da1688fc2881ce996e1d09093af48b785a2e5
+Size: 5693
+SHA256sum: 80d52cb2fa912cb4857c8bca9d7948ed0716bc9bc641a3e94cdf39d8f66f81e6
 Description:  ustream SSL Library (openssl)
 
 Package: libuuid1
@@ -510,10 +893,10 @@ Section: libs
 ABIVersion: 1
 CPE-ID: cpe:/a:kernel:util-linux
 Architecture: aarch64_cortex-a53
-Installed-Size: 12652
+Installed-Size: 12651
 Filename: libuuid1_2.36.1-2_aarch64_cortex-a53.ipk
-Size: 13643
-SHA256sum: e7f3c85057626020c8086b5263744ad0f10c436b6d9398dc450be10e2a828a6b
+Size: 13650
+SHA256sum: bd7e3032354ba20160d64e9844c1f0793a65250fe4f8d77f9bd9a338268ed44a
 Description:  The UUID library is used to generate unique identifiers for objects
  that may be accessible beyond the local system. This library
  generates UUIDs compatible with those created by the Open Software
@@ -525,11 +908,25 @@ Depends: libc, libubox20210516, libubus20210630, libblobmsg-json20210516
 License: GPL-2.0
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 10940
+Installed-Size: 10938
 Filename: logd_2020-10-25-9ef88681-2_aarch64_cortex-a53.ipk
-Size: 11509
-SHA256sum: df381681e268cfab01b1611d06c92c6b646f18d69c8f3dff957c860dfabc5da3
+Size: 11503
+SHA256sum: 5f69619fc5aaf81ec9fc24f2f4c03a0111057c6263be81c9e61864355fb42f29
 Description:  OpenWrt system log implementation
+
+Package: losetup
+Version: 2.36.1-2
+Depends: libc, libsmartcols1
+License: GPL-2.0
+Section: utils
+CPE-ID: cpe:/a:kernel:util-linux
+Architecture: aarch64_cortex-a53
+Installed-Size: 39956
+Filename: losetup_2.36.1-2_aarch64_cortex-a53.ipk
+Size: 40932
+SHA256sum: 28342efe6b3d6d4438ef88055943c07ddfafdc76885d9d5ae80f21aea52015f2
+Description:  losetup is used to associate loop devices with regular files or block devices,
+ to detach loop devices and to query the status of a loop device
 
 Package: lua
 Version: 5.1.5-9
@@ -540,34 +937,12 @@ CPE-ID: cpe:/a:lua:lua
 Architecture: aarch64_cortex-a53
 Installed-Size: 5059
 Filename: lua_5.1.5-9_aarch64_cortex-a53.ipk
-Size: 5943
-SHA256sum: 9ded7d4598e51d561ab238eb186345941653a73f7639a51d503e6cf224241b18
+Size: 5942
+SHA256sum: c1fa29cf88a5729c38c08aa3b3692121381a263798fd2d665606af21f6759f44
 Description:  Lua is a powerful light-weight programming language designed for extending 
  applications. Lua is also frequently used as a general-purpose, stand-alone 
  language. Lua is free software.
  This package contains the Lua language interpreter.
-
-Package: luci-app-mosdns
-Version: 1.5.17
-Depends: libc, mosdns, jsonfilter, luci-compat, curl, v2ray-geoip, v2ray-geosite, v2dat
-Section: luci
-Architecture: all
-Installed-Size: 75883
-Filename: luci-app-mosdns_1.5.17_all.ipk
-Size: 76886
-SHA256sum: e34777634942d68e6b7d14b97c89d8a02848062e0a0aefe8475e50d211354c02
-Description:  LuCI Support for mosdns
-
-Package: luci-i18n-mosdns-zh-cn
-Version: git-24.017.38855-169ae05
-Depends: libc, luci-app-mosdns
-Section: luci
-Architecture: all
-Installed-Size: 3871
-Filename: luci-i18n-mosdns-zh-cn_git-24.017.38855-169ae05_all.ipk
-Size: 4697
-SHA256sum: 9624fbad890951f8bbe6448ae3c1c07dd730453bbefd8720bc735cfda2245a2d
-Description:  Translation for luci-app-mosdns - 简体中文 (Chinese Simplified)
 
 Package: mhz
 Version: 2023-06-17-11aac239-1
@@ -575,10 +950,10 @@ Depends: libc
 License: MIT
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 2459
+Installed-Size: 2457
 Filename: mhz_2023-06-17-11aac239-1_aarch64_cortex-a53.ipk
 Size: 3229
-SHA256sum: d83b051b69e9f800f070c7ad8303315a8a3a50fb5ff57be9de78ddfeb381f830
+SHA256sum: f5d9fda963160bf858c9bc624cc5b286c492a5c28063b8d19288dc09f5bb9337
 Description:  Tool to mathematically calculate the current CPU frequency.
 
 Package: mkf2fs
@@ -588,23 +963,11 @@ Conflicts: mkf2fs-selinux
 License: GPL-2.0-only
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 14508
+Installed-Size: 14507
 Filename: mkf2fs_1.14.0-1_aarch64_cortex-a53.ipk
-Size: 15265
-SHA256sum: e460b4d8619a7219df5974328c974e330b5c68228c559d781e71f67e31e1a0de
+Size: 15262
+SHA256sum: f8735095accbd72e54e3e2e03f68954c4ebaaa6a59c36cb956d07edb052e72f1
 Description:  Utility for creating a Flash-Friendly File System (F2FS)
-
-Package: mosdns
-Version: 5.3.1-1
-Depends: libc, ca-bundle
-License: GPL-3.0
-Section: net
-Architecture: aarch64_cortex-a53
-Installed-Size: 5953368
-Filename: mosdns_5.3.1-1_aarch64_cortex-a53.ipk
-Size: 5936796
-SHA256sum: 3b42c9937944b2e96d8184105eb1510801b598f98bcb7fe79adb42382f57e3fe
-Description:  A plug-in DNS forwarder/splitter
 
 Package: mtk-smp
 Version: 1
@@ -612,10 +975,10 @@ Depends: libc
 License: GPL-2.0
 Section: MTK Properties
 Architecture: aarch64_cortex-a53
-Installed-Size: 4252
+Installed-Size: 4264
 Filename: mtk-smp_1_aarch64_cortex-a53.ipk
-Size: 4945
-SHA256sum: 7167f185be93c609620b89f1c8ce536897728dc0b1866d37df8407c9e77d8c27
+Size: 4960
+SHA256sum: 5672e48d36ff65a4e136ac94846194b1717d2614225664ff1d457b09bc8c760f
 Description:  Setup mtk smp settings
 
 Package: netifd
@@ -626,8 +989,8 @@ Section: base
 Architecture: aarch64_cortex-a53
 Installed-Size: 100722
 Filename: netifd_2021-10-30-8f82742c-2_aarch64_cortex-a53.ipk
-Size: 101412
-SHA256sum: 1cf6025083ad2d4b946ddd115122137ef182751ce80441f6fab58928d236b6ee
+Size: 101345
+SHA256sum: c16363d6120a0e71c56412356245da7672bcaf56f0008dbdbf53561974e9df9a
 Description:  OpenWrt Network Interface Configuration Daemon
 
 Package: odhcp6c
@@ -636,10 +999,10 @@ Depends: libc, libubox20210516
 License: GPL-2.0
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 27096
+Installed-Size: 27097
 Filename: odhcp6c_2021-01-09-53f07e90-16_aarch64_cortex-a53.ipk
-Size: 27865
-SHA256sum: 55f32f381cab42d919ea1188c5abbfaef096c6f4a962a2eeefe7149316d72be2
+Size: 27856
+SHA256sum: b89c1a50172e1a7348e3ed302f69cc517615a2dbc53954bc0ff2c7cc5a78e616
 Description:  Embedded DHCPv6-client for OpenWrt
 
 Package: odhcpd-ipv6only
@@ -648,10 +1011,10 @@ Depends: libc, libubox20210516, libuci20130104, libubus20210630, libnl-tiny2022-
 License: GPL-2.0
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 41651
+Installed-Size: 41647
 Filename: odhcpd-ipv6only_2021-07-18-bc9d317f-1_aarch64_cortex-a53.ipk
-Size: 42697
-SHA256sum: b5184151b2f6612ddb9bbfbbb781b4d96c0aedf2feb72a7bb757d2524c4e33ea
+Size: 42705
+SHA256sum: 2271cf7c72a4a3b00e6a048f9ac5fb63b06db3bc53a26ce9bf209c72fdcd89bd
 Description:  odhcpd is a daemon for serving and relaying IP management protocols to
  configure clients and downstream routers. It tries to follow the RFC 6204
  requirements for IPv6 home routers.
@@ -669,8 +1032,8 @@ CPE-ID: cpe:/a:openssl:openssl
 Architecture: aarch64_cortex-a53
 Installed-Size: 275383
 Filename: openssl-util_1.1.1w-1_aarch64_cortex-a53.ipk
-Size: 275525
-SHA256sum: e6516bb54b5aff75a9264e396dc442752c9d77572790148a0d1ce9f37d502375
+Size: 275517
+SHA256sum: 3a8bb8fb8d5d89b5ddfea25ad584a09ca80975f40716776a7db58ede299017fe
 Description:  The OpenSSL Project is a collaborative effort to develop a robust,
  commercial-grade, full-featured, and Open Source toolkit implementing the
  Transport Layer Security (TLS) protocol as well as a full-strength
@@ -684,10 +1047,10 @@ Provides: lede-keyring
 License: GPL-2.0
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 485
+Installed-Size: 484
 Filename: openwrt-keyring_2022-01-22-57304d01-2_aarch64_cortex-a53.ipk
-Size: 1287
-SHA256sum: f6fca5533af39f9cf26aea0c3e8b1ac6b93d13c8a121b64bc2cd426456cb8252
+Size: 1283
+SHA256sum: 2e2ebef3df4f7f4d8b18495dd7113b12b85638e966911f9509450e24bc00ae8d
 Description:  The keyring of with the developer using and gpg public keys.
 
 Package: opkg
@@ -697,10 +1060,10 @@ License: GPL-2.0
 Section: base
 Essential: yes
 Architecture: aarch64_cortex-a53
-Installed-Size: 74232
+Installed-Size: 74233
 Filename: opkg_2021-06-13-1bf042dd-2_aarch64_cortex-a53.ipk
-Size: 75258
-SHA256sum: fef7ce7776adda92012da310d3f863b288fee65fd354e8f3aaa4bff849419fc4
+Size: 75251
+SHA256sum: ed48ae5173364b39f61144f2d726dd429b78308c17fb3139bdf5c779802323b8
 Description:  Lightweight package management system
  opkg is the opkg Package Management System, for handling
  installation and removal of packages on a system. It can
@@ -718,8 +1081,8 @@ CPE-ID: cpe:/a:samba:ppp
 Architecture: aarch64_cortex-a53
 Installed-Size: 11250
 Filename: ppp-mod-pppoe_2.4.8.git-2020-10-03-6_aarch64_cortex-a53.ipk
-Size: 12086
-SHA256sum: fe65072ce19dec5e5ab110e3bf03b0d0bf075239563bddfd0b24aa3790c70c2f
+Size: 12087
+SHA256sum: 2c1a8b12b4e46e61b6818912bd403ec6941958a9334faee26113da3832f1191c
 Description:  This package contains a PPPoE (PPP over Ethernet) plugin for ppp.
 
 Package: ppp
@@ -729,10 +1092,10 @@ License: BSD-4-Clause
 Section: net
 CPE-ID: cpe:/a:samba:ppp
 Architecture: aarch64_cortex-a53
-Installed-Size: 137540
+Installed-Size: 137547
 Filename: ppp_2.4.8.git-2020-10-03-6_aarch64_cortex-a53.ipk
-Size: 138199
-SHA256sum: 115074251f8dcf69be157d7f903afb7e0c855cdbbd10456f425abb84244447be
+Size: 138203
+SHA256sum: 6d883ef0368f47250bb3f7e1a332e00ef214cbfdb6940b9b917f1e06d7091c7d
 Description:  This package contains the PPP (Point-to-Point Protocol) daemon.
 
 Package: procd
@@ -742,11 +1105,27 @@ Conflicts: procd-selinux
 License: GPL-2.0
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 56703
+Installed-Size: 56706
 Filename: procd_2021-03-08-2cfc26f8-1_aarch64_cortex-a53.ipk
-Size: 57495
-SHA256sum: ea9256c423540a6904b71b362e50a8c35e2f1aa6ec514219447a856202c9d8ed
+Size: 57490
+SHA256sum: 35a19a8ec0678e94e3596916385a2e32acfa216cf364ce4380118b431c20ae7a
 Description:  OpenWrt system process manager
+
+Package: resolveip
+Version: 2
+Depends: libc
+License: GPL-2.0
+Section: utils
+Architecture: aarch64_cortex-a53
+Installed-Size: 1797
+Filename: resolveip_2_aarch64_cortex-a53.ipk
+Size: 2704
+SHA256sum: 6446858a03b001746076b97eac5e16ae368a8ce58c00a7a4c62470141f647137
+Description:  This package contains the small resolveip utility which
+ can be used by scripts to turn host names into numeric
+ IP addresses. It supports IPv4 and IPv6 resolving and
+ has a configurable timeout to guarantee a certain maximum
+ runtime in case of slow or defunct DNS servers.
 
 Package: rpcd-mod-file
 Version: 2022-02-19-8d26a1ba-1
@@ -754,10 +1133,10 @@ Depends: libc, libubus20210630, libubox20210516, rpcd
 License: ISC
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 7495
+Installed-Size: 7494
 Filename: rpcd-mod-file_2022-02-19-8d26a1ba-1_aarch64_cortex-a53.ipk
-Size: 8301
-SHA256sum: c3ad3bf3c6a3ac36148acfb95ec4e44d168982196f0b3a16cb6d8308aa17ba58
+Size: 8296
+SHA256sum: 780a36111f30f435a546a2a726041ea15ee94a95b75faa8b81924f98c3ae1156
 Description:  Provides ubus calls for file and directory operations.
 
 Package: rpcd-mod-iwinfo
@@ -766,10 +1145,10 @@ Depends: libc, libubus20210630, libubox20210516, rpcd, libiwinfo20210430
 License: ISC
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 7879
+Installed-Size: 7878
 Filename: rpcd-mod-iwinfo_2022-02-19-8d26a1ba-1_aarch64_cortex-a53.ipk
-Size: 8696
-SHA256sum: 46375986294359618a5ede901b5b93b63a921d0a4b350a0268bdc96e8758cfe1
+Size: 8691
+SHA256sum: 4644c84b218d4f206e264e30c839703b6e80bf211f6c84648c0f4fe81520bb0a
 Description:  Provides ubus calls for accessing iwinfo data.
 
 Package: rpcd
@@ -778,10 +1157,10 @@ Depends: libc, libubus20210630, libubox20210516, libuci20130104, libblobmsg-json
 License: ISC
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 27095
+Installed-Size: 27091
 Filename: rpcd_2022-02-19-8d26a1ba-1_aarch64_cortex-a53.ipk
-Size: 27941
-SHA256sum: 57f8d8e1aa4a91d7e2c0e04cbd8b23908571162e289e79ef0247299263d4c97f
+Size: 27945
+SHA256sum: 87a8b920518fca4d0a80790e7f317e33ce1b8febfc078c5c41235d75e584986d
 Description:  This package provides the UBUS RPC backend server to expose various
  functionality to frontend programs via JSON-RPC.
 
@@ -790,11 +1169,23 @@ Version: 0.2-2
 Depends: libc, libpthread, kmod-macvlan
 Section: opt
 Architecture: aarch64_cortex-a53
-Installed-Size: 1944
+Installed-Size: 1949
 Filename: shellsync_0.2-2_aarch64_cortex-a53.ipk
-Size: 2683
-SHA256sum: b9d4937b2692951b2a4a3058094b7bab69e0439a1071229c735e0dc9acd1e1bb
+Size: 2678
+SHA256sum: c493b9d74eb640f25b0747a9c0f6559221f929493a51511a6c438570419507ea
 Description:  A tool to sync different shell scripts.Based on syncppp patch by morfast.
+
+Package: terminfo
+Version: 6.2-3
+Depends: libc
+License: MIT
+Section: libs
+Architecture: aarch64_cortex-a53
+Installed-Size: 7230
+Filename: terminfo_6.2-3_aarch64_cortex-a53.ipk
+Size: 7956
+SHA256sum: 1badee9d4231775bc2cfe4f7fc3b230cb5a8d08b683eaffa7e338091bfd09c18
+Description:  Terminal Info Database (ncurses)
 
 Package: ubox
 Version: 2020-10-25-9ef88681-2
@@ -803,10 +1194,10 @@ Alternatives: 100:/sbin/rmmod:/sbin/kmodloader, 100:/sbin/insmod:/sbin/kmodloade
 License: GPL-2.0
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 16891
+Installed-Size: 16893
 Filename: ubox_2020-10-25-9ef88681-2_aarch64_cortex-a53.ipk
-Size: 17671
-SHA256sum: 0c9f14f5566e721c77e5c53d6f9b746b0d6ce54b1ecc86108c5f7b0c8f99001a
+Size: 17670
+SHA256sum: cc07d95610affe148c02f6d0111706051379d4de64485daf548bd253f4d21499
 Description:  OpenWrt system helper toolbox
 
 Package: ubus
@@ -815,10 +1206,10 @@ Depends: libc, libubus20210630, libblobmsg-json20210516, ubusd
 License: LGPL-2.1
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 6493
+Installed-Size: 6492
 Filename: ubus_2021-06-30-4fc532c8-2_aarch64_cortex-a53.ipk
-Size: 7330
-SHA256sum: c04ff217ab998a05c52cfd426e10f5b39a32cdd11fbb08ff617fe941b5c02876
+Size: 7324
+SHA256sum: e6fd2ed5de9aca67d831ec83a69f65555fd43e98e83038ad43e346d0c9d3d63b
 Description:  OpenWrt RPC client utility
 
 Package: ubusd
@@ -829,8 +1220,8 @@ Section: base
 Architecture: aarch64_cortex-a53
 Installed-Size: 13336
 Filename: ubusd_2021-06-30-4fc532c8-2_aarch64_cortex-a53.ipk
-Size: 14082
-SHA256sum: 6377c8dd38ceaf5233dc37b65243f4cd5b37fcb1db5ce0b46520ddfe5650c0d7
+Size: 14092
+SHA256sum: cd9684abc2755db7a2bafa9b02c203d15ac12df4514279fcbfefa9d427d57a45
 Description:  OpenWrt RPC daemon
 
 Package: uci
@@ -841,8 +1232,8 @@ Section: base
 Architecture: aarch64_cortex-a53
 Installed-Size: 7256
 Filename: uci_2021-04-14-4b3db117-5_aarch64_cortex-a53.ipk
-Size: 8056
-SHA256sum: 7453f48ab2658b7008371d5b30d28c77ebe5547d6239ea85dbdbc337f9ac284f
+Size: 8055
+SHA256sum: e53adbd8e5b5e236b673722f3df2c985d065a32704ac0f22d614bf339af72edb
 Description:  Utility for the Unified Configuration Interface (UCI)
 
 Package: uclient-fetch
@@ -853,10 +1244,10 @@ Alternatives: 200:/usr/bin/wget:/bin/uclient-fetch
 License: ISC
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 7633
+Installed-Size: 7631
 Filename: uclient-fetch_2023-04-13-007d9454-1_aarch64_cortex-a53.ipk
-Size: 8413
-SHA256sum: 7dc7154c4d20293b1aed855584bccf8c8693f73aa7c923071f6b33416dd82f07
+Size: 8406
+SHA256sum: ed638456ffd7d18fc81e3e5ff9a794e7e56e1dc0aab727c7b1a7c38905bdd11c
 Description:  Tiny wget replacement using libuclient
 
 Package: uhttpd-mod-ubus
@@ -865,10 +1256,10 @@ Depends: libc, uhttpd, libubus20210630, libblobmsg-json20210516
 License: ISC
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 8615
+Installed-Size: 8610
 Filename: uhttpd-mod-ubus_2021-03-21-15346de8-2_aarch64_cortex-a53.ipk
-Size: 9480
-SHA256sum: ec68a57963bc80a2f5f4b47637f640d74f461472ef2079efc38dacad22e36003
+Size: 9471
+SHA256sum: 8bf925febaa7127dcc99d8c9e97fcb8076928960368892d60b8f245a79f2721b
 Description:  The ubus plugin adds a HTTP/JSON RPC proxy for ubus and publishes the
  session.* namespace and procedures.
 
@@ -878,10 +1269,10 @@ Depends: libc, libubox20210516, libblobmsg-json20210516, libjson-script20210516,
 License: ISC
 Section: net
 Architecture: aarch64_cortex-a53
-Installed-Size: 30667
+Installed-Size: 30671
 Filename: uhttpd_2021-03-21-15346de8-2_aarch64_cortex-a53.ipk
-Size: 31598
-SHA256sum: 3ad6e1bd19e88e1fc42bfd5dbae180a40d7892e4fce556732af09b89caafc6e7
+Size: 31595
+SHA256sum: ff1550cf331994af146d249cfb3adffdcbfdca334ae634734f0b458ddb972b50
 Description:  uHTTPd is a tiny single threaded HTTP server with TLS, CGI and Lua
  support. It is intended as a drop-in replacement for the Busybox
  HTTP daemon.
@@ -892,10 +1283,10 @@ Depends: libc, getrandom
 License: GPL-2.0-only
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 833
+Installed-Size: 834
 Filename: urandom-seed_3_aarch64_cortex-a53.ipk
-Size: 1576
-SHA256sum: 8c8bc592e3f60e21224e01d9435d0c345d3416808cbcd2a2a28c3f9a9760a625
+Size: 1575
+SHA256sum: ffe821cd9f27ae4d442104018efdc5026e425a7ff8d6b2abd19a46ad32b6e72b
 Description:  /etc/urandom.seed handling for OpenWrt
 
 Package: urngd
@@ -904,10 +1295,10 @@ Depends: libc, libubox20210516
 License: GPL-2.0 BSD-3-Clause
 Section: utils
 Architecture: aarch64_cortex-a53
-Installed-Size: 7924
+Installed-Size: 7921
 Filename: urngd_2023-11-01-44365eb1-1_aarch64_cortex-a53.ipk
-Size: 8907
-SHA256sum: 03f10552af0850c9680ef23237f5b587a926c4be7a224506928f743214309348
+Size: 8937
+SHA256sum: 15c9b18a059377fa987e48c64366781c7c2b4d2c8985ed8a97a265d0b43111ed
 Description:  urngd is OpenWrt's micro non-physical true random number generator based on
  timing jitter.
  
@@ -926,47 +1317,11 @@ Depends: libc, libubox20210516
 License: ISC
 Section: base
 Architecture: aarch64_cortex-a53
-Installed-Size: 11682
+Installed-Size: 11680
 Filename: usign_2020-05-23-f1f65026-1_aarch64_cortex-a53.ipk
-Size: 12461
-SHA256sum: 5e145add5db01f00fd89e1ce91ac88e4e1533a2b803a00ed701bd087c158876f
+Size: 12462
+SHA256sum: 86c08faa1fee8280a14e48abbf59e088e062b9a8519034b107b9287a47e2d11f
 Description:  OpenWrt signature verification utility
-
-Package: v2dat
-Version: 2022-12-15-47b8ee51-1
-Depends: libc
-License: GPL-3.0
-Section: utils
-Architecture: aarch64_cortex-a53
-Installed-Size: 2607489
-Filename: v2dat_2022-12-15-47b8ee51-1_aarch64_cortex-a53.ipk
-Size: 2599951
-SHA256sum: e8c0ceb4974e7e37b871d50fd8b46336a3b456c010c365f99d4a6090bccb4145
-Description:  V2ray geo/ip data unpack tools
-
-Package: v2ray-geoip
-Version: 2024-01-29
-Depends: libc
-License: CC-BY-SA-4.0
-Section: net
-Architecture: all
-Installed-Size: 34074
-Filename: v2ray-geoip_2024-01-29_all.ipk
-Size: 34406
-SHA256sum: d828a43ad375e80292481bb803e81dec525f8ba77e42378ea19cdc0ce5a7c498
-Description:  GeoIP List for V2Ray
-
-Package: v2ray-geosite
-Version: 2024-01-29
-Depends: libc
-License: MIT
-Section: net
-Architecture: all
-Installed-Size: 1740538
-Filename: v2ray-geosite_2024-01-29_all.ipk
-Size: 1741112
-SHA256sum: 37edb6bb90e495d9608c62af750f6815f155b7a241c77ee2180ff0e27acd7613
-Description:  Geosite List for V2Ray
 
 Package: zlib
 Version: 1.2.11-6
@@ -975,10 +1330,10 @@ License: Zlib
 Section: libs
 CPE-ID: cpe:/a:gnu:zlib
 Architecture: aarch64_cortex-a53
-Installed-Size: 43319
+Installed-Size: 43318
 Filename: zlib_1.2.11-6_aarch64_cortex-a53.ipk
-Size: 44097
-SHA256sum: 475f4cbbdc3530d098a1316d925a34643edb67902d38579c313b67d6eeafaa6a
+Size: 44112
+SHA256sum: 6e73a64128910fce05106b79438aa407ed3735b069cc8b3d9476a171349b9a71
 Description:  zlib is a lossless data-compression library.
  This package includes the shared library.
 

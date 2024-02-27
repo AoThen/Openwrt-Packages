@@ -58,6 +58,28 @@ Size: 9281
 SHA256sum: cfd00d9a150e8d1a0302e2fa7377f9069bb208ee8974df439cb9212dee95d93b
 Description:  OPKG package management application
 
+Package: luci-app-samba4
+Version: git-21.301.29094-41322f9
+Depends: libc, samba4-server
+Section: luci
+Architecture: all
+Installed-Size: 2363
+Filename: luci-app-samba4_git-21.301.29094-41322f9_all.ipk
+Size: 3225
+SHA256sum: 460378c1c1e1122f5ef02d966afa91168d720905ae3ec22cffba9966f5ad1ab3
+Description:  Network Shares - Samba 4 SMB/CIFS fileserver
+
+Package: luci-app-usb-printer
+Version: 1.0
+Depends: libc, p910nd, kmod-usb-printer
+Section: luci
+Architecture: all
+Installed-Size: 3339
+Filename: luci-app-usb-printer_1.0_all.ipk
+Size: 4205
+SHA256sum: fc1f93ac8bd1bde38fd1d3a6be09de81fd5fc51976d1356f6f22c2452e0b33bd
+Description:  USB Printer Share via TCP/IP
+
 Package: luci-base
 Version: git-23.098.38725-847bd6b
 Depends: libc, lua, luci-lib-nixio, luci-lib-ip, rpcd, libubus-lua, luci-lib-jsonc, liblucihttp-lua, luci-lib-base, rpcd-mod-file, rpcd-mod-luci, cgi-io
@@ -126,6 +148,28 @@ Filename: luci-i18n-opkg-zh-cn_git-23.090.62029-650e6d2_all.ipk
 Size: 2916
 SHA256sum: 03a30123d77484719018b836cefbf8989946cb8cb6dbe288804da8a8f83b207b
 Description:  Translation for luci-app-opkg - 简体中文 (Chinese Simplified)
+
+Package: luci-i18n-samba4-zh-cn
+Version: git-23.090.62029-650e6d2
+Depends: libc, luci-app-samba4
+Section: luci
+Architecture: all
+Installed-Size: 1690
+Filename: luci-i18n-samba4-zh-cn_git-23.090.62029-650e6d2_all.ipk
+Size: 2550
+SHA256sum: b786ebe33e8e3775b7f033b86107d28e9e96ccd843462e201841baefc5207f6c
+Description:  Translation for luci-app-samba4 - 简体中文 (Chinese Simplified)
+
+Package: luci-i18n-usb-printer-zh-cn
+Version: git-21.134.64880-4f62c44
+Depends: libc, luci-app-usb-printer
+Section: luci
+Architecture: all
+Installed-Size: 945
+Filename: luci-i18n-usb-printer-zh-cn_git-21.134.64880-4f62c44_all.ipk
+Size: 1809
+SHA256sum: 26c092155da56b1e2a44204a868f4d97fd6b55b99bcf5ef7ce9acaa2608843e4
+Description:  Translation for luci-app-usb-printer - 简体中文 (Chinese Simplified)
 
 Package: luci-lib-base
 Version: git-20.232.39649-1f6dc29
