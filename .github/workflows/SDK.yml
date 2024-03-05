@@ -135,10 +135,9 @@ jobs:
 
       - name: Copy Package
         run: |
-            cd openwrt-sdk
-            tree bin/packages/
             mkdir -p ${{ github.workspace }}/artifact
-            cd bin/packages/x86_64
+            tree openwrt-sdk/bin/packages/
+            cd openwrt-sdk/bin/packages/*
             rm -rf base
             rm -rf luci
             rm -rf packages
