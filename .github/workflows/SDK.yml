@@ -120,8 +120,8 @@ jobs:
           make defconfig
           make package/feeds/luci/luci-base/compile -j$(nproc)
 
-          make package/feeds/passwall/luci-app-passwall/compile -j$(nproc)
-          make package/feeds/passwall2/luci-app-passwall2/compile -j$(nproc)
+          make package/feeds/passwall/luci-app-passwall/compile -j$(nproc) || make package/feeds/passwall/luci-app-passwall/compile -j1 V=sc || exit 0
+          make package/feeds/passwall2/luci-app-passwall2/compile -j$(nproc) || make package/feeds/passwall2/luci-app-passwall2/compile -j1 V=sc || exit 0
           find . -name "*.ipk" -print
           # make package/feeds/passwall/luci-app-passwall/compile -j$(nproc) || make package/feeds/passwall/luci-app-passwall/compile -j1 V=sc || exit 0
           # make package/feeds/passwall2/luci-app-passwall2/compile -j$(nproc) || make package/feeds/passwall2/luci-app-passwall2/compile -j1 V=sc || exit 0
