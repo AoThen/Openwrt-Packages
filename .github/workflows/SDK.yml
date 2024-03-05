@@ -1,0 +1,167 @@
+name: SDK Build Passwall
+
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  TZ: Asia/Shanghai
+
+permissions:
+  actions: write
+
+jobs:
+
+  release:
+    name: Build for ${{ matrix.arch }}
+    runs-on: ubuntu-22.04
+    strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - arch: aarch64_cortex-a53
+              sdk_url: https://downloads.openwrt.org/releases/21.02.3/targets/bcm27xx/bcm2710/openwrt-sdk-21.02.3-bcm27xx-bcm2710_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+                #https://downloads.openwrt.org/snapshots/targets/bcm27xx/bcm2710/openwrt-sdk-bcm27xx-bcm2710_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+            # - arch: aarch64_cortex-a53
+            #   sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/openwrt-sdk-23.05.2-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+
+
+# - https://downloads.openwrt.org/releases/21.02.7/targets/x86/64/openwrt-sdk-21.02.7-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+# - https://downloads.openwrt.org/releases/22.03.5/targets/x86/64/openwrt-sdk-22.03.5-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
+
+    steps:
+
+      - name: Check server configuration
+        run: |
+          echo "警告⚠"
+          echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+          echo -e "已知CPU型号（降序）：8370C，8272CL，8171M，E5-2673 \n"
+          echo "--------------------------CPU信息--------------------------"
+          echo "CPU物理数量：$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+          echo -e "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+          echo "--------------------------内存信息--------------------------"
+          echo "已安装内存详细信息："
+          echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
+          echo "--------------------------硬盘信息--------------------------"
+          echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT    
+
+
+      # - name: Maximize build space
+      #   uses: easimon/maximize-build-space@master
+      #   with:
+      #       remove-android: "true"
+      #       remove-haskell: "true"
+      #       remove-dotnet: "true"
+      #       remove-docker-images: "true"
+
+      # - name: Checkout
+      #   uses: actions/checkout@main
+
+
+      # - name: Check space usage
+      #   if: (!cancelled())
+      #   run: |
+      #     df -hT
+      #     if [ "$USER" = "runner" ] || [ "$(whoami)" = "runner" ]; then
+      #       echo -e "\n[+] Debloating GH Runner...\n"
+      #         sudo rm /usr/local/lib/android -rf 2>/dev/null
+      #         sudo rm /opt/hostedtoolcache/CodeQL -rf 2>/dev/null
+      #         sudo rm /usr/local/.ghcup -rf 2>/dev/null
+      #         sudo rm /usr/share/dotnet -rf 2>/dev/null
+      #         sudo rm /usr/share/swift -rf 2>/dev/null
+      #         sudo rm /usr/local/share/powershell -rf 2>/dev/null
+      #         sudo rm /usr/local/lib/heroku -rf 2>/dev/null
+      #     fi
+      #     df -hT
+
+      - name: Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          docker rmi `docker images -q`
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /etc/mysql /etc/php
+          sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install build-essential clang flex bison g++ gawk gcc-multilib g++-multilib gettext git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev file wget
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+
+      # - name: Download SDK
+      #   run: |
+      #       url=${{ matrix.sdk_url }}
+      #       sdk=$(basename $url | awk -F '.tar.xz' '{ print $1 }')
+      #       wget $url
+      #       tar xvf $sdk.tar.xz
+      #       mkdir -p $sdk/package
+
+
+
+      - name: Install OpenWrt SDK
+        run: |
+          wget -O openwrt-sdk.tar.xz ${{ matrix.sdk_url }}
+          xz -q -d openwrt-sdk.tar.xz && tar -xvf openwrt-sdk.tar
+          mv -f openwrt-sdk-* openwrt-sdk
+          ls openwrt-sdk
+          echo 'CONFIG_ALL=y' >> openwrt-sdk/.config
+
+
+      - name: Build Package passwall
+        run: |
+
+          cd openwrt-sdk
+          echo "src-git pspackages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
+          echo 'CONFIG_ALL=y' >> .config
+          echo "src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main" >> "feeds.conf.default"
+          echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> "feeds.conf.default"
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+          make defconfig
+          make package/feeds/luci/luci-base/compile -j$(nproc)
+
+          make package/feeds/passwall/luci-app-passwall/compile -j$(nproc)
+          make package/feeds/passwall2/luci-app-passwall2/compile -j$(nproc)
+          find . -name "*.ipk" -print
+          # make package/feeds/passwall/luci-app-passwall/compile -j$(nproc) || make package/feeds/passwall/luci-app-passwall/compile -j1 V=sc || exit 0
+          # make package/feeds/passwall2/luci-app-passwall2/compile -j$(nproc) || make package/feeds/passwall2/luci-app-passwall2/compile -j1 V=sc || exit 0
+          pkgs=$(ls package/feeds/pspackages)
+          for pkg in $pkgs
+          do
+              echo $pkg
+              make V=s package/feeds/pspackages/$pkg/compile -j$(nproc) || make package/feeds/pspackages/$pkg/compile -j1 V=sc || exit 0
+          done
+          
+
+      - name: Copy Package
+        run: |
+            cd openwrt-sdk
+            tree bin/packages/
+            mkdir -p ${{ github.workspace }}/artifact
+            cd bin/packages/x86_64
+            rm -rf base
+            rm -rf luci
+            rm -rf packages
+            for ipk in `find . -name '*.ipk'`; do
+                cp $ipk ${{ github.workspace }}/artifact
+            done
+
+      - name: Artifact package
+        uses: actions/upload-artifact@main
+        with:
+          name: ipks
+          path: ${{ github.workspace }}/artifact
+          if-no-files-found: error
+
+
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
+
+      - name: Delete workflow runs
+        uses: AoThen/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 5
