@@ -20,8 +20,8 @@ jobs:
         matrix:
           include:
             - arch: aarch64_cortex-a53
-              sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/bcm27xx/bcm2711/openwrt-sdk-23.05.2-bcm27xx-bcm2711_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-                #https://downloads.openwrt.org/snapshots/targets/bcm27xx/bcm2710/openwrt-sdk-bcm27xx-bcm2710_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+              sdk_url: https://downloads.openwrt.org/snapshots/targets/bcm27xx/bcm2710/openwrt-sdk-bcm27xx-bcm2710_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+                #https://downloads.openwrt.org/releases/23.05.2/targets/bcm27xx/bcm2711/openwrt-sdk-23.05.2-bcm27xx-bcm2711_gcc-12.3.0_musl.Linux-x86_64.tar.xz
             # - arch: aarch64_cortex-a53
             #   sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/openwrt-sdk-23.05.2-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
 
@@ -117,8 +117,6 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
-          rm -rf ./feeds/packages/lang/golang
-          svn co https://github.com/openwrt/packages/branches/openwrt-23.05/lang/golang ./feeds/packages/lang/golang
 
 
           make defconfig
