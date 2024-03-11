@@ -117,7 +117,8 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
-
+          rm -rf feeds/packages/lang/golang
+          git clone --depth 1 https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang
 
           make defconfig
           make package/feeds/luci/luci-base/compile -j$(nproc)
