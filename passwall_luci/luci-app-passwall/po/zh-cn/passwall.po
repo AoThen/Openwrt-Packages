@@ -388,6 +388,9 @@ msgstr "负载均衡"
 msgid "Balancing Strategy"
 msgstr "负载均衡策略"
 
+msgid "Fallback Node"
+msgstr "后备节点"
+
 msgid "Use Custome Probe URL"
 msgstr "使用自定义探测网址"
 
@@ -474,6 +477,9 @@ msgstr "导入分享URL"
 
 msgid "Build Share URL"
 msgstr "导出分享URL"
+
+msgid "Generate QRCode"
+msgstr "生成二维码"
 
 msgid "Import Finished"
 msgstr "导入完成："
@@ -1590,3 +1596,6 @@ msgstr "落地节点"
 
 msgid "Only support a layer of proxy."
 msgstr "仅支持一层代理。"
+
+msgid "Only work with using the %s node."
+msgstr "与使用 %s 节点时生效。"

@@ -7,12 +7,13 @@ o = Map("netspeedtest", "<font color='green'>" .. translate("Net Speedtest") .."
 t=o:section(TypedSection,"speedtestwan",translate("Broadband speed test"))
 t.anonymous=true
 
-e = t:option(DummyValue, '', '')
-e.rawhtml = true
-e.template ='netspeedtest/speedtestwan'
+e = t:option(ListValue, 'speedtest_cli', translate('client version selection'))
+e:value("0",translate("ookla-speedtest-cli"))
+e:value("1",translate("python3-speedtest-cli"))
+e.default = "1"
 
-e =t:option(DummyValue, '', '')
-e.rawhtml = true
-e.template = 'netspeedtest/log'
+e=t:option(Button, "restart", translate("speedtest.net Broadband speed test"))
+e.inputtitle=translate("Click to execute")
+e.template ='netspeedtest/speedtestwan'
 
 return o
