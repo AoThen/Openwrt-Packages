@@ -1,33 +1,33 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chinadns-ng
-PKG_VERSION:=2024.03.27
+PKG_VERSION:=2024.04.30
 PKG_RELEASE:=1
 
 ifeq ($(ARCH),aarch64)
   PKG_ARCH:=chinadns-ng@aarch64-linux-musl@generic+v8a@fast+lto
-  PKG_HASH:=5255a5393d0923ca378f1076eefa8719ab301b25398ab0280e026cdc6316b0e4
+  PKG_HASH:=4d9c7efd782bd77f215b371faa272e3a503412e0a934ef70bdbd4058f5e0c96f
 else ifeq ($(ARCH),arm)
   ARM_CPU_FEATURES:=$(word 2,$(subst +,$(space),$(call qstrip,$(CONFIG_CPU_TYPE))))
   ifeq ($(ARM_CPU_FEATURES),)
-    PKG_ARCH:=chinadns-ng@arm-linux-musleabi@generic+v7a@fast+lto
-    PKG_HASH:=c2e0378e20f5fda376d4f52bfbe1a3dbc7dfe23879e8edc8ef7ab55694cfd676
+    PKG_ARCH:=chinadns-ng@arm-linux-musleabi@generic+v6+soft_float@fast+lto
+    PKG_HASH:=02ab8efb0522bc7ee2bf5e9ef0d8011a2916843ad192b473d7c2d7900fb6c498
   else
     PKG_ARCH:=chinadns-ng@arm-linux-musleabihf@generic+v7a@fast+lto
-    PKG_HASH:=d065c7d55b6c43b20dbb668d7bdafabe371c3360cc75bd0279cc2d7a83e342e9
+    PKG_HASH:=9bff2c01dd0a212a55f5c5a0e048c131a2f1515f7f9140b090f36c723be90aaf
   endif
 else ifeq ($(ARCH),mips)
   PKG_ARCH:=chinadns-ng@mips-linux-musl@mips32+soft_float@fast+lto
-  PKG_HASH:=2170011ecf8ee29057d805eb8054bcc4366b759f454c063f0a258c84403e416e
+  PKG_HASH:=2c88fa6ba8412b4cd4c344a47d4bfbf6c11855163937308e5d9b8137fe9a2491
 else ifeq ($(ARCH),mipsel)
   PKG_ARCH:=chinadns-ng@mipsel-linux-musl@mips32+soft_float@fast+lto
-  PKG_HASH:=9ac1462187b3b06173f908295d45fd0fa3e37eb50171e22198e29dd81710b268
+  PKG_HASH:=db32bf9c40a532bff26822fdf41ebf55ababd2dc58da687f221230999e47bc10
 else ifeq ($(ARCH),i386)
   PKG_ARCH:=chinadns-ng@i386-linux-musl@i686@fast+lto
-  PKG_HASH:=bf22fb35fba5e9b1174b0334a5473d4db8b3f85e489cec5af94f9a92f7c9787b
+  PKG_HASH:=46650b1a509b5c8369f5eecaefe09fa8bde78fa339a17258669f73498d63a557
 else ifeq ($(ARCH),x86_64)
   PKG_ARCH:=chinadns-ng@x86_64-linux-musl@x86_64@fast+lto
-  PKG_HASH:=8adf68d15068a3a27588772deb19be0a9804077a075aa8dad9dafa12a154c529
+  PKG_HASH:=611ccb0f3391798f2289362f4026e2e446f939309f0de6f2689e1551793d8274
 else
   PKG_HASH:=dummy
 endif

@@ -132,7 +132,7 @@ if (has_singbox or has_xray) and #nodes_table > 0 then
 			end
 			type.cfgvalue = get_cfgvalue(v.id, "type")
 			type.write = get_write(v.id, "type")
-			
+
 			-- pre-proxy
 			o = s:taboption("Main", Flag, vid .. "-preproxy_enabled", translate("Preproxy"))
 			o:depends("tcp_node", v.id)
@@ -257,20 +257,23 @@ if has_singbox or has_xray then
 	tcp_node_http_port.datatype = "port"
 end
 ]]--
-
+tcp_node_socks_bind_local = s:taboption("Main", Flag, "tcp_node_socks_bind_local", translate("TCP Node") .. " Socks " .. translate("Bind Local"), translate("When selected, it can only be accessed localhost."))
+tcp_node_socks_bind_local.default = "1"
+tcp_node_socks_bind_local:depends({ tcp_node = "nil", ["!reverse"] = true })
 
 s:tab("DNS", translate("DNS"))
+
+dns_shunt = s:taboption("DNS", ListValue, "dns_shunt", "DNS " .. translate("Shunt"))
+dns_shunt:value("dnsmasq", "Dnsmasq")
+dns_shunt:value("chinadns-ng", "Dnsmasq + ChinaDNS-NG")
 
 o = s:taboption("DNS", Flag, "filter_proxy_ipv6", translate("Filter Proxy Host IPv6"), translate("Experimental feature."))
 o.default = "0"
 
 ---- DNS Forward Mode
 dns_mode = s:taboption("DNS", ListValue, "dns_mode", translate("Filter Mode"))
-dns_mode.rmempty = false
-dns_mode:reset_values()
-if api.is_finded("dns2tcp") then
-	dns_mode:value("dns2tcp", translatef("Requery DNS By %s", "TCP"))
-end
+dns_mode:value("udp", translatef("Requery DNS By %s", "UDP"))
+dns_mode:value("tcp", translatef("Requery DNS By %s", "TCP"))
 if api.is_finded("dns2socks") then
 	dns_mode:value("dns2socks", "dns2socks")
 end
@@ -280,9 +283,8 @@ end
 if has_xray then
 	dns_mode:value("xray", "Xray")
 end
-dns_mode:value("udp", translatef("Requery DNS By %s", "UDP"))
 
-o = s:taboption("DNS", ListValue, "xray_dns_mode", " ")
+o = s:taboption("DNS", ListValue, "xray_dns_mode", translate("Request protocol"))
 o:value("tcp", "TCP")
 o:value("tcp+doh", "TCP + DoH (" .. translate("A/AAAA type") .. ")")
 o:depends("dns_mode", "xray")
@@ -295,7 +297,7 @@ o.write = function(self, section, value)
 	end
 end
 
-o = s:taboption("DNS", ListValue, "singbox_dns_mode", " ")
+o = s:taboption("DNS", ListValue, "singbox_dns_mode", translate("Request protocol"))
 o:value("tcp", "TCP")
 o:value("doh", "DoH")
 o:depends("dns_mode", "sing-box")
@@ -331,7 +333,7 @@ o:value("9.9.9.9", "9.9.9.9 (Quad9-Recommended)")
 o:value("208.67.220.220", "208.67.220.220 (OpenDNS)")
 o:value("208.67.222.222", "208.67.222.222 (OpenDNS)")
 o:depends({dns_mode = "dns2socks"})
-o:depends({dns_mode = "dns2tcp"})
+o:depends({dns_mode = "tcp"})
 o:depends({dns_mode = "udp"})
 o:depends({xray_dns_mode = "tcp"})
 o:depends({xray_dns_mode = "tcp+doh"})
@@ -361,7 +363,7 @@ o:depends({dns_mode = "xray"})
 
 o = s:taboption("DNS", Flag, "remote_fakedns", "FakeDNS", translate("Use FakeDNS work in the shunt domain that proxy."))
 o.default = "0"
-o:depends({dns_mode = "sing-box"})
+o:depends({dns_mode = "sing-box", dns_shunt = "dnsmasq"})
 o.validate = function(self, value, t)
 	if value and value == "1" then
 		local _dns_mode = dns_mode:formvalue(t)
@@ -375,46 +377,29 @@ o.validate = function(self, value, t)
 	return value
 end
 
-o = s:taboption("DNS", Flag, "dns_cache", translate("Cache Resolved"))
-o.default = "1"
-o:depends({dns_mode = "dns2socks"})
-o:depends({dns_mode = "sing-box", remote_fakedns = false})
-o:depends({dns_mode = "xray"})
-o.rmempty = false
-
-if api.is_finded("chinadns-ng") then
-	o = s:taboption("DNS", Flag, "chinadns_ng", translate("ChinaDNS-NG"), translate("The effect is better, but will increase the memory."))
-	o.default = "0"
-	o:depends({remote_fakedns = false, use_gfw_list = true})
-	o:depends({remote_fakedns = false, chn_list = "direct"})
-
-	o = s:taboption("DNS", ListValue, "chinadns_ng_default_tag", translate("ChinaDNS-NG Domain Default Tag"))
-	o.default = "smart"
-	o:value("smart", translate("Smart DNS"))
-	o:value("gfw", translate("Remote DNS"))
-	o:value("chn", translate("Direct DNS"))
-	o.description = "<ul>"
-			.. "<li>" .. translate("Forward to both remote and direct DNS, if the direct DNS resolution result is a mainland China ip, then use the direct result, otherwise use the remote result") .. "</li>"
-			.. "<li>" .. translate("Remote DNS can avoid more DNS leaks, but some domestic domain names maybe to proxy!") .. "</li>"
-			.. "<li>" .. translate("Direct DNS Internet experience may be better, but DNS will be leaked!") .. "</li>"
-			.. "</ul>"
-	o:depends("chinadns_ng", true)
-end
+o = s:taboption("DNS", ListValue, "chinadns_ng_default_tag", translate("ChinaDNS-NG Domain Default Tag"))
+o.default = "none"
+o:value("none", translate("Default"))
+o:value("gfw", translate("Remote DNS"))
+o:value("chn", translate("Direct DNS"))
+o.description = "<ul>"
+		.. "<li>" .. translate("When not matching any domain name list:") .. "</li>"
+		.. "<li>" .. translate("Default: Forward to both direct and remote DNS, if the direct DNS resolution result is a mainland China ip, then use the direct result, otherwise use the remote result.") .. "</li>"
+		.. "<li>" .. translate("Remote DNS: Can avoid more DNS leaks, but some domestic domain names maybe to proxy!") .. "</li>"
+		.. "<li>" .. translate("Direct DNS: Internet experience may be better, but DNS will be leaked!") .. "</li>"
+		.. "</ul>"
+o:depends({dns_shunt = "chinadns-ng", tcp_proxy_mode = "proxy", chn_list = "direct"})
 
 o = s:taboption("DNS", ListValue, "use_default_dns", translate("Default DNS"))
 o.default = "direct"
 o:value("remote", translate("Remote DNS"))
 o:value("direct", translate("Direct DNS"))
-o.description = translate("The default DNS used when not in the domain name rules list.")
-.. "<ul>"
-.. "<li>" .. translate("Remote DNS can avoid more DNS leaks, but some domestic domain names maybe to proxy!") .. "</li>"
-.. "<li>" .. translate("Direct DNS Internet experience may be better, but DNS will be leaked!") .. "</li>"
-.. "</ul>"
-local _depends = {tcp_proxy_mode = "proxy"}
-if api.is_finded("chinadns-ng") then
-	_depends["chinadns_ng"] = false
-end
-o:depends(_depends)
+o.description = "<ul>"
+		.. "<li>" .. translate("When not matching any domain name list:") .. "</li>"
+		.. "<li>" .. translate("Remote DNS: Can avoid more DNS leaks, but some domestic domain names maybe to proxy!") .. "</li>"
+		.. "<li>" .. translate("Direct DNS: Internet experience may be better, but DNS will be leaked!") .. "</li>"
+		.. "</ul>"
+o:depends({dns_shunt = "dnsmasq", tcp_proxy_mode = "proxy", chn_list = "direct"})
 
 o = s:taboption("DNS", Button, "clear_ipset", translate("Clear IPSET"), translate("Try this feature if the rule modification does not take effect."))
 o.inputstyle = "remove"
@@ -466,7 +451,7 @@ o = s:taboption("Proxy", Flag, "localhost_proxy", translate("Localhost Proxy"), 
 o.default = "1"
 o.rmempty = false
 
-o = s:taboption("Proxy", Flag, "client_proxy", translate("Client Proxy"), translate("When selected, devices in LAN can transparent proxy. Otherwise, it will not be proxy."))
+o = s:taboption("Proxy", Flag, "client_proxy", translate("Client Proxy"), translate("When selected, devices in LAN can transparent proxy. Otherwise, it will not be proxy. But you can still use access control to allow the designated device to proxy."))
 o.default = "1"
 o.rmempty = false
 
@@ -477,10 +462,12 @@ o.cfgvalue = function(t, n)
 end
 
 s:tab("log", translate("Log"))
-o = s:taboption("log", Flag, "close_log_tcp", translatef("%s Node Log Close", "TCP"))
+o = s:taboption("log", Flag, "log_tcp", translate("Enable") .. " " .. translatef("%s Node Log", "TCP"))
+o.default = "1"
 o.rmempty = false
 
-o = s:taboption("log", Flag, "close_log_udp", translatef("%s Node Log Close", "UDP"))
+o = s:taboption("log", Flag, "log_udp", translate("Enable") .. " " .. translatef("%s Node Log", "UDP"))
+o.default = "1"
 o.rmempty = false
 
 loglevel = s:taboption("log", ListValue, "loglevel", "Sing-Box/Xray " .. translate("Log Level"))
@@ -500,13 +487,15 @@ trojan_loglevel:value("4", "fatal")
 
 o = s:taboption("log", Flag, "advanced_log_feature", translate("Advanced log feature"), translate("For professionals only."))
 o.default = "0"
-o.rmempty = false
-local syslog = s:taboption("log", Flag, "sys_log", translate("Logging to system log"), translate("Logging to the system log for more advanced functions. For example, send logs to a dedicated log server."))
-syslog:depends("advanced_log_feature", "1")
-syslog.default = "0"
-syslog.rmempty = false
-local logpath = s:taboption("log", Value, "persist_log_path", translate("Persist log file directory"), translate("The path to the directory used to store persist log files, the \"/\" at the end can be omitted. Leave it blank to disable this feature."))
-logpath:depends({ ["advanced_log_feature"] = 1, ["sys_log"] = 0 })
+o = s:taboption("log", Flag, "sys_log", translate("Logging to system log"), translate("Logging to the system log for more advanced functions. For example, send logs to a dedicated log server."))
+o:depends("advanced_log_feature", "1")
+o.default = "0"
+o = s:taboption("log", Value, "persist_log_path", translate("Persist log file directory"), translate("The path to the directory used to store persist log files, the \"/\" at the end can be omitted. Leave it blank to disable this feature."))
+o:depends({ ["advanced_log_feature"] = 1, ["sys_log"] = 0 })
+o = s:taboption("log", Value, "log_event_filter", translate("Log Event Filter"), translate("Support regular expression."))
+o:depends("advanced_log_feature", "1")
+o = s:taboption("log", Value, "log_event_cmd", translate("Shell Command"), translate("Shell command to execute, replace log content with %s."))
+o:depends("advanced_log_feature", "1")
 
 s:tab("faq", "FAQ")
 
