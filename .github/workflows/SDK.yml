@@ -20,16 +20,8 @@ jobs:
         matrix:
           include:
             - arch: aarch64_cortex-a53
-              sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/bcm27xx/bcm2711/openwrt-sdk-23.05.2-bcm27xx-bcm2711_gcc-12.3.0_musl.Linux-x86_64.tar.xz
+              sdk_url: https://downloads.openwrt.org/snapshots/targets/mediatek/mt7629/openwrt-sdk-mediatek-mt7629_gcc-13.2.0_musl_eabi.Linux-x86_64.tar.zst
 
-                #https://downloads.openwrt.org/snapshots/targets/bcm27xx/bcm2710/openwrt-sdk-bcm27xx-bcm2710_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-                #https://archive.openwrt.org/releases/21.02.7/targets/bcm27xx/bcm2710/openwrt-sdk-21.02.7-bcm27xx-bcm2710_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-            # - arch: aarch64_cortex-a53
-            #   sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/openwrt-sdk-23.05.2-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz
-
-
-# - https://downloads.openwrt.org/releases/21.02.7/targets/x86/64/openwrt-sdk-21.02.7-x86-64_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-# - https://downloads.openwrt.org/releases/22.03.5/targets/x86/64/openwrt-sdk-22.03.5-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz
 
     steps:
 
