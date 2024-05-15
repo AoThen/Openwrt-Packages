@@ -20,7 +20,7 @@ jobs:
         matrix:
           include:
             - arch: aarch64_cortex-a53
-              sdk_url: https://downloads.openwrt.org/snapshots/targets/mediatek/mt7629/openwrt-sdk-mediatek-mt7629_gcc-13.2.0_musl_eabi.Linux-x86_64.tar.zst
+              sdk_url: https://downloads.openwrt.org/releases/23.05.2/targets/mediatek/mt7629/openwrt-sdk-23.05.2-mediatek-mt7629_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz
 
 
     steps:
