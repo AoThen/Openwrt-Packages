@@ -437,10 +437,10 @@ SourceDateEpoch: 1670367370
 CPE-ID: cpe:/a:samba:samba
 Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
 Architecture: aarch64_cortex-a53
-Installed-Size: 8033914
+Installed-Size: 8034787
 Filename: samba4-libs_4.14.12-2_aarch64_cortex-a53.ipk
-Size: 7983210
-SHA256sum: e17ffb94ff48c1f537a5fd9862f721cb1dcf5d25168d56c9e2019eef707a0755
+Size: 7987046
+SHA256sum: 1d2bf9b8df85430adf450751cba0e4b55dd75ec4db15d395c8872ae1bf5bbf94
 Description:  Samba 4.14.12 libs
 
 Package: samba4-server
@@ -456,10 +456,10 @@ SourceDateEpoch: 1670367370
 CPE-ID: cpe:/a:samba:samba
 Maintainer: Andy Walsh <andy.walsh44+github@gmail.com>
 Architecture: aarch64_cortex-a53
-Installed-Size: 252711
+Installed-Size: 252558
 Filename: samba4-server_4.14.12-2_aarch64_cortex-a53.ipk
-Size: 253653
-SHA256sum: 681927cda57e9ad870317b8b923a95ad13c30aa37e4e9b2ed9a6f246f35b0e94
+Size: 253540
+SHA256sum: 8cf8767f311f2cbc4bf7616577117420b13e57baa63e55546756d974c63ce4f0
 Description:  installs: smbd (nmbd) smbpasswd pdbedit testparm (nmblookup) (smbcacls sharesec)
  (samba samba-tool ntlm_auth samba-gpupdate samba_dnsupdate samba_kcc samba_spnupdate samba_upgradedns samba_downgrade_db)
  
