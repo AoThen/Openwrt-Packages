@@ -135,11 +135,11 @@ jobs:
 # git clone --depth 1 https://github.com/AoThen/luci-app-vssr.git luci-app-vssr
 # rm -rf luci-app-vssr/.git
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.OPENWRT_PACKAGES }}
-          repository: "AoThen/Openwrt-Packages"
-          branch: "feeds"
-          directory: "Openwrt-Packages"
-          force: true
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ secrets.OPENWRT_PACKAGES }}
+      #     repository: "AoThen/Openwrt-Packages"
+      #     branch: "feeds"
+      #     directory: "Openwrt-Packages"
+      #     force: true
