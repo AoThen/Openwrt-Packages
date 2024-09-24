@@ -54,6 +54,10 @@ o = s:option(Value, "remarks", translate("Remarks"))
 o.default = arg[1]
 o.rmempty = true
 
+o = s:option(Flag, "use_interface", translate("Use Interface With ACLs"))
+o.default = 0
+o.rmempty = false
+
 local mac_t = {}
 sys.net.mac_hints(function(e, t)
 	mac_t[#mac_t + 1] = {
@@ -73,6 +77,17 @@ table.sort(mac_t, function(a,b)
 	end
 	return false
 end)
+
+local device_list = {}
+device_list = sys.net.devices()
+table.sort(device_list)
+interface = s:option(ListValue, "interface", translate("Source Interface"))
+
+for k, name in ipairs(device_list) do
+	interface:value(name)
+end
+
+interface:depends({ use_interface = 1 })
 
 ---- Source
 sources = s:option(DynamicList, "sources", translate("Source"))
@@ -139,6 +154,7 @@ sources.validate = function(self, value, t)
 	return value
 end
 sources.write = dynamicList_write
+sources:depends({ use_interface = 0 })
 
 ---- TCP No Redir Ports
 local TCP_NO_REDIR_PORTS = uci:get(appname, "@global_forwarding[0]", "tcp_no_redir_ports")
@@ -282,7 +298,7 @@ if has_xray then
 	o:value("xray", "Xray")
 end
 
-o = s:option(ListValue, "xray_dns_mode", " ")
+o = s:option(ListValue, "xray_dns_mode", translate("Request protocol"))
 o:value("tcp", "TCP")
 o:value("tcp+doh", "TCP + DoH (" .. translate("A/AAAA type") .. ")")
 o:depends("dns_mode", "xray")
@@ -295,7 +311,7 @@ o.write = function(self, section, value)
 	end
 end
 
-o = s:option(ListValue, "singbox_dns_mode", " ")
+o = s:option(ListValue, "singbox_dns_mode", translate("Request protocol"))
 o:value("tcp", "TCP")
 o:value("doh", "DoH")
 o:depends("dns_mode", "sing-box")
