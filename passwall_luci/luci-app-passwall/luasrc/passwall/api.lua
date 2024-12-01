@@ -720,6 +720,7 @@ local default_file_tree = {
 	mips    = "mips",
 	mips64  = "mips64",
 	mipsel  = "mipsel",
+	mips64el = "mips64el",
 	armv5   = "arm.*5",
 	armv6   = "arm.*6[^4]*",
 	armv7   = "arm.*7",
@@ -986,7 +987,11 @@ function to_move(app_name,file)
 end
 
 function get_version()
-	return sys.exec("echo -n $(opkg list-installed luci-app-passwall |awk '{print $3}')")
+	local version = sys.exec("opkg list-installed luci-app-passwall 2>/dev/null | awk '{print $3}'")
+	if not version or #version == 0 then
+		version = sys.exec("apk info luci-app-passwall 2>/dev/null | awk 'NR == 1 {print $1}' | cut -d'-' -f4-")
+	end
+	return version or ""
 end
 
 function to_check_self()
@@ -1046,11 +1051,16 @@ function luci_types(id, m, s, type_name, option_prefix)
 				end
 				s.fields[key].write = function(self, section, value)
 					if s.fields["type"]:formvalue(id) == type_name then
-						if self.rewrite_option then
-							m:set(section, self.rewrite_option, value)
+						-- 添加自定义 custom_write 属性，如果有自定义的 custom_write 函数，则使用自定义的 write 逻辑
+						if self.custom_write then
+							self:custom_write(section, value)
 						else
-							if self.option:find(option_prefix) == 1 then
-								m:set(section, self.option:sub(1 + #option_prefix), value)
+							if self.rewrite_option then
+								m:set(section, self.rewrite_option, value)
+							else
+								if self.option:find(option_prefix) == 1 then
+									m:set(section, self.option:sub(1 + #option_prefix), value)
+								end
 							end
 						end
 					end
