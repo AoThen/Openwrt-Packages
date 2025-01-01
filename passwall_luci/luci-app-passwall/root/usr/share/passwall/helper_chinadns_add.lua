@@ -18,8 +18,10 @@ local DEFAULT_TAG = var["-DEFAULT_TAG"]
 local NO_LOGIC_LOG = var["-NO_LOGIC_LOG"]
 local TCP_NODE = var["-TCP_NODE"]
 local NFTFLAG = var["-NFTFLAG"]
+local REMOTE_FAKEDNS = var["-REMOTE_FAKEDNS"]
+local LOG_FILE = var["-LOG_FILE"]
 
-local uci = api.uci
+local uci = api.libuci
 local sys = api.sys
 local fs = api.fs
 local datatypes = api.datatypes
@@ -30,6 +32,7 @@ local RULES_PATH = "/usr/share/" .. appname .. "/rules"
 local FLAG_PATH = TMP_ACL_PATH .. "/" .. FLAG
 local config_lines = {}
 local tmp_lines = {}
+local USE_GEOVIEW = uci:get(appname, "@global_rules[0]", "enable_geoview")
 
 local function log(...)
 	if NO_LOGIC_LOG == "1" then
@@ -99,8 +102,10 @@ end
 
 local setflag = (NFTFLAG == "1") and "inet@passwall@" or ""
 
+local only_global = (DEFAULT_MODE == "proxy" and CHNLIST == "0" and GFWLIST == "0") and 1
+
 config_lines = {
-	--"verbose",
+	LOG_FILE ~= "/dev/null" and "verbose" or "",
 	"bind-addr 127.0.0.1",
 	"bind-port " .. LISTEN_PORT,
 	"china-dns " .. DNS_LOCAL,
@@ -115,12 +120,18 @@ end
 --自定义规则组，后声明的组具有更高优先级
 --屏蔽列表
 local file_block_host = TMP_ACL_PATH .. "/block_host"
-if USE_BLOCK_LIST == "1" and not fs.access(file_block_host) then   --对自定义列表进行清洗
+if USE_BLOCK_LIST == "1" and not fs.access(file_block_host) then
 	local block_domain, lookup_block_domain = {}, {}
+	local geosite_arg = ""
 	for line in io.lines(RULES_PATH .. "/block_host") do
-		line = api.get_std_domain(line)
-		if line ~= "" and not line:find("#") then
-			insert_unique(block_domain, line, lookup_block_domain)
+		if not line:find("#") and line:find("geosite:") then
+			line = string.match(line, ":([^:]+)$")
+			geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+		else
+			line = api.get_std_domain(line)
+			if line ~= "" and not line:find("#") then
+				insert_unique(block_domain, line, lookup_block_domain)
+			end
 		end
 	end
 	if #block_domain > 0 then
@@ -129,6 +140,10 @@ if USE_BLOCK_LIST == "1" and not fs.access(file_block_host) then   --对自定�
 			f_out:write(block_domain[i] .. "\n")
 		end
 		f_out:close()
+	end
+	if USE_GEOVIEW == "1" and geosite_arg ~= "" and api.is_finded("geoview") then
+		get_geosite(geosite_arg, file_block_host)
+		log("  * 解析[屏蔽列表] Geosite 到屏蔽域名表(blocklist)完成")
 	end
 end
 if USE_BLOCK_LIST == "1" and is_file_nonzero(file_block_host) then
@@ -156,11 +171,15 @@ if not is_file_nonzero(file_vpslist) then
 	f_out:close()
 end
 if is_file_nonzero(file_vpslist) then
+	local sets = {
+		setflag .. "passwall_vps",
+		setflag .. "passwall_vps6"
+	}
 	tmp_lines = {
 		"group vpslist",
 		"group-dnl " .. file_vpslist,
 		"group-upstream " .. DNS_LOCAL,
-		"group-ipset " .. setflag .. "passwall_vpslist," .. setflag .. "passwall_vpslist6"
+		"group-ipset " .. table.concat(sets, ",")
 	}
 	insert_array_after(config_lines, tmp_lines, "#--6")
 	log(string.format("  - 节点列表中的域名(vpslist)：%s", DNS_LOCAL or "默认"))
@@ -168,12 +187,18 @@ end
 
 --直连（白名单）列表
 local file_direct_host = TMP_ACL_PATH .. "/direct_host"
-if USE_DIRECT_LIST == "1" and not fs.access(file_direct_host) then   --对自定义列表进行清洗
+if USE_DIRECT_LIST == "1" and not fs.access(file_direct_host) then
 	local direct_domain, lookup_direct_domain = {}, {}
+	local geosite_arg = ""
 	for line in io.lines(RULES_PATH .. "/direct_host") do
-		line = api.get_std_domain(line)
-		if line ~= "" and not line:find("#") then
-			insert_unique(direct_domain, line, lookup_direct_domain)
+		if not line:find("#") and line:find("geosite:") then
+			line = string.match(line, ":([^:]+)$")
+			geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+		else
+			line = api.get_std_domain(line)
+			if line ~= "" and not line:find("#") then
+				insert_unique(direct_domain, line, lookup_direct_domain)
+			end
 		end
 	end
 	if #direct_domain > 0 then
@@ -183,13 +208,21 @@ if USE_DIRECT_LIST == "1" and not fs.access(file_direct_host) then   --对自定
 		end
 		f_out:close()
 	end
+	if USE_GEOVIEW == "1" and geosite_arg ~= "" and api.is_finded("geoview") then
+		get_geosite(geosite_arg, file_direct_host)
+		log("  * 解析[直连列表] Geosite 到域名白名单(whitelist)完成")
+	end
 end
 if USE_DIRECT_LIST == "1" and is_file_nonzero(file_direct_host) then
+	local sets = {
+		setflag .. "passwall_white",
+		setflag .. "passwall_white6"
+	}
 	tmp_lines = {
 		"group directlist",
 		"group-dnl " .. file_direct_host,
 		"group-upstream " .. DNS_LOCAL,
-		"group-ipset " .. setflag .. "passwall_whitelist," .. setflag .. "passwall_whitelist6"
+		"group-ipset " .. table.concat(sets, ",")
 	}
 	insert_array_after(config_lines, tmp_lines, "#--4")
 	log(string.format("  - 域名白名单(whitelist)：%s", DNS_LOCAL or "默认"))
@@ -197,12 +230,18 @@ end
 
 --代理（黑名单）列表
 local file_proxy_host = TMP_ACL_PATH .. "/proxy_host"
-if USE_PROXY_LIST == "1" and not fs.access(file_proxy_host) then   --对自定义列表进行清洗
+if USE_PROXY_LIST == "1" and not fs.access(file_proxy_host) then
 	local proxy_domain, lookup_proxy_domain = {}, {}
+	local geosite_arg = ""
 	for line in io.lines(RULES_PATH .. "/proxy_host") do
-		line = api.get_std_domain(line)
-		if line ~= "" and not line:find("#") then
-			insert_unique(proxy_domain, line, lookup_proxy_domain)
+		if not line:find("#") and line:find("geosite:") then
+			line = string.match(line, ":([^:]+)$")
+			geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+		else
+			line = api.get_std_domain(line)
+			if line ~= "" and not line:find("#") then
+				insert_unique(proxy_domain, line, lookup_proxy_domain)
+			end
 		end
 	end
 	if #proxy_domain > 0 then
@@ -212,13 +251,27 @@ if USE_PROXY_LIST == "1" and not fs.access(file_proxy_host) then   --对自定�
 		end
 		f_out:close()
 	end
+	if USE_GEOVIEW == "1" and geosite_arg ~= "" and api.is_finded("geoview") then
+		get_geosite(geosite_arg, file_proxy_host)
+		log("  * 解析[代理列表] Geosite 到代理域名表(blacklist)完成")
+	end
 end
 if USE_PROXY_LIST == "1" and is_file_nonzero(file_proxy_host) then
+	local sets = {
+		setflag .. "passwall_black",
+		setflag .. "passwall_black6"
+	}
+	if FLAG ~= "default" then
+		sets = {
+			setflag .. "passwall_" .. FLAG .. "_black",
+			setflag .. "passwall_" .. FLAG .. "_black6"
+		}
+	end
 	tmp_lines = {
 		"group proxylist",
 		"group-dnl " .. file_proxy_host,
 		"group-upstream " .. DNS_TRUST,
-		"group-ipset " .. setflag .. "passwall_blacklist," .. setflag .. "passwall_blacklist6"
+		REMOTE_FAKEDNS ~= "1" and "group-ipset " .. table.concat(sets, ",") or ""
 	}
 	if NO_IPV6_TRUST == "1" then table.insert(tmp_lines, "no-ipv6 tag:proxylist") end
 	insert_array_after(config_lines, tmp_lines, "#--3")
@@ -228,9 +281,19 @@ end
 --内置组(chn/gfw)优先级在自定义组后
 --GFW列表
 if GFWLIST == "1" and is_file_nonzero(RULES_PATH .. "/gfwlist") then
+	local sets = {
+		setflag .. "passwall_gfw",
+		setflag .. "passwall_gfw6"
+	}
+	if FLAG ~= "default" then
+		sets = {
+			setflag .. "passwall_" .. FLAG .. "_gfw",
+			setflag .. "passwall_" .. FLAG .. "_gfw6"
+		}
+	end
 	tmp_lines = {
 		"gfwlist-file " .. RULES_PATH .. "/gfwlist",
-		"add-taggfw-ip " .. setflag .. "passwall_gfwlist," .. setflag .. "passwall_gfwlist6"
+		REMOTE_FAKEDNS ~= "1" and "add-taggfw-ip " .. table.concat(sets, ",") or ""
 	}
 	if NO_IPV6_TRUST == "1" then table.insert(tmp_lines, "no-ipv6 tag:gfw") end
 	merge_array(config_lines, tmp_lines)
@@ -242,8 +305,8 @@ if CHNLIST ~= "0" and is_file_nonzero(RULES_PATH .. "/chnlist") then
 	if CHNLIST == "direct" then
 		tmp_lines = {
 			"chnlist-file " .. RULES_PATH .. "/chnlist",
-			"ipset-name4 " .. setflag .. "passwall_chnroute",
-			"ipset-name6 " .. setflag .. "passwall_chnroute6",
+			"ipset-name4 " .. setflag .. "passwall_chn",
+			"ipset-name6 " .. setflag .. "passwall_chn6",
 			"add-tagchn-ip",
 			"chnlist-first"
 		}
@@ -253,11 +316,15 @@ if CHNLIST ~= "0" and is_file_nonzero(RULES_PATH .. "/chnlist") then
 
 	--回中国模式
 	if CHNLIST == "proxy" then
+		local sets = {
+			setflag .. "passwall_chn",
+			setflag .. "passwall_chn6"
+		}
 		tmp_lines = {
 			"group chn_proxy",
 			"group-dnl " .. RULES_PATH .. "/chnlist",
 			"group-upstream " .. DNS_TRUST,
-			"group-ipset " .. setflag .. "passwall_chnroute," .. setflag .. "passwall_chnroute6"
+			REMOTE_FAKEDNS ~= "1" and "group-ipset " .. table.concat(sets, ",") or ""
 		}
 		if NO_IPV6_TRUST == "1" then table.insert(tmp_lines, "no-ipv6 tag:chn_proxy") end
 		insert_array_after(config_lines, tmp_lines, "#--1")
@@ -276,8 +343,8 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 	local t = uci:get_all(appname, TCP_NODE)
 	local default_node_id = t["default_node"] or "_direct"
 	uci:foreach(appname, "shunt_rules", function(s)
-		local _node_id = t[s[".name"]] or "nil"
-		if _node_id ~= "nil" and _node_id ~= "_blackhole" then
+		local _node_id = t[s[".name"]]
+		if _node_id and _node_id ~= "_blackhole" then
 			if _node_id == "_default" then
 				_node_id = default_node_id
 			end
@@ -334,14 +401,25 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 		end
 	end
 
-	local use_geoview = uci:get(appname, "@global_rules[0]", "enable_geoview")
-	if GFWLIST == "1" and CHNLIST == "0" and use_geoview == "1" then  --仅GFW模式解析geosite
+	if GFWLIST == "1" and CHNLIST == "0" and USE_GEOVIEW == "1" and api.is_finded("geoview") then  --仅GFW模式解析geosite
 		if geosite_white_arg ~= "" then
 			get_geosite(geosite_white_arg, file_white_host)
 		end
 		if geosite_shunt_arg ~= "" then
 			get_geosite(geosite_shunt_arg, file_shunt_host)
 		end
+		log("  * 解析[分流节点] Geosite 完成")
+	end
+
+	local sets = {
+		setflag .. "passwall_shunt",
+		setflag .. "passwall_shunt6"
+	}
+	if FLAG ~= "default" then
+		sets = {
+			setflag .. "passwall_" .. FLAG .. "_shunt",
+			setflag .. "passwall_" .. FLAG .. "_shunt6"
+		}
 	end
 
 	if is_file_nonzero(file_white_host) then
@@ -359,7 +437,7 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 				"group whitelist",
 				"group-dnl " .. file_white_host,
 				"group-upstream " .. DNS_LOCAL,
-				"group-ipset " .. setflag .. "passwall_shuntlist," .. setflag .. "passwall_shuntlist6"
+				"group-ipset " .. table.concat(sets, ",")
 			}
 			insert_array_after(config_lines, tmp_lines, "#--4")
 		end
@@ -371,7 +449,7 @@ if uci:get(appname, TCP_NODE, "protocol") == "_shunt" then
 			"group shuntlist",
 			"group-dnl " .. file_shunt_host,
 			"group-upstream " .. DNS_TRUST,
-			"group-ipset " .. setflag .. "passwall_shuntlist," .. setflag .. "passwall_shuntlist6"
+			(not only_global and REMOTE_FAKEDNS == "1") and "" or ("group-ipset " .. table.concat(sets, ","))
 		}
 		if NO_IPV6_TRUST == "1" then table.insert(tmp_lines, "no-ipv6 tag:shuntlist") end
 		insert_array_after(config_lines, tmp_lines, "#--2")
@@ -386,7 +464,7 @@ if GFWLIST == "1" and CHNLIST == "0" then DEFAULT_TAG = "chn" end
 if CHNLIST == "proxy" then DEFAULT_TAG = "chn" end
 
 --全局模式，默认使用远程DNS
-if DEFAULT_MODE == "proxy" and CHNLIST == "0" and GFWLIST == "0" then
+if only_global then
 	DEFAULT_TAG = "gfw"
 	if NO_IPV6_TRUST == "1" and uci:get(appname, TCP_NODE, "protocol") ~= "_shunt" then 
 		table.insert(config_lines, "no-ipv6")
@@ -409,11 +487,11 @@ end
 table.insert(config_lines, "hosts")
 
 if DEFAULT_TAG == "chn" then
-	log(string.format("  - 默认：%s", DNS_LOCAL))
+	log(string.format("  - 默认 DNS ：%s", DNS_LOCAL))
 elseif  DEFAULT_TAG == "gfw" then
-	log(string.format("  - 默认：%s", DNS_TRUST))
+	log(string.format("  - 默认 DNS ：%s", DNS_TRUST))
 else
-	log(string.format("  - 默认：%s", "智能匹配"))
+	log(string.format("  - 默认 DNS ：%s", "智能匹配"))
 end
 
 --输出配置文件
