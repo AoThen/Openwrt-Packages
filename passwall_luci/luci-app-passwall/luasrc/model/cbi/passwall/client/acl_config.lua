@@ -1,5 +1,14 @@
 local api = require "luci.passwall.api"
 local appname = "passwall"
+
+m = Map(appname)
+m.redirect = api.url("acl")
+api.set_apply_on_parse(m)
+
+if not arg[1] or not m:get(arg[1]) then
+	luci.http.redirect(m.redirect)
+end
+
 local fs = api.fs
 local sys = api.sys
 local has_singbox = api.finded_com("singbox")
@@ -11,8 +20,6 @@ local has_chnroute = fs.access("/usr/share/passwall/rules/chnroute")
 local port_validate = function(self, value, t)
 	return value:gsub("-", ":")
 end
-
-m = Map(appname)
 
 local nodes_table = {}
 for k, e in ipairs(api.get_valid_nodes()) do
@@ -290,6 +297,9 @@ o:depends({ _tcp_node_bool = "1" })
 o:value("dnsmasq", "Dnsmasq")
 o:value("chinadns-ng", translate("ChinaDNS-NG (recommended)"))
 
+o = s:option(DummyValue, "view_chinadns_log", " ")
+o.template = appname .. "/acl/view_chinadns_log"
+
 o = s:option(Flag, "filter_proxy_ipv6", translate("Filter Proxy Host IPv6"), translate("Experimental feature."))
 o.default = "0"
 o:depends({ _tcp_node_bool = "1" })
@@ -417,7 +427,5 @@ o:value("remote", translate("Remote DNS"))
 o:value("direct", translate("Direct DNS"))
 o.description = desc .. "</ul>"
 o:depends({dns_shunt = "dnsmasq", tcp_proxy_mode = "proxy", chn_list = "direct"})
-
-m:append(Template(appname .. "/acl/footer"))
 
 return m

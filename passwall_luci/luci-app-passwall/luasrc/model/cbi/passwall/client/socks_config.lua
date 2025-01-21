@@ -1,9 +1,16 @@
 local api = require "luci.passwall.api"
 local appname = "passwall"
-local has_singbox = api.finded_com("singbox")
-local has_xray = api.finded_com("xray")
 
 m = Map(appname)
+m.redirect = api.url()
+api.set_apply_on_parse(m)
+
+if not arg[1] or not m:get(arg[1]) then
+	luci.http.redirect(m.redirect)
+end
+
+local has_singbox = api.finded_com("singbox")
+local has_xray = api.finded_com("xray")
 
 local nodes_table = {}
 for k, e in ipairs(api.get_valid_nodes()) do
@@ -123,6 +130,8 @@ for k, v in pairs(nodes_table) do
 	socks_node:value(v.id, v["remark"])
 end
 
-m:append(Template(appname .. "/socks_auto_switch/footer"))
+o = s:option(DummyValue, "btn", " ")
+o.template = appname .. "/socks_auto_switch/btn"
+o:depends("enable_autoswitch", true)
 
 return m

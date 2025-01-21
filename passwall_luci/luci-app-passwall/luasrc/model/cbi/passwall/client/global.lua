@@ -10,6 +10,7 @@ local has_chnroute = fs.access("/usr/share/passwall/rules/chnroute")
 local chinadns_tls = os.execute("chinadns-ng -V | grep -i wolfssl >/dev/null")
 
 m = Map(appname)
+api.set_apply_on_parse(m)
 
 local nodes_table = {}
 for k, e in ipairs(api.get_valid_nodes()) do
@@ -601,7 +602,8 @@ else
 end
 o.inputstyle = "remove"
 function o.write(e, e)
-	luci.sys.call('[ -n "$(nft list sets 2>/dev/null | grep \"passwall_\")" ] && sh /usr/share/passwall/nftables.sh flush_nftset_reload || sh /usr/share/passwall/iptables.sh flush_ipset_reload > /dev/null 2>&1 &')
+	m:set("@global[0]", "flush_set", "1")
+	api.uci_save(m.uci, appname, true, true)
 	luci.http.redirect(api.url("log"))
 end
 

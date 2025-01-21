@@ -3,7 +3,7 @@ local com = require "luci.passwall.com"
 bin = require "nixio".bin
 fs = require "nixio.fs"
 sys = require "luci.sys"
-libuci = require "uci".cursor()
+uci = require "luci.model.uci".cursor()
 util = require "luci.util"
 datatypes = require "luci.cbi.datatypes"
 jsonc = require "luci.jsonc"
@@ -30,49 +30,117 @@ function log(...)
 	end
 end
 
-function uci_set_list(cursor, config, section, option, value)
-	if config and section and option then
-		if not value or #value == 0 then
-			return cursor:delete(config, section, option)
-		end
-		return cursor:set(
-			config, section, option,
-			( type(value) == "table" and value or { value } )
-		)
-	end
-	return false
+function is_js_luci()
+	return sys.call('[ -f "/www/luci-static/resources/uci.js" ]') == 0
 end
 
-function uci_section(cursor, config, type, name, values)
-	local stat = true
-	if name then
-		stat = cursor:set(config, name, type)
-	else
-		name = cursor:add(config, type)
-		stat = name and true
-	end
+function is_old_uci()
+	return sys.call("grep 'require \"uci\"' /usr/lib/lua/luci/model/uci.lua >/dev/null 2>&1") == 0
+end
 
-	return stat and name
+function set_apply_on_parse(map)
+	if not map then
+		return
+	end
+	if is_js_luci() then
+		map.apply_on_parse = false
+		map.on_after_apply = function(self)
+			showMsg_Redirect(self.redirect, 3000)
+		end
+	end
+end
+
+function showMsg_Redirect(redirectUrl, delay)
+	local message = "PassWall " .. i18n.translate("Settings have been successfully saved and applied!")
+	luci.http.write([[
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+				// 创建遮罩层
+				var overlay = document.createElement('div');
+				overlay.style.position = 'fixed';
+				overlay.style.top = '0';
+				overlay.style.left = '0';
+				overlay.style.width = '100%';
+				overlay.style.height = '100%';
+				overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+				overlay.style.zIndex = '9999';
+				// 创建提示条
+				var messageDiv = document.createElement('div');
+				messageDiv.style.position = 'fixed';
+				messageDiv.style.top = '0';
+				messageDiv.style.left = '0';
+				messageDiv.style.width = '100%';
+				messageDiv.style.background = '#4caf50';
+				messageDiv.style.color = '#fff';
+				messageDiv.style.textAlign = 'center';
+				messageDiv.style.padding = '10px';
+				messageDiv.style.zIndex = '10000';
+				messageDiv.textContent = ']] .. message .. [[';
+				// 将遮罩层和提示条添加到页面
+				document.body.appendChild(overlay);
+				document.body.appendChild(messageDiv);
+				// 重定向或隐藏提示条和遮罩层
+				var redirectUrl = ']] .. (redirectUrl or "") .. [[';
+				var delay = ]] .. (delay or 3000) .. [[;
+				setTimeout(function() {
+					if (redirectUrl) {
+						window.location.href = redirectUrl;
+					} else {
+						if (messageDiv && messageDiv.parentNode) {
+							messageDiv.parentNode.removeChild(messageDiv);
+						}
+						if (overlay && overlay.parentNode) {
+							overlay.parentNode.removeChild(overlay);
+						}
+					}
+				}, delay);
+			});
+		</script>
+	]])
+end
+
+function uci_save(cursor, config, commit, apply)
+	if is_old_uci() then
+		cursor:save(config)
+		if commit then
+			cursor:commit(config)
+			if apply then
+				sys.call("/etc/init.d/" .. config .. " reload > /dev/null 2>&1 &")
+			end
+		end
+	else
+		commit = true
+		if commit then
+			if apply then
+				cursor:commit(config)
+			else
+				sh_uci_commit(config)
+			end
+		end
+	end
 end
 
 function sh_uci_get(config, section, option)
 	exec_call(string.format("uci -q get %s.%s.%s", config, section, option))
-	exec_call(string.format("uci -q commit %s", config))
 end
 
-function sh_uci_set(config, section, option, val)
+function sh_uci_set(config, section, option, val, commit)
 	exec_call(string.format("uci -q set %s.%s.%s=\"%s\"", config, section, option, val))
-	exec_call(string.format("uci -q commit %s", config))
+	if commit then sh_uci_commit(config) end
 end
 
-function sh_uci_del(config, section, option)
+function sh_uci_del(config, section, option, commit)
 	exec_call(string.format("uci -q delete %s.%s.%s", config, section, option))
-	exec_call(string.format("uci -q commit %s", config))
+	if commit then sh_uci_commit(config) end
 end
 
-function sh_uci_add_list(config, section, option, val)
+function sh_uci_add_list(config, section, option, val, commit)
 	exec_call(string.format("uci -q del_list %s.%s.%s=\"%s\"", config, section, option, val))
 	exec_call(string.format("uci -q add_list %s.%s.%s=\"%s\"", config, section, option, val))
+	if commit then sh_uci_commit(config) end
+end
+
+function sh_uci_commit(config)
 	exec_call(string.format("uci -q commit %s", config))
 end
 
@@ -175,7 +243,7 @@ end
 
 function curl_direct(url, file, args)
 	--直连访问
-	local chn_list = libuci:get(appname, "@global[0]", "chn_list") or "direct"
+	local chn_list = uci:get(appname, "@global[0]", "chn_list") or "direct"
 	local Dns = (chn_list == "proxy") and "1.1.1.1" or "223.5.5.5"
 	if not args then args = {} end
 	local tmp_args = clone(args)
@@ -419,30 +487,10 @@ function get_domain_from_url(url)
 	return url
 end
 
-function get_node_name(node_id)
-	local e
-	if type(node_id) == "table" then
-		e = node_id
-	else
-		e = libuci:get_all(appname, node_id)
-	end
-	if e then
-		if e.type and e.remarks then
-			if e.protocol and (e.protocol == "_balancing" or e.protocol == "_shunt" or e.protocol == "_iface") then
-				local type = e.type
-				if type == "sing-box" then type = "Sing-Box" end
-				local remark = "%s：[%s] " % {type .. " " .. i18n.translatef(e.protocol), e.remarks}
-				return remark
-			end
-		end
-	end
-	return ""
-end
-
 function get_valid_nodes()
 	local show_node_info = uci_get_type("@global_other[0]", "show_node_info", "0")
 	local nodes = {}
-	libuci:foreach(appname, "nodes", function(e)
+	uci:foreach(appname, "nodes", function(e)
 		e.id = e[".name"]
 		if e.type and e.remarks then
 			if e.protocol and (e.protocol == "_balancing" or e.protocol == "_shunt" or e.protocol == "_iface") then
@@ -539,7 +587,7 @@ function gen_short_uuid()
 end
 
 function uci_get_type(type, config, default)
-	local value = libuci:get(appname, type, config) or default
+	local value = uci:get(appname, type, config) or default
 	if (value == nil or value == "") and (default and default ~= "") then
 		value = default
 	end
@@ -593,7 +641,7 @@ function clone(org)
 	return res
 end
 
-local function get_bin_version_cache(file, cmd)
+function get_bin_version_cache(file, cmd)
 	sys.call("mkdir -p /tmp/etc/passwall_tmp")
 	if fs.access(file) then
 		chmod_755(file)
@@ -1191,11 +1239,16 @@ function luci_types(id, m, s, type_name, option_prefix)
 				end
 				s.fields[key].remove = function(self, section)
 					if s.fields["type"]:formvalue(id) == type_name then
-						if self.rewrite_option and rewrite_option_table[self.rewrite_option] == 1 then
-							m:del(section, self.rewrite_option)
+						-- 添加自定义 custom_remove 属性，如果有自定义的 custom_remove 函数，则使用自定义的 remove 逻辑
+						if self.custom_remove then
+							self:custom_remove(section)
 						else
-							if self.option:find(option_prefix) == 1 then
-								m:del(section, self.option:sub(1 + #option_prefix))
+							if self.rewrite_option and rewrite_option_table[self.rewrite_option] == 1 then
+								m:del(section, self.rewrite_option)
+							else
+								if self.option:find(option_prefix) == 1 then
+									m:del(section, self.option:sub(1 + #option_prefix))
+								end
 							end
 						end
 					end
