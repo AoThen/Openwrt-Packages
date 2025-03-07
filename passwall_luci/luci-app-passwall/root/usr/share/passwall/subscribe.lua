@@ -85,10 +85,10 @@ local function is_filter_keyword(value)
 end
 
 local nodeResult = {} -- update result
-local debug = false
+local isDebug = false
 
 local log = function(...)
-	if debug == true then
+	if isDebug == true then
 		local result = os.date("%Y-%m-%d %H:%M:%S: ") .. table.concat({...}, " ")
 		print(result)
 	else
@@ -318,6 +318,36 @@ do
 					end
 				}
 			end
+		elseif node.protocol and node.protocol == '_urltest' then
+			local flag = "Sing-Box URLTest节点[" .. node_id .. "]列表"
+			local currentNodes = {}
+			local newNodes = {}
+			if node.urltest_node then
+				for k, node in pairs(node.urltest_node) do
+					currentNodes[#currentNodes + 1] = {
+						log = false,
+						node = node,
+						currentNode = node and uci:get_all(appname, node) or nil,
+						remarks = node,
+						set = function(o, server)
+							if o and server and server ~= "nil" then
+								table.insert(o.newNodes, server)
+							end
+						end
+					}
+				end
+			end
+			CONFIG[#CONFIG + 1] = {
+				remarks = flag,
+				currentNodes = currentNodes,
+				newNodes = newNodes,
+				set = function(o, newNodes)
+					if o then
+						if not newNodes then newNodes = o.newNodes end
+						uci:set_list(appname, node_id, "urltest_node", newNodes or {})
+					end
+				end
+			}
 		else
 			--前置代理节点
 			local currentNode = uci:get_all(appname, node_id) or nil
@@ -571,6 +601,7 @@ local function processData(szType, content, add_mode, add_from)
 		--ss://2022-blake3-aes-256-gcm:YctPZ6U7xPPcU%2Bgp3u%2B0tx%2FtRizJN9K8y%2BuKlW2qjlI%3D@192.168.100.1:8888/?plugin=v2ray-plugin%3Bserver#Example3
 		--ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp0ZXN0@xxxxxx.com:443?type=ws&path=%2Ftestpath&host=xxxxxx.com&security=tls&fp=&alpn=h3%2Ch2%2Chttp%2F1.1&sni=xxxxxx.com#test-1%40ss
 		--ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp4eHh4eHhAeHh4eC54eHh4eC5jb206NTYwMDE#Hong%20Kong-01
+		--ss://MjAyMi1ibGFrZTMtYWVzLTEyOC1nY206WEdXbmhjUFAxb0Z4SXdxRXpRYXBnUSUzRCUzRCUzQTRuWHRlc0w2QnFOZlEyTVh2dnBqdGclM0QlM0Q@test.com:10333/?group=test#grose7ym
 
 		local idx_sp = 0
 		local alias = ""
@@ -636,7 +667,7 @@ local function processData(szType, content, add_mode, add_from)
 			local method = userinfo:sub(1, userinfo:find(":") - 1)
 			local password = userinfo:sub(userinfo:find(":") + 1, #userinfo)
 			result.method = method
-			result.password = password
+			result.password = UrlDecode(password)
 
 			if ss_type_default == "shadowsocks-rust" and has_ss_rust then
 				result.type = 'SS-Rust'
@@ -1327,13 +1358,11 @@ local function truncate_nodes(add_from)
 			end
 		end
 	end)
-	if add_from then
-		uci:foreach(appname, "subscribe_list", function(o)
-			if add_from == "all-node" or add_from == o.remark then
-				uci:delete(appname, o['.name'], "md5")
-			end
-		end)
-	end
+	uci:foreach(appname, "subscribe_list", function(o)
+		if (not add_from) or add_from == o.remark then
+			uci:delete(appname, o['.name'], "md5")
+		end
+	end)
 	api.uci_save(uci, appname, true)
 end
 
@@ -1685,18 +1714,19 @@ local execute = function()
 			local access_mode = value.access_mode
 			local result = (not access_mode) and "自动" or (access_mode == "direct" and "直连访问" or (access_mode == "proxy" and "通过代理" or "自动"))
 			log('正在订阅:【' .. remark .. '】' .. url .. ' [' .. result .. ']')
-			local raw = curl(url, "/tmp/" .. cfgid, ua, access_mode)
+			local tmp_file = "/tmp/" .. cfgid
+			local raw = curl(url, tmp_file, ua, access_mode)
 			if raw == 0 then
-				local f = io.open("/tmp/" .. cfgid, "r")
+				local f = io.open(tmp_file, "r")
 				local stdout = f:read("*all")
 				f:close()
 				raw = trim(stdout)
 				local old_md5 = value.md5 or ""
-				local new_md5 = luci.sys.exec(string.format("echo -n $(echo '%s' | md5sum | awk '{print $1}')", raw))
+				local new_md5 = luci.sys.exec("[ -f " .. tmp_file .. " ] && md5sum " .. tmp_file .. " | awk '{print $1}' || echo 0"):gsub("\n", "")
+				os.remove(tmp_file)
 				if old_md5 == new_md5 then
 					log('订阅:【' .. remark .. '】没有变化，无需更新。')
 				else
-					os.remove("/tmp/" .. cfgid)
 					parse_link(raw, "2", remark, cfgid)
 					uci:set(appname, cfgid, "md5", new_md5)
 				end
@@ -1728,7 +1758,9 @@ if arg[1] then
 		log('开始订阅...')
 		xpcall(execute, function(e)
 			log(e)
-			log(debug.traceback())
+			if type(debug) == "table" and type(debug.traceback) == "function" then
+				log(debug.traceback())
+			end
 			log('发生错误, 正在恢复服务')
 		end)
 		log('订阅完毕...')

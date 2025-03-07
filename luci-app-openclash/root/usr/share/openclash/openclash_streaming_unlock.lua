@@ -251,7 +251,7 @@ function unlock_auto_select()
 					--loop proxy test
 					for i = 1, #(value.all) do
 						while true do
-							if value.all[i] == "REJECT" then
+							if value.all[i] == "REJECT" or value.all[i] == "REJECT-DROP" or value.all[i] == "PASS" then
 								break
 							else
 								get_proxy(info, value.all[i], value.name)
@@ -294,7 +294,7 @@ function unlock_auto_select()
 												table.insert(tested_proxy, proxy)
 											end
 											while true do
-												if proxy == "REJECT" or get_group_now(info, proxy) == "REJECT" then
+												if proxy == "REJECT" or proxy == "REJECT-DROP" or proxy == "PASS" or get_group_now(info, proxy) == "REJECT" or get_group_now(info, proxy) == "REJECT-DROP" or get_group_now(info, proxy) == "PASS" then
 													break
 												else
 													SYS.exec(string.format("curl -sL -m 5 --retry 2 -w %%{http_code} -o /dev/null -H 'Authorization: Bearer %s' -H 'Content-Type:application/json' -X PUT -d '{\"name\":\"%s\"}' http://%s:%s/proxies/%s", passwd, proxy, ip, port, urlencode(group_name)))
@@ -1111,7 +1111,7 @@ function netflix_unlock_test()
 	local filmId = 70143836
 	local url = "https://www.netflix.com/title/"..filmId
 	local headers = "User-Agent: "..UA
-	local info = SYS.exec(string.format('curl -sLI --connect-timeout 5 -m 5 --speed-time 5 --speed-limit 1 --retry 2 -o /dev/null -w %%{json} -H "Content-Type: application/json" -H "%s" -XGET %s', headers, url))
+	local info = SYS.exec(string.format('curl -sLI --connect-timeout 5 -m 5 --speed-time 5 --speed-limit 1 --retry 2 -o /dev/null -w %%{json} -H "Content-Type: application/json" -H "host: www.netflix.com" -H "accept-language: en-US,en;q=0.9" -H "sec-ch-ua: Google Chrome;v=125, Chromium;v=125, Not.A/Brand;v=24" -H "sec-ch-ua-mobile: ?0" -H "sec-ch-ua-platform: Windows" -H "sec-fetch-site: none" -H "sec-fetch-mode: navigate" -H "sec-fetch-user: ?1" -H "sec-fetch-dest: document" -H "%s" -XGET %s', headers, url))
 	local result = {}
 	local region
 	local old_region = get_old_region()

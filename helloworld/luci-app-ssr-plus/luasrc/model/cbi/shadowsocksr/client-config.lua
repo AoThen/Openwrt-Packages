@@ -279,8 +279,13 @@ o.rmempty = true
 o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
 o.default = "1"
 
+-- [[ Enable Shadowsocks Plugin ]]--
+o = s:option(Flag, "enable_plugin", translate("Enable Plugin"))
+o.rmempty = true
+o.default = "0"
+
 -- Shadowsocks Plugin
-o = s:option(Value, "plugin", translate("Obfs"))
+o = s:option(ListValue, "plugin", translate("Obfs"))
 o:value("none", translate("None"))
 if is_finded("obfs-local") then
 	o:value("obfs-local", translate("obfs-local"))
@@ -291,12 +296,17 @@ end
 if is_finded("xray-plugin") then
 	o:value("xray-plugin", translate("xray-plugin"))
 end
+o:value("custom", translate("Custom"))
 o.rmempty = true
-o:depends("type", "ss")
+o:depends({type = "ss", enable_plugin = true})
+
+o = s:option(Value, "custom_plugin", translate("Custom Plugin Path"))
+o.placeholder = "/path/to/custom-plugin"
+o:depends({plugin = "custom"})
 
 o = s:option(Value, "plugin_opts", translate("Plugin Opts"))
 o.rmempty = true
-o:depends("type", "ss")
+o:depends({type = "ss", enable_plugin = true})
 
 o = s:option(ListValue, "protocol", translate("Protocol"))
 for _, v in ipairs(protocol) do
@@ -434,7 +444,7 @@ o:depends("type", "shadowtls")
 o.default = "1"
 o.rmempty = false
 
-o = s:option(Flag, "fastopen", translate("TCP Fast Open"))
+o = s:option(Flag, "fastopen", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
 o:depends("type", "shadowtls")
 o.default = "0"
 o.rmempty = false
@@ -735,8 +745,8 @@ o.rmempty = true
 
 o = s:option(Flag, "enable_xhttp_extra", translate("XHTTP Extra"))
 o.description = translate("Enable this option to configure XHTTP Extra (JSON format).")
+o.rmempty = true
 o.default = "0"
-o.rmempty = false
 o:depends("transport", "xhttp")
 
 o = s:option(TextValue, "xhttp_extra", " ")
@@ -1008,6 +1018,19 @@ if is_finded("xray") then
 	o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "raw", tls = true})
 	o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "raw", reality = true})
 
+	o = s:option(ListValue, "xhttp_tls_flow", translate("Flow"))
+	for _, v in ipairs(tls_flows) do
+		if v == "none" then
+		   o.default = "none"
+		   o:value("none", translate("none"))
+		else
+		   o:value("xtls-rprx-vision", translate("xtls-rprx-vision"))
+		end
+	end
+	o.rmempty = true
+	o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp", tls = true})
+	o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp", reality = true})
+
 	-- [[ uTLS ]]--
 	o = s:option(ListValue, "fingerprint", translate("Finger Print"))
 	o.default = ""
@@ -1051,19 +1074,37 @@ o:depends({type = "hysteria", insecure = true })
 o.rmempty = true
 
 
--- [[ Mux ]]--
-o = s:option(Flag, "mux", translate("Mux"))
+-- [[ Mux.Cool ]] --
+o = s:option(Flag, "mux", translate("Mux"), translate("Enable Mux.Cool"))
 o.rmempty = false
 o.default = false
-o:depends({type = "v2ray", v2ray_protocol = "vless"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "raw"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "ws"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "kcp"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "httpupgrade"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "splithttp"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "h2"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "quic"})
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "grpc"})
 o:depends({type = "v2ray", v2ray_protocol = "vmess"})
 o:depends({type = "v2ray", v2ray_protocol = "trojan"})
 o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
 o:depends({type = "v2ray", v2ray_protocol = "socks"})
 o:depends({type = "v2ray", v2ray_protocol = "http"})
 
+-- [[ XUDP Mux ]] --
+o = s:option(Flag, "xmux", translate("Xudp Mux"), translate("Enable Xudp Mux"))
+o.rmempty = false
+o.default = false
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp"})
+
 -- [[ TCP 最大并发连接数 ]]--
-o = s:option(ListValue, "concurrency", translate("concurrency"))
+o = s:option(Value, "concurrency", translate("concurrency"))
+o.description = translate(
+		"<ul>"
+		.. "<li>" .. translate("Default: disable. When entering a negative number, such as -1, The Mux module will not be used to carry TCP traffic.") .. "</li>"
+		.. "<li>" .. translate("Min value is 1, Max value is 128. When omitted or set to 0, it equals 8.") .. "</li>"
+		.. "</ul>")
 o.rmempty = true
 o.default = "-1"
 o:value("-1", translate("disable"))
@@ -1071,15 +1112,27 @@ o:value("8", translate("8"))
 o:depends("mux", true)
 
 -- [[ UDP 最大并发连接数 ]]--
-o = s:option(ListValue, "xudpConcurrency", translate("xudpConcurrency"))
+o = s:option(Value, "xudpConcurrency", translate("xudpConcurrency"))
+o.description = translate(
+		"<ul>"
+		.. "<li>" .. translate("Default:16. When entering a negative number, such as -1, The Mux module will not be used to carry UDP traffic, Use original UDP transmission method of proxy protocol.") .. "</li>"
+		.. "<li>" .. translate("Min value is 1, Max value is 1024. When omitted or set to 0, Will same path as TCP traffic.") .. "</li>"
+		.. "</ul>")
 o.rmempty = true
 o.default = "16"
 o:value("-1", translate("disable"))
 o:value("16", translate("16"))
 o:depends("mux", true)
+o:depends("xmux", true)
 
 -- [[ 对被代理的 UDP/443 流量处理方式 ]]--
 o = s:option(ListValue, "xudpProxyUDP443", translate("xudpProxyUDP443"))
+o.description = translate(
+		"<ul>"
+		.. "<li>" .. translate("Default reject rejects traffic.") .. "</li>"
+		.. "<li>" .. translate("allow: Allows use Mux connection.") .. "</li>"
+		.. "<li>" .. translate("skip: Not use Mux module to carry UDP 443 traffic, Use original UDP transmission method of proxy protocol.") .. "</li>"
+		.. "</ul>")
 o.rmempty = true
 o.default = "reject"
 o:value("reject", translate("reject"))
@@ -1087,11 +1140,16 @@ o:value("allow", translate("allow"))
 o:value("skip", translate("skip"))
 o:depends("mux", true)
 
+-- [[ XHTTP TCP Fast Open ]]--
+o = s:option(Flag, "tcpfastopen", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
+o.rmempty = true
+o.default = "0"
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp"})
 
 -- [[ MPTCP ]]--
-o = s:option(Flag, "mptcp", translate("MPTCP"), translate("Enabling MPTCP Requires Server Support."))
-o.rmempty = false
-o.default = false
+o = s:option(Flag, "mptcp", translate("MPTCP"), translate("Enable Multipath TCP, need to be enabled in both server and client configuration."))
+o.rmempty = true
+o.default = "0"
 o:depends({type = "v2ray", v2ray_protocol = "vless"})
 o:depends({type = "v2ray", v2ray_protocol = "vmess"})
 o:depends({type = "v2ray", v2ray_protocol = "trojan"})
@@ -1166,7 +1224,7 @@ o:value("/etc/ssl/private/ca.pem")
 o.description = translate("Please confirm the current certificate path")
 o.default = "/etc/ssl/private/ca.pem"
 
-o = s:option(Flag, "fast_open", translate("TCP Fast Open"))
+o = s:option(Flag, "fast_open", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
 o.rmempty = true
 o.default = "0"
 o:depends("type", "ssr")
