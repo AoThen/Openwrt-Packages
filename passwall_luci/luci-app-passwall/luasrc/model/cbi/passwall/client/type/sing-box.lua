@@ -2,7 +2,8 @@ local m, s = ...
 
 local api = require "luci.passwall.api"
 
-local singbox_bin = api.finded_com("singbox")
+local singbox_bin = api.finded_com("sing-box")
+local geoview_bin = api.is_finded("geoview")
 
 if not singbox_bin then
 	return
@@ -57,7 +58,9 @@ if singbox_tags:find("with_quic") then
 	o:value("hysteria2", "Hysteria2")
 end
 o:value("_urltest", translate("URLTest"))
-o:value("_shunt", translate("Shunt"))
+if geoview_bin then --缺少geoview时禁用分流
+	o:value("_shunt", translate("Shunt"))
+end
 o:value("_iface", translate("Custom Interface"))
 
 o = s:option(Value, _n("iface"), translate("Interface"))
@@ -398,6 +401,10 @@ if singbox_tags:find("with_quic") then
 end
 
 if singbox_tags:find("with_quic") then
+	o = s:option(Value, _n("hysteria2_ports"), translate("Port hopping range"))
+	o.description = translate("Format as 1000:2000 Multiple groups are separated by commas (,).")
+	o:depends({ [_n("protocol")] = "hysteria2" })
+
 	o = s:option(Value, _n("hysteria2_up_mbps"), translate("Max upload Mbps"))
 	o:depends({ [_n("protocol")] = "hysteria2" })
 
