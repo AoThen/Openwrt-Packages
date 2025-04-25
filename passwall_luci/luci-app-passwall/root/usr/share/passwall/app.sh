@@ -497,7 +497,7 @@ run_singbox() {
 
 run_xray() {
 	local flag type node tcp_redir_port tcp_proxy_way udp_redir_port socks_address socks_port socks_username socks_password http_address http_port http_username http_password
-	local dns_listen_port direct_dns_query_strategy remote_dns_udp_server remote_dns_tcp_server remote_dns_doh remote_dns_client_ip remote_fakedns remote_dns_query_strategy dns_cache dns_socks_address dns_socks_port
+	local dns_listen_port direct_dns_query_strategy direct_dns_port direct_dns_udp_server direct_dns_tcp_server remote_dns_udp_server remote_dns_tcp_server remote_dns_doh remote_dns_client_ip remote_fakedns remote_dns_query_strategy dns_cache dns_socks_address dns_socks_port
 	local loglevel log_file config_file server_host server_port
 	local _extra_param=""
 	eval_set_val $@
@@ -526,6 +526,20 @@ run_xray() {
 	[ -n "$http_username" ] && [ -n "$http_password" ] && _extra_param="${_extra_param} -local_http_username $http_username -local_http_password $http_password"
 	[ -n "$dns_socks_address" ] && [ -n "$dns_socks_port" ] && _extra_param="${_extra_param} -dns_socks_address ${dns_socks_address} -dns_socks_port ${dns_socks_port}"
 	[ -n "$dns_listen_port" ] && _extra_param="${_extra_param} -dns_listen_port ${dns_listen_port}"
+	
+	if [ -n "$direct_dns_udp_server" ]; then
+		direct_dns_port=$(echo ${direct_dns_udp_server} | awk -F '#' '{print $2}')
+		_extra_param="${_extra_param} -direct_dns_udp_server $(echo ${direct_dns_udp_server} | awk -F '#' '{print $1}')"
+	elif [ -n "$direct_dns_tcp_server" ]; then
+		direct_dns_port=$(echo ${direct_dns_tcp_server} | awk -F '#' '{print $2}')
+		_extra_param="${_extra_param} -direct_dns_tcp_server $(echo ${direct_dns_tcp_server} | awk -F '#' '{print $1}')"
+	else
+		local local_dns=$(echo -n $(echo "${LOCAL_DNS}" | sed "s/,/\n/g" | head -n1) | tr " " ",")
+		_extra_param="${_extra_param} -direct_dns_udp_server $(echo ${local_dns} | awk -F '#' '{print $1}')"
+		direct_dns_port=$(echo ${local_dns} | awk -F '#' '{print $2}')
+	fi
+	_extra_param="${_extra_param} -direct_dns_port ${direct_dns_port:-53}"
+
 	direct_dns_query_strategy=${direct_dns_query_strategy:-UseIP}
 	_extra_param="${_extra_param} -direct_dns_query_strategy ${direct_dns_query_strategy}"
 	[ -n "$remote_dns_query_strategy" ] && _extra_param="${_extra_param} -remote_dns_query_strategy ${remote_dns_query_strategy}"
@@ -919,7 +933,7 @@ run_redir() {
 						_args="${_args} direct_dns_tcp_server=$(config_t_get global direct_dns_tcp 223.5.5.5 | sed 's/:/#/g')"
 					;;
 					dot)
-						local tmp_dot_dns=$(config_t_get global direct_dns_dot "tls://1.12.12.12")
+						local tmp_dot_dns=$(config_t_get global direct_dns_dot "tls://dot.pub@1.12.12.12")
 						local tmp_dot_ip=$(echo "$tmp_dot_dns" | sed -n 's/.*:\/\/\([^@#]*@\)*\([^@#]*\).*/\2/p')
 						local tmp_dot_port=$(echo "$tmp_dot_dns" | sed -n 's/.*#\([0-9]\+\).*/\1/p')
 						_args="${_args} direct_dns_dot_server=$tmp_dot_ip#${tmp_dot_port:-853}"
@@ -996,6 +1010,16 @@ run_redir() {
 				[ "${DNS_CACHE}" == "0" ] && _args="${_args} dns_cache=0"
 				resolve_dns_port=${NEXT_DNS_LISTEN_PORT}
 				_args="${_args} dns_listen_port=${resolve_dns_port}"
+
+				case "$(config_t_get global direct_dns_mode "auto")" in
+					udp)
+						_args="${_args} direct_dns_udp_server=$(config_t_get global direct_dns_udp 223.5.5.5 | sed 's/:/#/g')"
+					;;
+					tcp)
+						_args="${_args} direct_dns_tcp_server=$(config_t_get global direct_dns_tcp 223.5.5.5 | sed 's/:/#/g')"
+					;;
+				esac
+
 				_args="${_args} remote_dns_tcp_server=${REMOTE_DNS}"
 				if [ "$v2ray_dns_mode" = "tcp+doh" ]; then
 					remote_dns_doh=$(config_t_get global remote_dns_doh "https://1.1.1.1/dns-query")
@@ -1396,13 +1420,14 @@ start_dns() {
 		;;
 		dot)
 			if [ "$chinadns_tls" != "nil" ]; then
-				local DIRECT_DNS=$(config_t_get global direct_dns_dot "tls://1.12.12.12")
+				local DIRECT_DNS=$(config_t_get global direct_dns_dot "tls://dot.pub@1.12.12.12")
+				local cert_verify=$([ "$(config_t_get global chinadns_ng_cert_verify 0)" = "1" ] && echo "--cert-verify")
 				china_ng_local_dns=${DIRECT_DNS}
 
 				#当全局（包括访问控制节点）开启chinadns-ng时，不启动新进程。
 				[ "$DNS_SHUNT" != "chinadns-ng" ] || [ "$ACL_RULE_DNSMASQ" = "1" ] && {
 					LOCAL_DNS="127.0.0.1#${NEXT_DNS_LISTEN_PORT}"
-					ln_run "$(first_type chinadns-ng)" chinadns-ng "/dev/null" -b 127.0.0.1 -l ${NEXT_DNS_LISTEN_PORT} -c ${DIRECT_DNS} -d chn
+					ln_run "$(first_type chinadns-ng)" chinadns-ng "/dev/null" -b 127.0.0.1 -l ${NEXT_DNS_LISTEN_PORT} -c ${DIRECT_DNS} -d chn ${cert_verify}
 					echolog "  - ChinaDNS-NG(${LOCAL_DNS}) -> ${DIRECT_DNS}"
 					echolog "  * 请确保上游直连 DNS 支持 DoT 查询。"
 					NEXT_DNS_LISTEN_PORT=$(expr $NEXT_DNS_LISTEN_PORT + 1)
@@ -1518,13 +1543,14 @@ start_dns() {
 		TCP_PROXY_DNS=1
 		if [ "$chinadns_tls" != "nil" ]; then
 			local china_ng_listen_port=${NEXT_DNS_LISTEN_PORT}
-			local china_ng_trust_dns=$(config_t_get global remote_dns_dot "tls://1.1.1.1")
+			local china_ng_trust_dns=$(config_t_get global remote_dns_dot "tls://one.one.one.one@1.1.1.1")
+			local cert_verify=$([ "$(config_t_get global chinadns_ng_cert_verify 0)" = "1" ] && echo "--cert-verify")
 			local tmp_dot_ip=$(echo "$china_ng_trust_dns" | sed -n 's/.*:\/\/\([^@#]*@\)*\([^@#]*\).*/\2/p')
 			local tmp_dot_port=$(echo "$china_ng_trust_dns" | sed -n 's/.*#\([0-9]\+\).*/\1/p')
 			REMOTE_DNS="$tmp_dot_ip#${tmp_dot_port:-853}"
 			[ "$DNS_SHUNT" != "chinadns-ng" ] && {
 				[ "$FILTER_PROXY_IPV6" = "1" ] && DNSMASQ_FILTER_PROXY_IPV6=0 && local no_ipv6_trust="-N"
-				ln_run "$(first_type chinadns-ng)" chinadns-ng "/dev/null" -b 127.0.0.1 -l ${china_ng_listen_port} -t ${china_ng_trust_dns} -d gfw ${no_ipv6_trust}
+				ln_run "$(first_type chinadns-ng)" chinadns-ng "/dev/null" -b 127.0.0.1 -l ${china_ng_listen_port} -t ${china_ng_trust_dns} -d gfw ${no_ipv6_trust} ${cert_verify}
 				echolog "  - ChinaDNS-NG(${TUN_DNS}) -> ${china_ng_trust_dns}"
 			}
 		else
@@ -1863,7 +1889,7 @@ acl_app() {
 										;;
 										dot)
 											if [ "$(chinadns-ng -V | grep -i wolfssl)" != "nil" ]; then
-												_chinadns_local_dns=$(config_t_get global direct_dns_dot "tls://1.12.12.12")
+												_chinadns_local_dns=$(config_t_get global direct_dns_dot "tls://dot.pub@1.12.12.12")
 											fi
 										;;
 									esac
