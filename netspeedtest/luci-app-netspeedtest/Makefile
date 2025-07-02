@@ -1,29 +1,21 @@
-
-# Copyright (C) 2020-2021 sirpdboy <herboy2008@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-only
 #
-# This is free software, licensed under the GNU General Public License v3.
-# 
+# Copyright (C) 2021-2025  sirpdboy  <herboy2008@gmail.com> 
+# https://github.com/sirpdboy/luci-app-netspeedtest
+# This is free software, licensed under the Apache License, Version 2.0 .
+#
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-netspeedtest
 
-PKG_VERSION:=2.3.1
-PKG_RELEASE:=20250302
+PKG_VERSION:=5.0.5
+PKG_RELEASE:=20250612
 
 LUCI_TITLE:=LuCI Support for netspeedtest
-LUCI_DEPENDS:=+python3 +iperf3-ssl +homebox
+LUCI_DEPENDS:=+speedtest-cli +homebox +netspeedtest $(if $(find_package iperf3-ssl),+iperf3-ssl,+iperf3)
 LUCI_PKGARCH:=all
-PKG_MAINTAINER:=<https://github.com/sirpdboy/netspeedtest>
-
-
-define Package/$(PKG_NAME)/conffiles
-/etc/config/netspeedtest
-endef
-
-define Package/$(PKG_NAME)/postinst
-endef
-
+PKG_MAINTAINER:=sirpdboy  <herboy2008@gmail.com>
 
 include $(TOPDIR)/feeds/luci/luci.mk
 

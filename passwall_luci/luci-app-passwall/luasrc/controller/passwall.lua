@@ -63,6 +63,7 @@ function index()
 	entry({"admin", "services", appname, "link_add_node"}, call("link_add_node")).leaf = true
 	entry({"admin", "services", appname, "socks_autoswitch_add_node"}, call("socks_autoswitch_add_node")).leaf = true
 	entry({"admin", "services", appname, "socks_autoswitch_remove_node"}, call("socks_autoswitch_remove_node")).leaf = true
+	entry({"admin", "services", appname, "gen_client_config"}, call("gen_client_config")).leaf = true
 	entry({"admin", "services", appname, "get_now_use_node"}, call("get_now_use_node")).leaf = true
 	entry({"admin", "services", appname, "get_redir_log"}, call("get_redir_log")).leaf = true
 	entry({"admin", "services", appname, "get_socks_log"}, call("get_socks_log")).leaf = true
@@ -80,6 +81,8 @@ function index()
 	entry({"admin", "services", appname, "clear_all_nodes"}, call("clear_all_nodes")).leaf = true
 	entry({"admin", "services", appname, "delete_select_nodes"}, call("delete_select_nodes")).leaf = true
 	entry({"admin", "services", appname, "update_rules"}, call("update_rules")).leaf = true
+	entry({"admin", "services", appname, "subscribe_del_node"}, call("subscribe_del_node")).leaf = true
+	entry({"admin", "services", appname, "subscribe_del_all"}, call("subscribe_del_all")).leaf = true
 
 	--[[rule_list]]
 	entry({"admin", "services", appname, "read_rulelist"}, call("read_rulelist")).leaf = true
@@ -126,10 +129,28 @@ function hide_menu()
 end
 
 function link_add_node()
-	local lfile = "/tmp/links.conf"
-	local link = luci.http.formvalue("link")
-	luci.sys.call('echo \'' .. link .. '\' > ' .. lfile)
-	luci.sys.call("lua /usr/share/passwall/subscribe.lua add log")
+	-- 分片接收以突破uhttpd的限制
+	local tmp_file = "/tmp/links.conf"
+	local chunk = luci.http.formvalue("chunk")
+	local chunk_index = tonumber(luci.http.formvalue("chunk_index"))
+	local total_chunks = tonumber(luci.http.formvalue("total_chunks"))
+
+	if chunk and chunk_index ~= nil and total_chunks ~= nil then
+		-- 按顺序拼接到文件
+		local mode = "a"
+		if chunk_index == 0 then
+			mode = "w"
+		end
+		local f = io.open(tmp_file, mode)
+		if f then
+			f:write(chunk)
+			f:close()
+		end
+		-- 如果是最后一片，才执行
+		if chunk_index + 1 == total_chunks then
+			luci.sys.call("lua /usr/share/passwall/subscribe.lua add log")
+		end
+	end
 end
 
 function socks_autoswitch_add_node()
@@ -169,6 +190,20 @@ function socks_autoswitch_remove_node()
 		api.uci_save(uci, appname)
 	end
 	luci.http.redirect(api.url("socks_config", id))
+end
+
+
+function gen_client_config()
+	local id = luci.http.formvalue("id")
+	local config_file = api.TMP_PATH .. "/config_" .. id
+	luci.sys.call(string.format("/usr/share/passwall/app.sh run_socks flag=config_%s node=%s bind=127.0.0.1 socks_port=1080 config_file=%s no_run=1", id, id, config_file))
+	if nixio.fs.access(config_file) then
+		luci.http.prepare_content("application/json")
+		luci.http.write(luci.sys.exec("cat " .. config_file))
+		luci.sys.call("rm -f " .. config_file)
+	else
+		luci.http.redirect(api.url("node_list"))
+	end
 end
 
 function get_now_use_node()
@@ -613,4 +648,17 @@ function geo_view()
 	else
 		http.write(i18n.translate("No results were found!"))
 	end
+end
+
+function subscribe_del_node()
+	local remark = luci.http.formvalue("remark")
+	if remark and remark ~= "" then
+		luci.sys.call("lua /usr/share/" .. appname .. "/subscribe.lua truncate " .. luci.util.shellquote(remark) .. " > /dev/null 2>&1")
+	end
+	luci.http.status(200, "OK")
+end
+
+function subscribe_del_all()
+	luci.sys.call("lua /usr/share/" .. appname .. "/subscribe.lua truncate > /dev/null 2>&1")
+	luci.http.status(200, "OK")
 end

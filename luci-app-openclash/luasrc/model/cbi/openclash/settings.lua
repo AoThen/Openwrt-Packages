@@ -7,6 +7,7 @@ local UTIL = require "luci.util"
 local fs = require "luci.openclash"
 local uci = require "luci.model.uci".cursor()
 local json = require "luci.jsonc"
+local datatypes = require "luci.cbi.datatypes"
 
 font_green = [[<b style=color:green>]]
 font_red = [[<b style=color:red>]]
@@ -101,6 +102,10 @@ o.default = 0
 
 o = s:taboption("op_mode", Flag, "disable_quic_go_gso", translate("Disable quic-go GSO Support"))
 o.description = font_red..bold_on..translate("Suggestion: If Encountering Issues With QUIC UDP on The Linux Kernel Version Above 6.6, Please Try to Enable.")..bold_off..font_off
+o.default = 0
+
+o = s:taboption("op_mode", Flag, "skip_safe_path_check", translate("Skip Safe Path Check"))
+o.description = font_red..bold_on..translate("Enable If You Want Using Files Not in /etc/openclash in You Config")..bold_off..font_off
 o.default = 0
 
 o = s:taboption("op_mode", Flag, "small_flash_memory", translate("Small Flash Memory"))
@@ -244,26 +249,86 @@ o:value("accept", translate("ACCEPT"))
 o:value("drop", translate("DROP"))
 o.rmempty = false
 
+local function ip_compare(a, b)
+    local function ipv4_to_number(ip)
+        local p1, p2, p3, p4 = ip:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+        if p1 and p2 and p3 and p4 then
+            local n1, n2, n3, n4 = tonumber(p1), tonumber(p2), tonumber(p3), tonumber(p4)
+            if n1 <= 255 and n2 <= 255 and n3 <= 255 and n4 <= 255 then
+                return n1 * 16777216 + n2 * 65536 + n3 * 256 + n4
+            end
+        end
+        return 0
+    end
+    
+    local a_is_ipv4 = datatypes.ip4addr(a.dest)
+    local b_is_ipv4 = datatypes.ip4addr(b.dest)
+    
+    if a_is_ipv4 and not b_is_ipv4 then
+        return true
+    elseif not a_is_ipv4 and b_is_ipv4 then
+        return false
+    elseif a_is_ipv4 and b_is_ipv4 then
+        return ipv4_to_number(a.dest) < ipv4_to_number(b.dest)
+    else
+        return a.dest < b.dest
+    end
+end
+
+local all_neighbors = {}
+
 luci.ip.neighbors({ family = 4 }, function(n)
-	if n.mac and n.dest then
-		ip_b:value(n.dest:string())
-		ip_w:value(n.dest:string())
-		ip_ac:value(n.dest:string())
-		mac_b:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
-		mac_w:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
-	end
+    if n.mac and n.dest then
+        table.insert(all_neighbors, {dest = n.dest:string(), mac = n.mac, family = 4})
+    end
 end)
 
 if string.len(SYS.exec("/usr/share/openclash/openclash_get_network.lua 'gateway6'")) ~= 0 then
-luci.ip.neighbors({ family = 6 }, function(n)
-	if n.mac and n.dest then
-		ip_b:value(n.dest:string())
-		ip_w:value(n.dest:string())
-		ip_ac:value(n.dest:string())
-		mac_b:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
-		mac_w:value(n.mac, "%s (%s)" %{ n.mac, n.dest:string() })
-	end
-end)
+    luci.ip.neighbors({ family = 6 }, function(n)
+        if n.mac and n.dest then
+            table.insert(all_neighbors, {dest = n.dest:string(), mac = n.mac, family = 6})
+        end
+    end)
+end
+
+table.sort(all_neighbors, ip_compare)
+
+local mac_ip_map = {}
+local mac_order = {}
+
+for _, item in ipairs(all_neighbors) do
+    ip_b:value(item.dest)
+    ip_w:value(item.dest)
+    ip_ac:value(item.dest)
+    if not mac_ip_map[item.mac] then
+        mac_ip_map[item.mac] = {}
+        table.insert(mac_order, item.mac)
+    end
+    table.insert(mac_ip_map[item.mac], item.dest)
+end
+
+for _, mac in ipairs(mac_order) do
+    local ips = mac_ip_map[mac]
+    table.sort(ips, function(a, b)
+        local a_is_ipv4 = datatypes.ip4addr(a)
+        local b_is_ipv4 = datatypes.ip4addr(b)
+        if a_is_ipv4 and not b_is_ipv4 then
+            return true
+        elseif not a_is_ipv4 and b_is_ipv4 then
+            return false
+        elseif a_is_ipv4 and b_is_ipv4 then
+            local function ipv4_to_number(ip)
+                local p1, p2, p3, p4 = ip:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+                return p1 and p2 and p3 and p4 and (tonumber(p1)*16777216+tonumber(p2)*65536+tonumber(p3)*256+tonumber(p4)) or 0
+            end
+            return ipv4_to_number(a) < ipv4_to_number(b)
+        else
+            return a < b
+        end
+    end)
+    local ip_str = table.concat(ips, "|")
+    mac_b:value(mac, "%s (%s)" %{ mac, ip_str })
+    mac_w:value(mac, "%s (%s)" %{ mac, ip_str })
 end
 
 ---- Traffic Control
@@ -790,8 +855,7 @@ o.description = translate("Custom GeoIP MMDB URL, Click Button Below To Refresh 
 o:value("https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb", translate("Alecthw-lite-Version")..translate("(Default mmdb)"))
 o:value("https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/Country.mmdb", translate("Alecthw-Version")..translate("(All Info mmdb)"))
 o:value("https://testingcf.jsdelivr.net/gh/Hackl0us/GeoIP2-CN@release/Country.mmdb", translate("Hackl0us-Version")..translate("(Only CN)"))
-o:value("https://geolite.clash.dev/Country.mmdb", translate("Geolite.clash.dev"))
-o.default = "http://www.ideame.top/mmdb/Country.mmdb"
+o.default = "https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb"
 
 o = s:taboption("geo_update", Button, translate("GEOIP Update")) 
 o.title = translate("Update GeoIP MMDB")
@@ -890,6 +954,49 @@ o.write = function()
 end
 o:depends("geosite_auto_update", "1")
 
+o = s:taboption("geo_update", Flag, "geoasn_auto_update", font_red..bold_on..translate("Auto Update Geo ASN")..bold_off..font_off)
+o.default = 0
+
+o = s:taboption("geo_update", ListValue, "geoasn_update_week_time", translate("Update Time (Every Week)"))
+o:value("*", translate("Every Day"))
+o:value("1", translate("Every Monday"))
+o:value("2", translate("Every Tuesday"))
+o:value("3", translate("Every Wednesday"))
+o:value("4", translate("Every Thursday"))
+o:value("5", translate("Every Friday"))
+o:value("6", translate("Every Saturday"))
+o:value("0", translate("Every Sunday"))
+o.default = "1"
+o:depends("geoasn_auto_update", "1")
+
+o = s:taboption("geo_update", ListValue, "geoasn_update_day_time", translate("Update time (every day)"))
+for t = 0,23 do
+o:value(t, t..":00")
+end
+o.default = "0"
+o:depends("geoasn_auto_update", "1")
+
+o = s:taboption("geo_update", Value, "geoasn_custom_url")
+o.title = translate("Custom GeoSite URL")
+o.rmempty = true
+o.description = translate("Custom Geo ASN Data URL, Click Button Below To Refresh After Edit")
+o:value("https://testingcf.jsdelivr.net/gh/xishang0128/geoip@release/GeoLite2-ASN.mmdb", translate("xishang0128-testingcf-jsdelivr-Version")..translate("(Default)"))
+o:value("https://fastly.jsdelivr.net/gh/xishang0128/geoip@release/GeoLite2-ASN.mmdb", translate("xishang0128-fastly-jsdelivr-Version"))
+o.default = "https://testingcf.jsdelivr.net/gh/xishang0128/geoip@release/GeoLite2-ASN.mmdb"
+o:depends("geoasn_auto_update", "1")
+
+o = s:taboption("geo_update", Button, translate("ASN Update")) 	
+o.title = translate("Update Geo ASN Database")
+o.inputtitle = translate("Check And Update")
+o.inputstyle = "reload"
+o.write = function()
+  m.uci:set("openclash", "config", "enable", 1)
+  m.uci:commit("openclash")
+  SYS.call("/usr/share/openclash/openclash_geoasn.sh >/dev/null 2>&1 &")
+  HTTP.redirect(DISP.build_url("admin", "services", "openclash"))
+end
+o:depends("geoasn_auto_update", "1")
+
 o = s:taboption("chnr_update", Flag, "chnr_auto_update", translate("Auto Update"))
 o.description = translate("Auto Update Chnroute Lists")
 o.default = 0
@@ -917,8 +1024,8 @@ o.rmempty = false
 o.description = translate("Custom Chnroute Lists URL, Click Button Below To Refresh After Edit")
 o:value("https://ispip.clang.cn/all_cn.txt", translate("Clang-CN")..translate("(Default)"))
 o:value("https://ispip.clang.cn/all_cn_cidr.txt", translate("Clang-CN-CIDR"))
-o:value("https://fastly.jsdelivr.net/gh/Hackl0us/GeoIP2-CN@release/CN-ip-cidr.txt", translate("Hackl0us-CN-CIDR-fastly-jsdelivr")..translate("(Large Size)"))
-o:value("https://testingcf.jsdelivr.net/gh/Hackl0us/GeoIP2-CN@release/CN-ip-cidr.txt", translate("Hackl0us-CN-CIDR-testingcf-jsdelivr")..translate("(Large Size)"))
+o:value("https://fastly.jsdelivr.net/gh/Hackl0us/GeoIP2-CN@release/CN-ip-cidr.txt", translate("Hackl0us-CN-CIDR-fastly-jsdelivr"))
+o:value("https://testingcf.jsdelivr.net/gh/Hackl0us/GeoIP2-CN@release/CN-ip-cidr.txt", translate("Hackl0us-CN-CIDR-testingcf-jsdelivr"))
 o.default = "https://ispip.clang.cn/all_cn.txt"
 
 o = s:taboption("chnr_update", Value, "chnr6_custom_url")

@@ -169,6 +169,8 @@ yml_dns_get()
    config_get_bool "skip_cert_verify" "$section" "skip_cert_verify" "0"
    config_get_bool "ecs_override" "$section" "ecs_override" "0"
    config_get "ecs_subnet" "$section" "ecs_subnet" ""
+   config_get "disable_ipv4" "$section" "disable_ipv4" "0"
+   config_get "disable_ipv6" "$section" "disable_ipv6" "0"
 
    if [ "$enabled" = "0" ]; then
       return
@@ -276,21 +278,41 @@ yml_dns_get()
       ecs_override=""
    fi
 
+   if [ "$disable_ipv4" = "1" ]; then
+      if [ -n "$specific_group" ] || [ -n "$interface" ] || [ -n "$http3" ] || [ -n "$skip_cert_verify" ] || [ -n "$ecs_subnet" ] || [ -n "$ecs_override" ]; then
+         disable_ipv4="&disable-ipv4=true"
+      else
+         disable_ipv4="#disable-ipv4=true"
+      fi
+   else
+      disable_ipv4=""
+   fi
+
+   if [ "$disable_ipv6" = "1" ]; then
+      if [ -n "$specific_group" ] || [ -n "$interface" ] || [ -n "$http3" ] || [ -n "$skip_cert_verify" ] || [ -n "$ecs_subnet" ] || [ -n "$ecs_override" ] || [ -n "$disable_ipv4" ]; then
+         disable_ipv6="&disable-ipv6=true"
+      else
+         disable_ipv6="#disable-ipv6=true"
+      fi
+   else
+      disable_ipv6=""
+   fi
+
    if [ "$node_resolve" = "1" ]; then
       if [ -z "$(grep "^ \{0,\}proxy-server-nameserver:$" /tmp/yaml_config.proxynamedns.yaml 2>/dev/null)" ]; then
          echo "  proxy-server-nameserver:" >/tmp/yaml_config.proxynamedns.yaml
       fi
-      echo "    - \"$dns_type$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override\"" >>/tmp/yaml_config.proxynamedns.yaml
+      echo "    - \"$dns_type$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override$disable_ipv4$disable_ipv6\"" >>/tmp/yaml_config.proxynamedns.yaml
    fi
 
    if [ "$direct_nameserver" = "1" ]; then
       if [ -z "$(grep "^ \{0,\}direct-nameserver:$" /tmp/yaml_config.directnamedns.yaml 2>/dev/null)" ]; then
          echo "  direct-nameserver:" >/tmp/yaml_config.directnamedns.yaml
       fi
-      echo "    - \"$dns_type$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override\"" >>/tmp/yaml_config.directnamedns.yaml
+      echo "    - \"$dns_type$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override$disable_ipv4$disable_ipv6\"" >>/tmp/yaml_config.directnamedns.yaml
    fi
 
-   dns_address="$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override"
+   dns_address="$dns_address$specific_group$interface$http3$skip_cert_verify$ecs_subnet$ecs_override$disable_ipv4$disable_ipv6"
 
    if [ -n "$group" ]; then
       if [ "$group" = "nameserver" ]; then
@@ -345,8 +367,14 @@ threads << Thread.new {
       Value['secret']='$2';
       Value['bind-address']='*';
       Value['external-ui']='/usr/share/openclash/ui';
-      Value['keep-alive-interval']=15;
-      Value['keep-alive-idle']=600;
+      Value['external-ui-name']='metacubexd';
+      if Value.key?('external-ui-url') then
+         Value.delete('external-ui-url');
+      end;
+      if not Value.key?('keep-alive-interval') and not Value.key?('keep-alive-idle') then
+         Value['keep-alive-interval']=15;
+         Value['keep-alive-idle']=600;
+      end;
       if $6 == 1 then
          Value['ipv6']=true;
       else
@@ -466,6 +494,9 @@ threads << Thread.new {
       end;
       if Value.key?('auto-redir') then
          Value.delete('auto-redir');
+      end;
+      if Value.key?('geo-auto-update') then
+         Value['geo-auto-update']=false;
       end;
    rescue Exception => e
       YAML.LOG('Error: Set General Failed,【' + e.message + '】');

@@ -5,7 +5,6 @@ require "nixio.fs"
 require "luci.sys"
 require "luci.http"
 require "luci.jsonc"
-require "luci.model.ipkg"
 require "luci.model.uci"
 local uci = require "luci.model.uci".cursor()
 
@@ -238,7 +237,7 @@ o = s:option(ListValue, "v2ray_protocol", translate("V2Ray/XRay protocol"))
 o:value("vless", translate("VLESS"))
 o:value("vmess", translate("VMess"))
 o:value("trojan", translate("Trojan"))
-o:value("shadowsocks", translate("Shadowsocks"))
+o:value("shadowsocks", translate("ShadowSocks"))
 if is_finded("xray") then
 	o:value("wireguard", translate("WireGuard"))
 end
@@ -349,6 +348,9 @@ end
 if is_finded("xray-plugin") then
 	o:value("xray-plugin", translate("xray-plugin"))
 end
+if is_finded("shadow-tls") then
+	o:value("shadow-tls", translate("shadow-tls"))
+end
 o:value("custom", translate("Custom"))
 o.rmempty = true
 o:depends({enable_plugin = true})
@@ -428,12 +430,12 @@ o.default = "0"
 o = s:option(Value, "obfs_type", translate("Obfuscation Type"))
 o:depends({type = "hysteria2", flag_obfs = "1"})
 o.rmempty = true
-o.default = "salamander"
+o.placeholder = "salamander"
 
 o = s:option(Value, "salamander", translate("Obfuscation Password"))
 o:depends({type = "hysteria2", flag_obfs = "1"})
 o.rmempty = true
-o.default = "cry_me_a_r1ver"
+o.placeholder = "cry_me_a_r1ver"
 
 o = s:option(Flag, "flag_quicparam", translate("Hysterir QUIC parameters"))
 o:depends("type", "hysteria2")
@@ -518,7 +520,7 @@ o.default = ""
 o = s:option(ListValue, "chain_type", translate("Shadow-TLS ChainPoxy type"))
 o:depends("type", "shadowtls")
 if is_finded("sslocal") then
-	o:value("sslocal", translate("Shadowsocks-rust Version"))
+	o:value("sslocal", translate("ShadowSocks-rust Version"))
 end
 if is_finded("xray") or is_finded("v2ray") then
 	o:value("vmess", translate("Vmess Protocol"))
@@ -953,14 +955,14 @@ o = s:option(Value, "uplink_capacity", translate("Uplink Capacity(Default:Mbps)"
 o.datatype = "uinteger"
 o:depends("transport", "kcp")
 o:depends("type", "hysteria2")
-o.default = 5
+o.placeholder = 5
 o.rmempty = true
 
 o = s:option(Value, "downlink_capacity", translate("Downlink Capacity(Default:Mbps)"))
 o.datatype = "uinteger"
 o:depends("transport", "kcp")
 o:depends("type", "hysteria2")
-o.default = 20
+o.placeholder = 20
 o.rmempty = true
 
 o = s:option(Value, "read_buffer_size", translate("Read Buffer Size"))
