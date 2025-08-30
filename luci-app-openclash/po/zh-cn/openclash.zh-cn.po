@@ -17,9 +17,6 @@ msgstr "技术支持"
 msgid "Overviews"
 msgstr "运行状态"
 
-msgid "Plugin Settings"
-msgstr "插件设置"
-
 msgid "Overwrite Settings"
 msgstr "覆写设置"
 
@@ -353,6 +350,9 @@ msgstr "更新时间(每天)"
 msgid "Update Interval(min)"
 msgstr "更新间隔(分钟)"
 
+msgid "Update Interval(hour)"
+msgstr "更新间隔(小时)"
+
 msgid "Update Mode"
 msgstr "更新模式"
 
@@ -605,9 +605,6 @@ msgstr "当前内核版本"
 msgid "Last Core Version"
 msgstr "最新内核版本"
 
-msgid "Unknown"
-msgstr "查询失败"
-
 msgid "Check Failed"
 msgstr "查询更新失败"
 
@@ -691,7 +688,7 @@ msgid "Mix This Page's Proxies"
 msgstr "一键生成配置文件时合并本页下方的所有代理服务器信息（不区分配置文件）"
 
 msgid "Type"
-msgstr "节点类型"
+msgstr "类型"
 
 msgid "Server Alias"
 msgstr "别名（请勿重名）"
@@ -912,13 +909,13 @@ msgstr "指定策略组"
 msgid "No Need Set when Config Create, The added Proxy Groups Must Exist"
 msgstr "注意：使用一键生成配置文件功能时无需设置此项，修改配置文件前添加的策略组必须已创建"
 
-msgid "Clean Log"
+msgid "Clean"
 msgstr "清理日志"
 
-msgid "Stop Refresh Log"
+msgid "Stop Refresh"
 msgstr "停止刷新"
 
-msgid "Start Refresh Log"
+msgid "Start Refresh"
 msgstr "开始刷新"
 
 msgid "Config File"
@@ -1149,6 +1146,9 @@ msgstr "删除所有文件"
 msgid "SS/SSR/Vmess or Other Link And Subscription Address is Supported When Online Subscription Conversion is Enabled, Multiple Links Should be One Per Line or Separated By |"
 msgstr "在线订阅转换启用时支持：SS/SSR/Vmess 等节点链接和订阅链接，多个链接请每行一个或用 | 分隔"
 
+msgid "URI and subscription address is supported when online subscription conversion enabled, multiple links should be one per line or separated by"
+msgstr "在线订阅转换启用时支持：节点链接和订阅链接，多个链接请每行一个或使用分隔符"
+
 msgid "Template Name"
 msgstr "订阅转换模板"
 
@@ -1260,11 +1260,11 @@ msgstr "兼容"
 msgid "Mix"
 msgstr "混合"
 
-msgid "Close All Connections"
-msgstr "关闭所有链接"
+msgid "Close Connect"
+msgstr "关闭链接"
 
-msgid "Close All Connections Failed"
-msgstr "关闭所有连接失败"
+msgid "Close Connect Failed"
+msgstr "关闭连接失败"
 
 msgid "Restore Nodes Selection"
 msgstr "还原策略组节点选择"
@@ -1326,9 +1326,6 @@ msgstr "Tip: OpenClash 成功启动后请耐心等待下方网站访问检查连
 msgid "Tip: You can modify the profile on the profile page (for content that is not taken over)"
 msgstr "Tip: 您可以在配置文件页面直接修改配置文件（适用于没被接管的内容）"
 
-msgid "Tip: click the version icon above to jump to the client publishing page"
-msgstr "Tip: 点击上方版本图标可跳转到客户端发布页面"
-
 msgid "Tip: do not write configuration files? Try to create one click on the server page"
 msgstr "Tip: 不会编写配置文件？试试在【服务器与策略组管理】页面一键创建"
 
@@ -1341,20 +1338,14 @@ msgstr "Tip: 使用 Fake-IP 模式可以获得更加快速的访问体验"
 msgid "Tip: query DNS by TLS & TCP & HTTPS can get better anti pollution effect"
 msgstr "Tip: 使用 TLS & TCP & HTTPS 方式查询DNS可以获得更好的抗污染效果"
 
-msgid "Tip: openlash will check the configuration file parameters to ensure that it works properly"
-msgstr "Tip: OpenClash 启动时会检查配置文件参数【服务器（策略）组、规则、DNS设置】以确保能够正常工作"
-
 msgid "Tip: the nameserver group must have at least one server set when using custom DNS"
 msgstr "Tip: 使用自定义DNS上游服务器时NameServer组必须设置至少一个服务器"
-
-msgid "Tip: the website access check shows the connection of the device currently logged in to the Luci page"
-msgstr "Tip: 网站访问检查展示的是当前登录LUCI页面设备的连接情况"
 
 msgid "Tip: if you don not use IPv6, please turn off the DHCP service of IPv6, otherwise the connection will be abnormal"
 msgstr "Tip: 如果不使用IPv6，请关闭IPv6的DHCP服务，否则会造成连接异常"
 
-msgid "Tip: you can update the version in the global settings page"
-msgstr "Tip: 您可以在全局设置页面进行版本更新操作"
+msgid "Tip: you can update the version in the settings page"
+msgstr "Tip: 您可以在插件设置页面进行版本更新操作"
 
 msgid "Note: if the update fails, you can manually download and upload"
 msgstr "注意：如更新失败可手动下载并上传"
@@ -1407,9 +1398,6 @@ msgstr "最新客户端版本"
 msgid "Download Latest Client"
 msgstr "下载最新版本客户端"
 
-msgid "Download"
-msgstr "下载到本地"
-
 msgid "Restore Default Config"
 msgstr "还原默认配置"
 
@@ -1449,8 +1437,8 @@ msgstr "页面已切换为 Redir-Host 模式！"
 msgid "IP Address"
 msgstr "IP 地址"
 
-msgid "Website Access Check"
-msgstr "网站访问检查"
+msgid "Access Check"
+msgstr "访问检查"
 
 msgid "Baidu Search"
 msgstr "百度搜索"
@@ -1632,17 +1620,14 @@ msgstr "下载成功，开始进行更新前测试..."
 msgid "Pre update test failed..."
 msgstr "更新前测试失败..."
 
-msgid "pre update test failed after 3 attempts, the file is saved in /tmp/openclash.ipk, please try to update manually with"
+msgid "Pre update test failed after 3 attempts, the file is saved in /tmp/openclash.ipk, please try to update manually with"
 msgstr "更新前测试失败，文件保存在 /tmp/openclash.ipk，请尝试以下命令手动更新"
 
-msgid "pre update test failed after 3 attempts, the file is saved in /tmp/openclash.apk, please try to update manually with"
+msgid "Pre update test failed after 3 attempts, the file is saved in /tmp/openclash.apk, please try to update manually with"
 msgstr "更新前测试失败，文件保存在 /tmp/openclash.apk，请尝试以下命令手动更新"
 
-msgid "pre update test passed, ready to update and please do not refresh the page and other operations..."
+msgid "Pre update test passed, ready to update and please do not refresh the page and other operations..."
 msgstr "更新前测试通过，准备开始更新，更新过程请不要刷新页面和进行其他操作..."
-
-msgid "Tip: Uninstalling the old version, please do not refresh the page or do other operations..."
-msgstr "提示：正在卸载旧版本，更新过程请不要刷新页面和进行其他操作..."
 
 msgid "Installing the new version, please do not refresh the page or do other operations..."
 msgstr "正在安装新版本，更新过程请不要刷新页面和进行其他操作..."
@@ -1715,9 +1700,6 @@ msgstr "警告：检测到启用了多个第三方规则配置，忽略后续配
 
 msgid "Download Successful, Start Preprocessing Rule File..."
 msgstr "下载成功，开始预处理规则文件..."
-
-msgid "Error: Ruby Works Abnormally, Please Check The Ruby Library Depends!"
-msgstr "错误：Ruby 依赖异常，无法校验配置文件，请确认ruby依赖工作正常后重试！"
 
 msgid "Error:"
 msgstr "错误："
@@ -1944,9 +1926,6 @@ msgstr "读取错误，配置文件"
 msgid "Abnormal!"
 msgstr "异常！"
 
-msgid "Abnormal!"
-msgstr "异常！"
-
 msgid "Deleting Old Configuration..."
 msgstr "正在删除旧配置..."
 
@@ -2100,7 +2079,13 @@ msgstr "第六步：删除 OpenClash 残留文件..."
 msgid "OpenClash Already Stop!"
 msgstr "OpenClash 关闭成功！"
 
+msgid "Skip Reload OpenClash Firewall Rules Until 5 Minutes Later..."
+msgstr "5 分钟内重置已超过限制次数，跳过本次 OpenClash 防火墙规则重置..."
+
 msgid "Reload OpenClash Firewall Rules..."
+msgstr "重置 OpenClash 防火墙规则..."
+
+msgid "Manually Reload Firewall Rules..."
 msgstr "重置 OpenClash 防火墙规则..."
 
 msgid "Warning: OpenClash Now Disabled, Need Start From Luci Page, Exit..."
@@ -2151,14 +2136,14 @@ msgstr "3、在此页面设置您已下载的规则的对应配置文件、策�
 msgid "When setting this page, if the groups is empty, please go to the <Onekey Create> page to add"
 msgstr "本页设置时如策略组为空，请先到《一键生成》页面进行添加"
 
-msgid "Introduction to rule set usage: https://wiki.metacubex.one/config/rule-providers/content/"
-msgstr "规则集使用介绍：https://wiki.metacubex.one/config/rule-providers/content/"
+msgid "Introduction to rule set usage:"
+msgstr "规则集使用介绍："
 
-msgid "Introduction to proxy usage: https://wiki.metacubex.one/config/proxies/"
-msgstr "代理使用介绍：https://wiki.metacubex.one/config/proxies/"
+msgid "Introduction to proxy usage:"
+msgstr "代理使用介绍："
 
-msgid "Introduction to proxy-provider usage: https://wiki.metacubex.one/config/proxy-providers/"
-msgstr "代理集使用介绍：https://wiki.metacubex.one/config/proxy-providers/"
+msgid "Introduction to proxy-provider usage:"
+msgstr "代理集使用介绍："
 
 msgid "Subconverter external configuration (subscription conversion template) Description: https://github.com/tindy2013/subconverter#external-configuration-file"
 msgstr "subconverter 外部配置(订阅转换模板)说明：https://github.com/tindy2013/subconverter#external-configuration-file"
@@ -2247,8 +2232,8 @@ msgstr "签到间隔（小时）"
 msgid "Checkin Multiple"
 msgstr "签到倍数"
 
-msgid "Multiple Must Be a Positive Integer and No More Than 50"
-msgstr "倍数必须是正整数且不大于50"
+msgid "Multiple Must Be a Positive Integer and No More Than 100"
+msgstr "倍数必须是正整数且不大于 100"
 
 msgid "Dler Cloud Checkin Successful, Result:"
 msgstr "Dler Cloud 签到成功，结果："
@@ -2270,9 +2255,6 @@ msgstr "规则没有更新"
 
 msgid "Download Timeout"
 msgstr "下载超时"
-
-msgid "Rule Project:"
-msgstr "规则项目:"
 
 msgid "Rule Project:"
 msgstr "规则项目:"
@@ -2333,6 +2315,12 @@ msgstr "错误：修改 General 配置失败，"
 
 msgid "Error: Set authentication Failed,"
 msgstr "错误：修改 Authentication 配置失败，"
+
+msgid "Error: DNS Loop Check,"
+msgstr "错误：DNS 回环检查失败，"
+
+msgid "Error: proxy-groups Get Failed,"
+msgstr "错误：proxy-groups 获取失败，"
 
 msgid "Error: Set Hosts Rules Failed,"
 msgstr "错误：修改 Hosts 配置失败，"
@@ -2412,7 +2400,7 @@ msgstr "上传总量"
 msgid "Down Total"
 msgstr "下载总量"
 
-msgid "Connections"
+msgid "Connect"
 msgstr "活动连接"
 
 msgid "Ram"
@@ -2727,8 +2715,14 @@ msgstr "使用指定代理（CDN）反代插件和配置文件中的 Github 地�
 msgid "File Edit"
 msgstr "文件编辑"
 
+msgid "Overwrite Edit"
+msgstr "覆写设置"
+
 msgid "Create File"
 msgstr "新建文件"
+
+msgid "You are editing the overwrite script, please note that some settings may cause the abnormal, be careful with the modification!"
+msgstr "您正在编辑覆写脚本，请注意某些设置可能会导致异常，请谨慎修改！"
 
 msgid "Paste the name of the new file (including the extension) here:"
 msgstr "请在此输入要新建的文件名称（含扩展名）："
@@ -2754,9 +2748,6 @@ msgstr "正在收集数据..."
 msgid "Flushing..."
 msgstr "清理中..."
 
-msgid "Flush Fail"
-msgstr "清理失败"
-
 msgid "Flush Successful"
 msgstr "清理成功"
 
@@ -2766,8 +2757,8 @@ msgstr "清理超时"
 msgid "Flush"
 msgstr "清理"
 
-msgid "Flush Fake-IP Cache"
-msgstr "清理 Fake-IP 缓存"
+msgid "Flush DNS Cache"
+msgstr "清理DNS缓存"
 
 msgid "No Specify Upload File"
 msgstr "未选择上传文件"
@@ -2849,6 +2840,9 @@ msgstr "启用后将尽可能的覆盖DNS查询到的域名"
 
 msgid "Meta Settings"
 msgstr "Meta 设置"
+
+msgid "Smart Settings"
+msgstr "Smart 设置"
 
 msgid "Geodata Loader Mode"
 msgstr "Geodata 数据加载方式"
@@ -3002,9 +2996,6 @@ msgstr "更新失败"
 
 msgid "Update Successful"
 msgstr "更新成功"
-
-msgid "Switch Failed"
-msgstr "切换失败"
 
 msgid "Switch Successful"
 msgstr "切换成功"
@@ -3177,9 +3168,6 @@ msgstr "设置 Fake-IP 地址范围 (IPv4 Cidr)"
 msgid "IPv6 Settings"
 msgstr "IPv6 设置"
 
-msgid "IPv6 Settings"
-msgstr "IPv6 设置"
-
 msgid "Custom Config Overwrite Scripts Which Will Run After Plugin Own Completely, Please Be Careful, The Wrong Changes May Lead to Exceptions"
 msgstr "自定义配置文件的覆写脚本，此脚本将在插件覆写完成后执行，请谨慎修改，错误的修改可能会导致异常"
 
@@ -3230,9 +3218,6 @@ msgstr "路由器模式"
 
 msgid "Browser Mode"
 msgstr "浏览器模式"
-
-msgid "Refresh"
-msgstr "刷新"
 
 msgid "Refresh"
 msgstr "刷新"
@@ -3329,12 +3314,6 @@ msgstr "错误：绕过代理服务器地址设置失败，"
 
 msgid "Flush Failed"
 msgstr "清理失败"
-
-msgid "Flush Successful"
-msgstr "清理成功"
-
-msgid "Flush Timeout"
-msgstr "清理超时"
 
 msgid "Respect Rules"
 msgstr "遵循规则"
@@ -3687,17 +3666,14 @@ msgstr "订阅链接"
 msgid "Click to select file or drag and drop"
 msgstr "点击选择文件或拖拽上传"
 
-msgid "Support YAML files, max size 10MB"
-msgstr "支持 YAML 文件，最大 10MB"
-
 msgid "Support YAML file, max size 10MB"
 msgstr "支持 YAML 文件，最大 10MB"
 
+msgid "Support txt,conf files, max size 10MB"
+msgstr "支持 txt,conf 文件，最大 10MB"
+
 msgid "Subscription URL"
 msgstr "订阅地址"
-
-msgid "Enter subscription URL (http:// or https://)"
-msgstr "请输入订阅地址（http:// 或 https://）"
 
 msgid "User-Agent"
 msgstr "User-Agent"
@@ -3707,9 +3683,6 @@ msgstr "可选"
 
 msgid "Custom"
 msgstr "自定义"
-
-msgid "Enter custom User-Agent"
-msgstr "输入自定义 User-Agent"
 
 msgid "Config Name"
 msgstr "配置名称"
@@ -3798,9 +3771,6 @@ msgstr "处理失败"
 msgid "Close"
 msgstr "关闭"
 
-msgid "File Edit"
-msgstr "文件编辑"
-
 msgid "Loading..."
 msgstr "加载中..."
 
@@ -3816,6 +3786,9 @@ msgstr "下载"
 msgid "Save"
 msgstr "保存"
 
+msgid "Compare"
+msgstr "对比"
+
 msgid "Loading config file..."
 msgstr "正在加载配置文件..."
 
@@ -3823,10 +3796,19 @@ msgid "Ready"
 msgstr "就绪"
 
 msgid "Press F11 for fullscreen, Esc to exit fullscreen, Ctrl+Mouse Wheel to zoom"
-msgstr "按 F11 全屏，Esc 退出全屏，Ctrl+鼠标滚轮缩放"
+msgstr "按 F11 全屏，Esc 退出全屏，Ctrl+ 鼠标滚轮缩放"
+
+msgid "Press F10 to toggle differences, F11 for fullscreen, Esc to exit fullscreen, Ctrl+Mouse Wheel to zoom"
+msgstr "按 F10 显示 Diff，F11 全屏，Esc 退出全屏，Ctrl+ 鼠标滚轮缩放"
+
+msgid "Compare mode: left(Original Config), right(Runtime Config)"
+msgstr "对比模式：左侧（原始配置），右侧（运行配置）"
 
 msgid "Please select a config file first"
 msgstr "请先选择一个配置文件"
+
+msgid "No config files found, Please upload a config file to get started"
+msgstr "未找到配置文件，请先上传或订阅一个配置"
 
 msgid "Unknown"
 msgstr "未知"
@@ -3836,9 +3818,6 @@ msgstr "配置文件加载失败"
 
 msgid "Load failed"
 msgstr "加载失败"
-
-msgid "Saving..."
-msgstr "保存中..."
 
 msgid "Config file content is empty"
 msgstr "配置文件内容为空"
@@ -3951,11 +3930,248 @@ msgstr "发现新版本"
 msgid "Failed to get subscription config"
 msgstr "获取订阅配置失败"
 
-msgid "Failed to download subscription config"
-msgstr "下载订阅配置失败"
-
 msgid "Expire Date"
 msgstr "到期时间"
 
-msgid "Use RAW address download"
-msgstr "使用原始地址下载"
+msgid "RAW address"
+msgstr "原始地址"
+
+msgid "Enter custom User-Agent"
+msgstr "输入自定义 User-Agent"
+
+msgid "Stream Unlock"
+msgstr "流媒体解锁"
+
+msgid "Previous"
+msgstr "上一个"
+
+msgid "Next"
+msgstr "下一个"
+
+msgid "Enter subscription URL or multiple links (one per line)"
+msgstr "输入订阅地址或多个链接（每行一个）"
+
+msgid "Enter custom convert address"
+msgstr "输入自定义转换地址"
+
+msgid "Enter custom template URL"
+msgstr "输入自定义模板地址"
+
+msgid "eg: rename=match@replace, one param per line"
+msgstr "例如：rename=match@replace，每行一个参数"
+
+msgid "Enter keywords to include nodes (one per line)"
+msgstr "输入包含节点的关键词（每行一个）"
+
+msgid "Enter keywords to exclude nodes (one per line)"
+msgstr "输入排除节点的关键词（每行一个）"
+
+msgid "Expire Time"
+msgstr "过期时间"
+
+msgid "Remaining Traffic"
+msgstr "剩余流量"
+
+msgid "TG Group"
+msgstr "TG群"
+
+msgid "Invalid subscription URL format. Support HTTP/HTTPS subscription URLs or protocol links, can be separated by newlines or |"
+msgstr "订阅地址格式无效。支持 HTTP/HTTPS 订阅地址或协议链接，可以用换行符或 | 分隔"
+
+msgid "Invalid subscription URL format. Only single HTTP/HTTPS subscription URL is supported when subscription conversion is disabled"
+msgstr "订阅地址格式无效。未启用订阅转换时仅支持单个 HTTP/HTTPS 订阅地址"
+
+msgid "Advanced Options"
+msgstr "高级选项"
+
+msgid "Show more subscription options"
+msgstr "显示更多订阅设置"
+
+msgid "Overwrite"
+msgstr "覆写"
+
+msgid "Original Config"
+msgstr "原始配置"
+
+msgid "Runtime Config"
+msgstr "运行配置"
+
+msgid "Runtime config (read only)"
+msgstr "运行配置（只读）"
+
+msgid "Start Downloading LightGBM Model..."
+msgstr "开始下载 LightGBM 模型..."
+
+msgid "LightGBM Model Download Success, Check Updated..."
+msgstr "LightGBM 模型下载成功，检查是否有更新..."
+
+msgid "LightGBM Model Has Been Updated, Starting To Replace The Old Version..."
+msgstr "LightGBM 模型有更新，正在替换旧版本..."
+
+msgid "LightGBM Model Update Successful!"
+msgstr "LightGBM 模型更新成功！"
+
+msgid "Updated LightGBM Model No Change, Do Nothing..."
+msgstr "LightGBM 模型没有更新，停止继续操作..."
+
+msgid "LightGBM Model Update Error, Please Try Again Later..."
+msgstr "LightGBM 模型更新失败，请检查网络或稍后再试..."
+
+msgid "Smart Auto Switch"
+msgstr "Smart 策略自动切换"
+
+msgid "Auto Switch Url-test and Load-balance Group to Smart Group"
+msgstr "自动切换 Url-test、Load-balance 策略组到 Smart 策略组"
+
+msgid "Auto Update LightGBM Model"
+msgstr "自动更新模型"
+
+msgid "Custom Model URL"
+msgstr "自定义模型更新 URL"
+
+msgid "Update Model"
+msgstr "更新模型"
+
+msgid "Custom LightGBM Model URL, Click Button Below To Refresh After Edit"
+msgstr "自定义模型的更新来源，编辑后点击下方按钮生效"
+
+msgid "Colletct Training Data"
+msgstr "收集训练数据"
+
+msgid "Data Colletct File Size (MB)"
+msgstr "数据收集文件大小（MB）"
+
+msgid "Limit The File Size of Collected Data, The Default is 100MB"
+msgstr "限制数据收集文件大小，默认为 100MB"
+
+msgid "Data Colletct Rate"
+msgstr "数据收集采样率"
+
+msgid "Data Acquisition Rate, Desirable Values are 0-1, The Default is 1"
+msgstr "指定数据收集时的采样率，值为 0-1 之间的数字，默认为 1"
+
+msgid "Node Select Strategy"
+msgstr "节点选择策略"
+
+msgid "Before Node Data Collect Completely, The Default is Sticky-sessions"
+msgstr "在收集到足够数据并优选前，使用指定策略选择节点，默认为粘性会话（sticky-sessions）"
+
+msgid "Error: Setting Smart Auto Switch Failed,"
+msgstr "错误：Smart 策略组自动切换失败，"
+
+msgid "Flush Smart Cache"
+msgstr "清理 Smart 缓存"
+
+msgid "Current Version:"
+msgstr "当前版本:"
+
+msgid "Light Version"
+msgstr "轻量版"
+
+msgid "Middle Version"
+msgstr "中等版"
+
+msgid "Large Version"
+msgstr "完整版"
+
+msgid "Add New File"
+msgstr "添加新文件"
+
+msgid "Local File"
+msgstr "本地文件"
+
+msgid "Refresh Subscription"
+msgstr "刷新订阅"
+
+msgid "Refreshing subscription..."
+msgstr "正在刷新订阅..."
+
+msgid "Subscription refreshed successfully"
+msgstr "订阅刷新成功"
+
+msgid "Subscription refresh failed"
+msgstr "订阅刷新失败"
+
+msgid "Edit Subscription Info"
+msgstr "编辑订阅信息"
+
+msgid "Are you sure you want to delete this file and its subscription info?"
+msgstr "确定要删除该文件及其订阅信息吗？"
+
+msgid "Add Overwrite Module"
+msgstr "添加覆写模块"
+
+msgid "Ready to add file"
+msgstr "准备添加文件"
+
+msgid "openclash_custom_overwrite.sh already exists and cannot be added again"
+msgstr "openclash_custom_overwrite.sh 已存在，不能重复添加"
+
+msgid "Created successfully"
+msgstr "新建成功"
+
+msgid "Please enter subscription URL"
+msgstr "请输入订阅URL"
+
+msgid "Invalid subscription URL format, only single HTTP/HTTPS link is supported"
+msgstr "无效的订阅URL格式，仅支持单一HTTP/HTTPS链接"
+
+msgid "Downloading subscription content..."
+msgstr "正在下载订阅内容..."
+
+msgid "Download completed"
+msgstr "下载完成"
+
+msgid "Failed to save subscription info:"
+msgstr "订阅信息保存失败:"
+
+msgid "Ready to edit"
+msgstr "准备编辑"
+
+msgid "Subscription saved successfully"
+msgstr "订阅保存成功"
+
+msgid "Failed to save subscription"
+msgstr "订阅保存失败"
+
+msgid "Environment variable"
+msgstr "环境变量"
+
+msgid "Warning: DOWNLOAD FILE no target in"
+msgstr "警告：文件下载未指定目标参数"
+
+msgid "Error: DOWNLOAD FILE failed for"
+msgstr "错误：文件下载失败"
+
+msgid "Warning: skip General key not allowed"
+msgstr "警告：跳过不支持的参数"
+
+msgid "Warning: skip invalid Overwrite command"
+msgstr "警告：跳过不支持的覆写命令"
+
+msgid "Tip: Processing Overwrite Module"
+msgstr "提示：执行覆写模块"
+
+msgid "Tip: Load Overwrite Script"
+msgstr "提示：加载覆写命令"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Delete failed"
+msgstr "删除失败"
+
+msgid "Overwrite Module Edit"
+msgstr "覆写模块编辑"
+
+msgid "Nodes Weight Priority, <1 Means Lower Priority, >1 Means Higher Priority, The Default is 1, Pattern Support Regex and String"
+msgstr "节点权重加成，<1 表示较低优先级，>1 表示较高优先级，默认为 1，匹配模式支持 Regex 和字符串"
+
+msgid "Edit Module Info"
+msgstr "编辑模块信息"
+
+msgid "Subscription"
+msgstr "订阅"
+
+msgid "Overwrite Module"
+msgstr "覆写模块"

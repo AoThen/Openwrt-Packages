@@ -37,7 +37,7 @@ local function get_domain_excluded()
 	if not content then return nil end
 	local hosts = {}
 	string.gsub(content, '[^' .. "\n" .. ']+', function(w)
-		local s = w:gsub("^%s*(.-)%s*$", "%1") -- Trim
+		local s = api.trim(w)
 		if s == "" then return end
 		if s:find("#") and s:find("#") == 1 then return end
 		if not s:find("#") or s:find("#") ~= 1 then table.insert(hosts, s) end
@@ -157,14 +157,17 @@ function gen_outbound(flag, node, tag, proxy_table)
 				tlsSettings = (node.stream_security == "tls") and {
 					serverName = node.tls_serverName,
 					allowInsecure = (node.tls_allowInsecure == "1") and true or false,
-					fingerprint = (node.type == "Xray" and node.utls == "1" and node.fingerprint and node.fingerprint ~= "") and node.fingerprint or nil
+					fingerprint = (node.type == "Xray" and node.utls == "1" and node.fingerprint and node.fingerprint ~= "") and node.fingerprint or nil,
+					echConfigList = (node.ech == "1") and node.ech_config or nil,
+					echForceQuery = (node.ech == "1") and (node.ech_ForceQuery or "none") or nil
 				} or nil,
 				realitySettings = (node.stream_security == "reality") and {
 					serverName = node.tls_serverName,
 					publicKey = node.reality_publicKey,
 					shortId = node.reality_shortId or "",
 					spiderX = node.reality_spiderX or "/",
-					fingerprint = (node.type == "Xray" and node.fingerprint and node.fingerprint ~= "") and node.fingerprint or "chrome"
+					fingerprint = (node.type == "Xray" and node.fingerprint and node.fingerprint ~= "") and node.fingerprint or "chrome",
+					mldsa65Verify = (node.use_mldsa65Verify == "1") and node.reality_mldsa65Verify or nil
 				} or nil,
 				rawSettings = ((node.transport == "raw" or node.transport == "tcp") and node.protocol ~= "socks" and (node.tcp_guise and node.tcp_guise ~= "none")) and {
 					header = {
@@ -186,7 +189,10 @@ function gen_outbound(flag, node, tag, proxy_table)
 					readBufferSize = tonumber(node.mkcp_readBufferSize),
 					writeBufferSize = tonumber(node.mkcp_writeBufferSize),
 					seed = (node.mkcp_seed and node.mkcp_seed ~= "") and node.mkcp_seed or nil,
-					header = {type = node.mkcp_guise}
+					header = {
+						type = node.mkcp_guise,
+						domain = node.mkcp_domain
+					}
 				} or nil,
 				wsSettings = (node.transport == "ws") and {
 					path = node.ws_path or "/",
@@ -460,7 +466,8 @@ function gen_config_server(node)
 								certificateFile = node.tls_certificateFile,
 								keyFile = node.tls_keyFile
 							}
-						}
+						},
+						echServerKeys = (node.ech == "1") and node.ech_key or nil
 					} or nil,
 					rawSettings = (node.transport == "raw" or node.transport == "tcp") and {
 						header = {
@@ -482,7 +489,10 @@ function gen_config_server(node)
 						readBufferSize = tonumber(node.mkcp_readBufferSize),
 						writeBufferSize = tonumber(node.mkcp_writeBufferSize),
 						seed = (node.mkcp_seed and node.mkcp_seed ~= "") and node.mkcp_seed or nil,
-						header = {type = node.mkcp_guise}
+						header = {
+							type = node.mkcp_guise,
+							domain = node.mkcp_domain
+						}
 					} or nil,
 					wsSettings = (node.transport == "ws") and {
 						host = node.ws_host or nil,
@@ -542,7 +552,8 @@ function gen_config_server(node)
 				dest = node.reality_dest,
 				serverNames = node.reality_serverNames or {},
 				privateKey = node.reality_private_key,
-				shortIds = node.reality_shortId or ""
+				shortIds = node.reality_shortId or "",
+				mldsa65Seed = (node.use_mldsa65Seed == "1") and node.reality_mldsa65Seed or nil
 			} or nil
 		end
 	end
@@ -768,6 +779,10 @@ function gen_config(var)
 							table.insert(outbounds, outbound)
 							fallback_node_tag = outbound.tag
 						end
+					else
+						if gen_balancer(fallback_node) then
+							fallback_node_tag = fallback_node_id
+						end
 					end
 				end
 			end
@@ -794,7 +809,7 @@ function gen_config(var)
 						subjectSelector = { "blc-" },
 						pingConfig = {
 							destination = _node.useCustomProbeUrl and _node.probeUrl or nil,
-							interval = _node.probeInterval or "1m",
+							interval = (api.format_go_time(_node.probeInterval) ~= "0s") and api.format_go_time(_node.probeInterval) or "1m",
 							sampling = 3,
 							timeout = "5s"
 						}
@@ -1141,7 +1156,7 @@ function gen_config(var)
 				sys.call(string.format("mkdir -p %s && touch %s/%s", api.TMP_IFACE_PATH, api.TMP_IFACE_PATH, node.iface))
 			end
 		else
-			local outbound = gen_outbound(flag, node, nil, { fragment = xray_settings.fragment == "1" or nil, noise = xray_settings.fragment == "1" or nil, run_socks_instance = not no_run })
+			local outbound = gen_outbound(flag, node, nil, { fragment = xray_settings.fragment == "1" or nil, noise = xray_settings.noise == "1" or nil, run_socks_instance = not no_run })
 			if outbound then
 				outbound.tag = outbound.tag .. ":" .. node.remarks
 				COMMON.default_outbound_tag, last_insert_outbound = set_outbound_detour(node, outbound, outbounds)

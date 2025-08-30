@@ -3,17 +3,35 @@
 local api = require "luci.passwall.api"
 local appname = 'passwall'
 local map = self.map
-local ss_type = map:get("@global_subscribe[0]", "ss_type") or "xray"
-local trojan_type = map:get("@global_subscribe[0]", "trojan_type") or "xray"
-local vmess_type = map:get("@global_subscribe[0]", "vmess_type") or "xray"
-local vless_type = map:get("@global_subscribe[0]", "vless_type") or "xray"
-local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sing-box"
+
+local has_ss = api.is_finded("ss-redir")
+local has_ss_rust = api.is_finded("sslocal")
+local has_trojan_plus = api.is_finded("trojan-plus")
+local has_singbox = api.finded_com("sing-box")
+local has_xray = api.finded_com("xray")
+local has_hysteria2 = api.finded_com("hysteria")
+
+local function get_core(field, candidates)
+	local v = map:get("@global_subscribe[0]", field)
+	if not v or v == "" then
+		for _, c in ipairs(candidates) do
+			if c[1] then return c[2] end
+		end
+	end
+	return v
+end
+
+local ss_type = get_core("ss_type", {{has_ss,"shadowsocks-libev"},{has_ss_rust,"shadowsocks-rust"},{has_singbox,"sing-box"},{has_xray,"xray"}})
+local trojan_type = get_core("trojan_type", {{has_trojan_plus,"trojan-plus"},{has_singbox,"sing-box"},{has_xray,"xray"}})
+local vmess_type = get_core("vmess_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
+local vless_type = get_core("vless_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
+local hysteria2_type = get_core("hysteria2_type", {{has_hysteria2,"hysteria2"},{has_singbox,"sing-box"}})
 -%>
 <script src="<%=resource%>/qrcode.min.js"></script>
 <script type="text/javascript">//<![CDATA[
-	let has_singbox = "<%=api.finded_com("sing-box")%>"
-	let has_xray = "<%=api.finded_com("xray")%>"
-	let has_hysteria2 = "<%=api.finded_com("hysteria")%>"
+	let has_singbox = "<%=has_singbox%>"
+	let has_xray = "<%=has_xray%>"
+	let has_hysteria2 = "<%=has_hysteria2%>"
 	let ss_type = "<%=ss_type%>"
 	let trojan_type = "<%=trojan_type%>"
 	let vmess_type = "<%=vmess_type%>"
@@ -241,7 +259,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 						shadow_tls = 1;
 					}
 				}
-			} else {
+			} else if (v_type === "sing-box" || v_type === "Xray") {
 				var v_transport = opt.get(dom_prefix + "transport").value;
 				if (v_transport === "ws") {
 					params += opt.query("host", dom_prefix + "ws_host");
@@ -261,6 +279,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				} else if (v_transport === "mkcp") {
 					v_transport = "kcp";
 					params += opt.query("headerType", dom_prefix + "mkcp_guise");
+					params += opt.query("seed", dom_prefix + "mkcp_seed");
 				} else if (v_transport === "quic") {
 					params += opt.query("headerType", dom_prefix + "quic_guise");
 					params += opt.query("key", dom_prefix + "quic_key");
@@ -285,17 +304,16 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 						params += opt.query("pbk", dom_prefix + "reality_publicKey");
 						params += opt.query("sid", dom_prefix + "reality_shortId");
 						params += opt.query("spx", dom_prefix + "reality_spiderX");
-					}
-					if (opt.get(dom_prefix + "flow") && opt.get(dom_prefix + "flow").value) {
-						let v_flow = opt.get(dom_prefix + "flow").value;
-						params += "&flow=" + v_flow;
+						params += opt.query("pqv", dom_prefix + "reality_mldsa65Verify");
 					}
 					params += "&security=" + v_security;
 					params += opt.query("alpn", dom_prefix + "alpn");
 					params += opt.query("sni", dom_prefix + "tls_serverName");
+					params += opt.query("allowinsecure", dom_prefix + "tls_allowInsecure");
+					params += opt.query("ech", dom_prefix + "ech_config");
 				}
 
-				if (opt.get(dom_prefix + "shadowtls").checked) {
+				if (opt.get(dom_prefix + "shadowtls")?.checked) {
 					let st_plugin_str = "";
 					let st_version = opt.get(dom_prefix + "shadowtls_version")?.value;
 					if (st_version) st_plugin_str += "v" + st_version + "=1;";
@@ -372,10 +390,11 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 			} else if (v_transport === "mkcp") {
 				v_transport = "kcp";
 				info.type = opt.get(dom_prefix + "mkcp_guise").value;
+				info.seed = opt.get(dom_prefix + "mkcp_seed").value;
 			} else if (v_transport === "quic") {
-				info.type = opt.get(dom_prefix + "quic_guise").value;
-				info.key = opt.get(dom_prefix + "quic_key").value;
-				info.securty = opt.get(dom_prefix + "quic_security").value;
+				info.type = opt.get(dom_prefix + "quic_guise")?.value;
+				info.key = opt.get(dom_prefix + "quic_key")?.value;
+				info.securty = opt.get(dom_prefix + "quic_security")?.value;
 			} else if (v_transport === "grpc") {
 				info.path = opt.get(dom_prefix + "grpc_serviceName").value;
 			}
@@ -406,7 +425,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				params += opt.query("path", dom_prefix + "ws_path");
 				if (v_type == "sing-box" && opt.get(dom_prefix + "ws_enableEarlyData").checked) {
 					var ws_maxEarlyData = opt.get(dom_prefix + "ws_maxEarlyData").value;
-					params += "?ed=" + ws_maxEarlyData;
+					params += encodeURIComponent("?ed=" + ws_maxEarlyData);
 				}
 			} else if (v_transport === "h2") {
 				v_transport = "http";
@@ -419,6 +438,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 			} else if (v_transport === "mkcp") {
 				v_transport = "kcp";
 				params += opt.query("headerType", dom_prefix + "mkcp_guise");
+				params += opt.query("seed", dom_prefix + "mkcp_seed");
 			} else if (v_transport === "quic") {
 				params += opt.query("headerType", dom_prefix + "quic_guise");
 				params += opt.query("key", dom_prefix + "quic_key");
@@ -441,7 +461,11 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 			}
 			params += "&type=" + v_transport;
 
-			params += opt.query("encryption", dom_prefix + "encryption");
+			if (v_type === "sing-box") {
+				params += "&encryption=none";
+			} else {
+				params += opt.query("encryption", dom_prefix + "encryption");
+			}
 
 			if (opt.get(dom_prefix + "tls").checked) {
 				var v_security = "tls";
@@ -454,6 +478,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					params += opt.query("pbk", dom_prefix + "reality_publicKey");
 					params += opt.query("sid", dom_prefix + "reality_shortId");
 					params += opt.query("spx", dom_prefix + "reality_spiderX");
+					params += opt.query("pqv", dom_prefix + "reality_mldsa65Verify");
 				}
 				if (opt.get(dom_prefix + "flow") && opt.get(dom_prefix + "flow").value) {
 					let v_flow = opt.get(dom_prefix + "flow").value;
@@ -462,6 +487,8 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				params += "&security=" + v_security;
 				params += opt.query("alpn", dom_prefix + "alpn");
 				params += opt.query("sni", dom_prefix + "tls_serverName");
+				params += opt.query("allowinsecure", dom_prefix + "tls_allowInsecure");
+				params += opt.query("ech", dom_prefix + "ech_config");
 			}
 
 			params += "#" + encodeURI(v_alias.value);
@@ -496,6 +523,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 			} else if (v_transport === "mkcp") {
 				v_transport = "kcp";
 				params += opt.query("headerType", dom_prefix + "mkcp_guise");
+				params += opt.query("seed", dom_prefix + "mkcp_seed");
 			} else if (v_transport === "quic") {
 				params += opt.query("headerType", dom_prefix + "quic_guise");
 				params += opt.query("key", dom_prefix + "quic_key");
@@ -520,6 +548,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					params += opt.query("pbk", dom_prefix + "reality_publicKey");
 					params += opt.query("sid", dom_prefix + "reality_shortId");
 					params += opt.query("spx", dom_prefix + "reality_spiderX");
+					params += opt.query("pqv", dom_prefix + "reality_mldsa65Verify");
 				}
 				if (opt.get(dom_prefix + "flow") && opt.get(dom_prefix + "flow").value) {
 					let v_flow = opt.get(dom_prefix + "flow").value;
@@ -528,6 +557,8 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				params += "&security=" + v_security;
 				params += opt.query("alpn", dom_prefix + "alpn");
 				params += opt.query("sni", dom_prefix + "tls_serverName");
+				params += opt.query("allowinsecure", dom_prefix + "tls_allowInsecure");
+				params += opt.query("ech", dom_prefix + "ech_config");
 			}
 			params += "#" + encodeURI(v_alias.value);
 			if (params[0] == "&") {
@@ -947,23 +978,23 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					if (queryParam.security == "tls") {
 						opt.set(dom_prefix + 'tls', true);
 						opt.set(dom_prefix + 'reality', false);
-						opt.set(dom_prefix + 'flow', queryParam.flow || '');
 						opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 						opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 						opt.set(dom_prefix + 'tls_allowInsecure', true);
-						if (queryParam.allowinsecure === '0' || queryParam.insecure === '0') {
+						if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 							opt.set(dom_prefix + 'tls_allowInsecure', false);
 						}
 						if (queryParam.fp && queryParam.fp.trim() != "") {
 							opt.set(dom_prefix + 'utls', true);
 							opt.set(dom_prefix + 'fingerprint', queryParam.fp);
 						}
+						opt.set(dom_prefix + 'ech', !!queryParam.ech);
+						opt.set(dom_prefix + 'ech_config', queryParam.ech || '');
 					}
 
 					if (queryParam.security == "reality") {
 						opt.set(dom_prefix + 'tls', true);
 						opt.set(dom_prefix + 'reality', true);
-						opt.set(dom_prefix + 'flow', queryParam.flow || '');
 						opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 						opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 						if (queryParam.fp && queryParam.fp.trim() != "") {
@@ -973,6 +1004,8 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 						opt.set(dom_prefix + 'reality_publicKey', queryParam.pbk || '');
 						opt.set(dom_prefix + 'reality_shortId', queryParam.sid || '');
 						opt.set(dom_prefix + 'reality_spiderX', queryParam.spx || '');
+						opt.set(dom_prefix + 'use_mldsa65Verify', !!queryParam.pqv);
+						opt.set(dom_prefix + 'reality_mldsa65Verify', queryParam.pqv || '');
 					}
 				}
 
@@ -1035,6 +1068,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					opt.set(dom_prefix + 'quic_key', queryParam.key);
 				} else if (queryParam.type === "mkcp") {
 					opt.set(dom_prefix + 'mkcp_guise', queryParam.headerType || "none");
+					opt.set(dom_prefix + 'mkcp_seed', queryParam.seed || "");
 				} else if (queryParam.type === "grpc") {
 					opt.set(dom_prefix + 'grpc_serviceName', (queryParam.serviceName || queryParam.path) || "");
 					opt.set(dom_prefix + 'grpc_mode', queryParam.mode || "gun");
@@ -1174,6 +1208,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				opt.set(dom_prefix + 'quic_key', queryParam.key);
 			} else if (queryParam.type === "mkcp") {
 				opt.set(dom_prefix + 'mkcp_guise', queryParam.headerType || "none");
+				opt.set(dom_prefix + 'mkcp_seed', queryParam.seed || "");
 			} else if (queryParam.type === "grpc") {
 				opt.set(dom_prefix + 'grpc_serviceName', (queryParam.serviceName || queryParam.path) || "");
 				opt.set(dom_prefix + 'grpc_mode', queryParam.mode || "gun");
@@ -1188,9 +1223,11 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				}
 				tls_serverName = tls_serverName || "";
 				opt.set(dom_prefix + 'tls_serverName', tls_serverName);
+				opt.set(dom_prefix + 'flow', (queryParam.flow || '').replace('-udp443', ''));
+				opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 			}
 			opt.set(dom_prefix + 'tls_allowInsecure', true);
-			if (queryParam.allowinsecure === '0' || queryParam.insecure === '0') {
+			if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 				opt.set(dom_prefix + 'tls_allowInsecure', false);
 			}
 
@@ -1283,7 +1320,8 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				opt.set(dom_prefix + 'quic_security', ssm.securty);
 				opt.set(dom_prefix + 'quic_key', ssm.key);
 			} else if (ssm.net === "kcp" || ssm.net === "mkcp") {
-				opt.set(dom_prefix + 'mkcp_guise', ssm.type);
+				opt.set(dom_prefix + 'mkcp_guise', ssm.type || "none");
+				opt.set(dom_prefix + 'mkcp_seed', ssm.seed || "");
 			} else if (ssm.net === "grpc") {
 				opt.set(dom_prefix + 'grpc_serviceName', ssm.path);
 			}
@@ -1323,23 +1361,25 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				if (queryParam.security == "tls") {
 					opt.set(dom_prefix + 'tls', true);
 					opt.set(dom_prefix + 'reality', false);
-					opt.set(dom_prefix + 'flow', queryParam.flow || '');
+					opt.set(dom_prefix + 'flow', (queryParam.flow || '').replace('-udp443', ''));
 					opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 					opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 					opt.set(dom_prefix + 'tls_allowInsecure', true);
-					if (queryParam.allowinsecure === '0' || queryParam.insecure === '0') {
+					if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 						opt.set(dom_prefix + 'tls_allowInsecure', false);
 					}
 					if (queryParam.fp && queryParam.fp.trim() != "") {
 						opt.set(dom_prefix + 'utls', true);
 						opt.set(dom_prefix + 'fingerprint', queryParam.fp);
 					}
+					opt.set(dom_prefix + 'ech', !!queryParam.ech);
+					opt.set(dom_prefix + 'ech_config', queryParam.ech || '');
 				}
 
 				if (queryParam.security == "reality") {
 					opt.set(dom_prefix + 'tls', true);
 					opt.set(dom_prefix + 'reality', true);
-					opt.set(dom_prefix + 'flow', queryParam.flow || '');
+					opt.set(dom_prefix + 'flow', (queryParam.flow || '').replace('-udp443', ''));
 					opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 					opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 					if (queryParam.fp && queryParam.fp.trim() != "") {
@@ -1349,6 +1389,8 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					opt.set(dom_prefix + 'reality_publicKey', queryParam.pbk || '');
 					opt.set(dom_prefix + 'reality_shortId', queryParam.sid || '');
 					opt.set(dom_prefix + 'reality_spiderX', queryParam.spx || '');
+					opt.set(dom_prefix + 'use_mldsa65Verify', !!queryParam.pqv);
+					opt.set(dom_prefix + 'reality_mldsa65Verify', queryParam.pqv || '');
 				}
 
 			}
@@ -1415,6 +1457,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				opt.set(dom_prefix + 'quic_key', queryParam.key);
 			} else if (queryParam.type === "kcp" || queryParam.type === "mkcp") {
 				opt.set(dom_prefix + 'mkcp_guise', queryParam.headerType || "none");
+				opt.set(dom_prefix + 'mkcp_seed', queryParam.seed || "");
 			} else if (queryParam.type === "grpc") {
 				opt.set(dom_prefix + 'grpc_serviceName', (queryParam.serviceName || queryParam.path) || "");
 				opt.set(dom_prefix + 'grpc_mode', queryParam.mode || "gun");
@@ -1518,7 +1561,7 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 			opt.set(dom_prefix + 'tuic_alpn', queryParam.alpn || 'default');
 			opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 			opt.set(dom_prefix + 'tls_allowInsecure', true);
-			if (queryParam.allowinsecure === '0' || queryParam.insecure === '0') {
+			if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 				opt.set(dom_prefix + 'tls_allowInsecure', false);
 			}
 			if (hash) {
@@ -1551,15 +1594,17 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 					queryParam[decodeURIComponent(params[0])] = decodeURIComponent(params[1] || '');
 				}
 			}
+			if ((!queryParam.security || queryParam.security == "") && queryParam.sni && queryParam.sni != "") {
+				queryParam.security = "tls";
+			}
 			if (queryParam.security) {
 				if (queryParam.security == "tls") {
 					opt.set(dom_prefix + 'tls', true);
 					opt.set(dom_prefix + 'reality', false);
-					opt.set(dom_prefix + 'flow', queryParam.flow || '');
 					opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 					opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 					opt.set(dom_prefix + 'tls_allowInsecure', true);
-					if (queryParam.allowinsecure === '0' || queryParam.insecure === '0') {
+					if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 						opt.set(dom_prefix + 'tls_allowInsecure', false);
 					}
 					if (queryParam.fp && queryParam.fp.trim() != "") {
@@ -1570,7 +1615,6 @@ local hysteria2_type = map:get("@global_subscribe[0]", "hysteria2_type") or "sin
 				if (queryParam.security == "reality") {
 					opt.set(dom_prefix + 'tls', true);
 					opt.set(dom_prefix + 'reality', true);
-					opt.set(dom_prefix + 'flow', queryParam.flow || '');
 					opt.set(dom_prefix + 'alpn', queryParam.alpn || 'default');
 					opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
 					if (queryParam.fp && queryParam.fp.trim() != "") {

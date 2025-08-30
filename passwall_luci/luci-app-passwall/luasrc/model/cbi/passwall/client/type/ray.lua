@@ -24,7 +24,7 @@ local ss_method_list = {
 local security_list = { "none", "auto", "aes-128-gcm", "chacha20-poly1305", "zero" }
 
 local header_type_list = {
-	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard"
+	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
 }
 
 local xray_version = api.get_app_version("xray")
@@ -58,7 +58,8 @@ for k, e in ipairs(api.get_valid_nodes()) do
 		nodes_table[#nodes_table + 1] = {
 			id = e[".name"],
 			remark = e["remark"],
-			type = e["type"]
+			type = e["type"],
+			chain_proxy = e["chain_proxy"]
 		}
 	end
 	if e.protocol == "_balancing" then
@@ -132,7 +133,7 @@ if api.compare_versions(xray_version, ">=", "1.8.10") then
 end
 
 -- 探测地址
-local ucpu = s:option(Flag, _n("useCustomProbeUrl"), translate("Use Custome Probe URL"), translate("By default the built-in probe URL will be used, enable this option to use a custom probe URL."))
+local ucpu = s:option(Flag, _n("useCustomProbeUrl"), translate("Use Custom Probe URL"), translate("By default the built-in probe URL will be used, enable this option to use a custom probe URL."))
 ucpu:depends({ [_n("balancingStrategy")] = "leastPing" })
 ucpu:depends({ [_n("balancingStrategy")] = "leastLoad" })
 
@@ -152,7 +153,10 @@ local pi = s:option(Value, _n("probeInterval"), translate("Probe Interval"))
 pi:depends({ [_n("balancingStrategy")] = "leastPing" })
 pi:depends({ [_n("balancingStrategy")] = "leastLoad" })
 pi.default = "1m"
-pi.description = translate("The interval between initiating probes. The time format is numbers + units, such as '10s', '2h45m', and the supported time units are <code>ns</code>, <code>us</code>, <code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, which correspond to nanoseconds, microseconds, milliseconds, seconds, minutes, and hours, respectively.")
+pi.placeholder = "1m"
+pi.description = translate("The interval between initiating probes.") .. "<br>" ..
+		translate("The time format is numbers + units, such as '10s', '2h45m', and the supported time units are <code>s</code>, <code>m</code>, <code>h</code>, which correspond to seconds, minutes, and hours, respectively.") .. "<br>" ..
+		translate("When the unit is not filled in, it defaults to seconds.")
 
 if api.compare_versions(xray_version, ">=", "1.8.12") then
 	ucpu:depends({ [_n("protocol")] = "_balancing" })
@@ -328,6 +332,7 @@ o.default = ""
 o:value("", translate("Disable"))
 o:value("xtls-rprx-vision")
 o:depends({ [_n("protocol")] = "vless", [_n("tls")] = true, [_n("transport")] = "raw" })
+o:depends({ [_n("protocol")] = "trojan", [_n("tls")] = true, [_n("transport")] = "raw" })
 
 o = s:option(Flag, _n("tls"), translate("TLS"))
 o.default = 0
@@ -370,6 +375,26 @@ o = s:option(Flag, _n("tls_allowInsecure"), translate("allowInsecure"), translat
 o.default = "0"
 o:depends({ [_n("tls")] = true, [_n("reality")] = false })
 
+o = s:option(Flag, _n("ech"), translate("ECH"))
+o.default = "0"
+o:depends({ [_n("tls")] = true, [_n("flow")] = "", [_n("reality")] = false })
+
+o = s:option(TextValue, _n("ech_config"), translate("ECH Config"))
+o.default = ""
+o.rows = 5
+o.wrap = "soft"
+o:depends({ [_n("ech")] = true })
+o.validate = function(self, value)
+	return api.trim(value:gsub("[\r\n]", ""))
+end
+
+o = s:option(ListValue, _n("ech_ForceQuery"), translate("ECH Query Policy"), translate("Controls the policy used when performing DNS queries for ECH configuration."))
+o.default = "none"
+o:value("none")
+o:value("half")
+o:value("full")
+o:depends({ [_n("ech")] = true })
+
 -- [[ REALITY部分 ]] --
 o = s:option(Value, _n("reality_publicKey"), translate("Public Key"))
 o:depends({ [_n("tls")] = true, [_n("reality")] = true })
@@ -399,6 +424,19 @@ o:value("randomized")
 o.default = "chrome"
 o:depends({ [_n("tls")] = true, [_n("utls")] = true })
 o:depends({ [_n("tls")] = true, [_n("reality")] = true })
+
+o = s:option(Flag, _n("use_mldsa65Verify"), translate("ML-DSA-65"))
+o.default = "0"
+o:depends({ [_n("tls")] = true, [_n("reality")] = true })
+
+o = s:option(TextValue, _n("reality_mldsa65Verify"), "ML-DSA-65 " .. translate("Public key"))
+o.default = ""
+o.rows = 5
+o.wrap = "soft"
+o:depends({ [_n("use_mldsa65Verify")] = true })
+o.validate = function(self, value)
+	return api.trim(value:gsub("[\r\n]", ""))
+end
 
 o = s:option(ListValue, _n("transport"), translate("Transport"))
 o:value("raw", "RAW (TCP)")
@@ -459,9 +497,12 @@ o:depends({ [_n("tcp_guise")] = "http" })
 
 -- [[ mKCP部分 ]]--
 
-o = s:option(ListValue, _n("mkcp_guise"), translate("Camouflage Type"), translate('<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)'))
+o = s:option(ListValue, _n("mkcp_guise"), translate("Camouflage Type"), translate('<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)<br />dns: Disguising traffic as DNS requests.'))
 for a, t in ipairs(header_type_list) do o:value(t) end
 o:depends({ [_n("transport")] = "mkcp" })
+
+o = s:option(Value, _n("mkcp_domain"), translate("Camouflage Domain"), translate("Use it together with the DNS disguised type. You can fill in any domain."))
+o:depends({ [_n("mkcp_guise")] = "dns" })
 
 o = s:option(Value, _n("mkcp_mtu"), translate("KCP MTU"))
 o.default = "1350"
@@ -656,7 +697,7 @@ o = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Onl
 o:depends({ [_n("chain_proxy")] = "2" })
 
 for k, v in pairs(nodes_table) do
-	if v.type == "Xray" and v.id ~= arg[1] then
+	if v.type == "Xray" and v.id ~= arg[1] and (not v.chain_proxy or v.chain_proxy == "") then
 		s.fields[_n("preproxy_node")]:value(v.id, v.remark)
 		s.fields[_n("to_node")]:value(v.id, v.remark)
 	end

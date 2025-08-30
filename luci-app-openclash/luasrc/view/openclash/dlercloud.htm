@@ -31,7 +31,7 @@
 }
 
 .oc[data-darkmode="true"] .card .additional .user-card::after {
-  border-left: 2px solid #dfdfdf;
+  border-left: 2px solid #ffffff33;
 }
 
 .oc[data-darkmode="true"] .card .additional .more-info h1 {
@@ -52,10 +52,7 @@
 
 .oc .dler-main-container {
   background: var(--bg-white);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  margin: 16px auto;
+  margin: 0 auto;
   width: 100%;
   transition: all var(--transition-fast);
 }
@@ -66,7 +63,7 @@
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: 16px;
+  padding: 12px;
   transition: all var(--transition-fast);
 }
 
@@ -134,8 +131,7 @@
 }
 
 .oc .card .additional .user-card img {
-  width: 60%;
-  max-width: 90px;
+  width: 65%;
   border-radius: 50%;
   position: relative;
   top: auto;
@@ -231,7 +227,7 @@
   padding-top: 10px;
   margin: 0 0 0 -15%;
   line-height: 35px;
-  color: black;
+  color: var(--text-title) !important;
 }
 
 .oc .card .general .dler-info {
@@ -295,7 +291,7 @@
 
 .oc .card .general .dler-title {
   font-weight: bold;
-  color: #444;
+  color: var(--text-primary) !important;
   font-size: 15px;
   display: inline-block;
   width: 45%;
@@ -309,7 +305,7 @@
 }
 
 .oc .card .general .dler-result {
-  color: #444;
+  color: var(--text-secondary) !important;
   font-size: 15px;
   white-space: nowrap;
   display: inline-block;
@@ -323,7 +319,7 @@
 }
 
 .oc .card .general .dler-result2 {
-  color: #444;
+  color: var(--text-secondary) !important;
   font-size: 15px;
   white-space: nowrap;
   display: inline-block;
@@ -349,10 +345,12 @@
   font-weight: bold;
   display: inline-block;
   overflow: hidden;
+  appearance: button;
   -webkit-appearance: button;
-  border: none;
+  border: none !important;
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-shadow: none !important;
 }
 
 .oc .card .general .btn:hover {
@@ -365,7 +363,7 @@
   padding: 0;
   margin: 0;
   pointer-events: auto;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -377,6 +375,8 @@
   z-index: 10;
   padding-right: 16px;
   padding-bottom: 5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .oc .card .general .more p {
@@ -386,10 +386,11 @@
   color: var(--text-secondary);
   text-align: right;
   white-space: nowrap;
-  overflow: visible;
-  width: auto;
-  min-width: max-content;
-  flex-shrink: 0;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
+  text-overflow: ellipsis;
 }
 
 .oc .card .general .more a {
@@ -398,6 +399,7 @@
   opacity: 0.8;
   transition: opacity var(--transition-fast);
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .oc .card .general .more a:hover {
@@ -424,7 +426,6 @@
 
 @media screen and (max-width: 1200px) {
   .oc .dler-main-container {
-    margin: 11px auto;
     width: calc(100% - 32px);
   }
   
@@ -434,10 +435,6 @@
   
   .oc .card .additional .user-card {
     width: 140px;
-  }
-  
-  .oc .card .additional .user-card img {
-    max-width: 80px;
   }
   
   .oc .card .additional .more-info h1 {
@@ -462,12 +459,7 @@
 
 @media screen and (max-width: 768px) {
   .oc .dler-main-container {
-    margin: 10px auto;
     width: 100%;
-  }
-  
-  .oc .center {
-    padding: 14px;
   }
   
   .oc .card .additional.collapsed {
@@ -476,10 +468,6 @@
   
   .oc .card .additional .user-card {
     width: 125px;
-  }
-  
-  .oc .card .additional .user-card img {
-    max-width: 70px;
   }
   
   .oc .card .additional .more-info h1 {
@@ -506,7 +494,7 @@
     grid-template-rows: auto auto auto;
     gap: 12px;
     padding-right: 8px;
-    height: 60%;
+    height: 50%;
   }
   
   .oc .card .general .dler-info-right {
@@ -516,9 +504,10 @@
   }
   
   .oc .card .general .btn {
-    width: 80px;
+    width: 80px !important;
     height: 80px !important;
     font-size: 14px;
+    padding: 0 !important;
   }
   
   .oc .card .general .dler-title {
@@ -537,11 +526,15 @@
     padding-right: 10px;
   }
 
+  .oc .card .general .more p {
+    font-size: 13px;
+  }
+
 }
 
 @media screen and (max-width: 575px) {
   .oc .center {
-    padding: 12px;
+    padding: 8px;
   }
   
   .oc .card .additional.collapsed {
@@ -550,10 +543,6 @@
   
   .oc .card .additional .user-card {
     width: 115px;
-  }
-  
-  .oc .card .additional .user-card img {
-    max-width: 60px;
   }
   
   .oc .card .additional .more-info h1 {
@@ -570,7 +559,7 @@
   }
 
   .oc .card .general .dler-info {
-    height: 60%;
+    height: 50%;
   }
   
   .oc .card .general h1 {
@@ -596,9 +585,14 @@
   }
 
   .oc .card .general .btn {
-    width: 60px;
+    width: 60px !important;
     height: 60px !important;
     font-size: 10px;
+    padding: 0 !important;
+  }
+
+  .oc .card .general .more p {
+    font-size: 11px;
   }
 }
 </style>
@@ -698,13 +692,8 @@
 
   document.addEventListener('DOMContentLoaded', function() {
       DarkModeDetector.init();
-  });
-
-  window.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      obj.classList.add('collapsed');
-      obj.classList.remove('expanded');
-    }, 100);
+      obj.classList.remove('collapsed');
+      obj.classList.add('expanded');
   });
    
   XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "dler_info")%>', null, function(x, status) {

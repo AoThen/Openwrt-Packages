@@ -389,6 +389,15 @@ eval_cache_var() {
 	[ -s "$TMP_PATH/var" ] && eval $(cat "$TMP_PATH/var")
 }
 
+has_1_65535() {
+	local val="$1"
+	val=${val//:/-}
+	case ",$val," in
+		*,1-65535,*) return 0 ;;
+		*) return 1 ;;
+	esac
+}
+
 run_ipt2socks() {
 	local flag proto tcp_tproxy local_port socks_address socks_port socks_username socks_password log_file
 	local _extra_param=""
@@ -679,7 +688,7 @@ run_socks() {
 			local _args="http_address=$bind http_port=$http_port"
 		}
 		[ -n "$relay_port" ] && _args="${_args} server_host=$server_host server_port=$server_port"
-		[ -n "$no_run" ] && _args="${_args} -no_run 1"
+		[ -n "$no_run" ] && _args="${_args} no_run=1"
 		run_singbox flag=$flag node=$node socks_address=$bind socks_port=$socks_port config_file=$config_file log_file=$log_file ${_args}
 	;;
 	xray)
@@ -689,7 +698,7 @@ run_socks() {
 			local _args="http_address=$bind http_port=$http_port"
 		}
 		[ -n "$relay_port" ] && _args="${_args} server_host=$server_host server_port=$server_port"
-		[ -n "$no_run" ] && _args="${_args} -no_run 1"
+		[ -n "$no_run" ] && _args="${_args} no_run=1"
 		run_xray flag=$flag node=$node socks_address=$bind socks_port=$socks_port config_file=$config_file log_file=$log_file ${_args}
 	;;
 	trojan*)
@@ -1236,13 +1245,17 @@ socks_node_switch() {
 	local flag new_node
 	eval_set_val $@
 	[ -n "$flag" ] && [ -n "$new_node" ] && {
+		local prefix pf filename
 		# 结束 SS 插件进程
-		local pf; for pf in "$TMP_PATH"/{,HTTP_}SOCKS_"$flag"_plugin.pid; do
+		for prefix in "" "HTTP_"; do
+			pf="$TMP_PATH/${prefix}SOCKS_${flag}_plugin.pid"
 			[ -s "$pf" ] && kill -9 "$(head -n1 "$pf")" >/dev/null 2>&1
 		done
 
 		pgrep -af "$TMP_BIN_PATH" | awk -v P1="${flag}" 'BEGIN{IGNORECASE=1}$0~P1 && !/acl\/|acl_/{print $1}' | xargs kill -9 >/dev/null 2>&1
-		rm -rf "$TMP_PATH"/{,HTTP_,HTTP2}SOCKS_"$flag"*
+		for prefix in "" "HTTP_" "HTTP2"; do
+			rm -rf "$TMP_PATH/${prefix}SOCKS_${flag}"*
+		done
 
 		for filename in $(ls ${TMP_SCRIPT_FUNC_PATH}); do
 			cmd=$(cat ${TMP_SCRIPT_FUNC_PATH}/${filename})
@@ -1794,10 +1807,9 @@ acl_app() {
 		dnsmasq_port=${GLOBAL_DNSMASQ_PORT:-11400}
 		chinadns_port=11500
 		for item in $items; do
-			sid=$(uci -q show "${CONFIG}.${item}" | grep "=acl_rule" | awk -F '=' '{print $1}' | awk -F '.' '{print $2}')
+			local sid=$(uci -q show "${CONFIG}.${item}" | grep "=acl_rule" | awk -F '=' '{print $1}' | awk -F '.' '{print $2}')
+			[ "$(config_n_get $sid enabled)" = "1" ] || continue
 			eval $(uci -q show "${CONFIG}.${item}" | cut -d'.' -sf 3-)
-
-			[ "$enabled" = "1" ] || continue
 
 			if [ -n "${sources}" ]; then
 				for s in $sources; do
@@ -1833,7 +1845,7 @@ acl_app() {
 			}
 			tcp_no_redir_ports=${tcp_no_redir_ports:-${TCP_NO_REDIR_PORTS}}
 			udp_no_redir_ports=${udp_no_redir_ports:-${UDP_NO_REDIR_PORTS}}
-			if [ "$tcp_no_redir_ports" == "1:65535" ] && [ "$udp_no_redir_ports" == "1:65535" ]; then
+			if has_1_65535 "$tcp_no_redir_ports" && has_1_65535 "$udp_no_redir_ports"; then
 				unset use_global_config
 				unset tcp_node
 				unset udp_node
@@ -2011,7 +2023,7 @@ acl_app() {
 								run_dns ${_dns_port}
 							fi
 							set_cache_var "ACL_${sid}_tcp_node" "${tcp_node}"
-							set_cache_var "ACL_${sid}_tcp_redir_port" "${redir_port}"
+							set_cache_var "ACL_${sid}_tcp_redir_port" "${tcp_port}"
 						fi
 					}
 				fi
@@ -2027,9 +2039,9 @@ acl_app() {
 					else
 						echolog "  - 全局节点未启用，跳过【${remarks}】"
 					fi
-				elif [ "$udp_node" = "tcp" ]; then
+				elif [ "$udp_node" = "tcp" ] || [ "$udp_node" = "$tcp_node" ]; then
 					udp_node=$(get_cache_var "ACL_${sid}_tcp_node")
-					udp_port=$(get_cache_var "ACL_${sid}_tcp_port")
+					udp_port=$(get_cache_var "ACL_${sid}_tcp_redir_port")
 					set_cache_var "ACL_${sid}_udp_node" "${udp_node}"
 					set_cache_var "ACL_${sid}_udp_redir_port" "${udp_port}"
 				else
@@ -2066,7 +2078,7 @@ acl_app() {
 								fi
 							fi
 							set_cache_var "ACL_${sid}_udp_node" "${udp_node}"
-							set_cache_var "ACL_${sid}_udp_redir_port" "${redir_port}"
+							set_cache_var "ACL_${sid}_udp_redir_port" "${udp_port}"
 						fi
 					}
 				fi
@@ -2080,7 +2092,7 @@ acl_app() {
 }
 
 start() {
-	mkdir -p /tmp/etc $TMP_PATH $TMP_BIN_PATH $TMP_SCRIPT_FUNC_PATH $TMP_ROUTE_PATH $TMP_ACL_PATH $TMP_PATH2
+	mkdir -p /tmp/etc /tmp/log $TMP_PATH $TMP_BIN_PATH $TMP_SCRIPT_FUNC_PATH $TMP_ROUTE_PATH $TMP_ACL_PATH $TMP_PATH2
 	get_config
 	export V2RAY_LOCATION_ASSET=$(config_t_get global_rules v2ray_location_asset "/usr/share/v2ray/")
 	export XRAY_LOCATION_ASSET=$V2RAY_LOCATION_ASSET

@@ -5,6 +5,7 @@
 . /usr/share/openclash/log.sh
 . /lib/functions/procd.sh
 . /usr/share/openclash/openclash_curl.sh
+. /usr/share/openclash/uci.sh
 
 set_lock() {
    exec 889>"/tmp/lock/openclash_subs.lock" 2>/dev/null
@@ -22,14 +23,16 @@ LOGTIME=$(echo $(date "+%Y-%m-%d %H:%M:%S"))
 LOG_FILE="/tmp/openclash.log"
 CFG_FILE="/tmp/yaml_sub_tmp_config.yaml"
 CRON_FILE="/etc/crontabs/root"
-CONFIG_PATH=$(uci -q get openclash.config.config_path)
-servers_update=$(uci -q get openclash.config.servers_update)
-router_self_proxy=$(uci -q get openclash.config.router_self_proxy || echo 1)
+CONFIG_PATH=$(uci_get "config_path")
+servers_update=$(uci_get "servers_update")
+router_self_proxy=$(uci_get "router_self_proxy" || echo 1)
 FW4=$(command -v fw4)
 CLASH="/etc/openclash/clash"
 CLASH_CONFIG="/etc/openclash"
 restart=0
 only_download=0
+
+inc_job_counter
 
 urlencode() {
    if [ "$#" -eq 1 ]; then
@@ -517,18 +520,5 @@ config_foreach sub_info_get "config_subscribe" "$1"
 uci -q delete openclash.config.config_update_path
 uci commit openclash
 
-if [ "$restart" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ]; then
-   /etc/init.d/openclash restart >/dev/null 2>&1 &
-elif [ "$restart" -eq 0 ] && [ "$(unify_ps_prevent)" -eq 0 ] && [ "$(uci -q get openclash.config.restart)" -eq 1 ]; then
-   /etc/init.d/openclash restart >/dev/null 2>&1 &
-   uci -q set openclash.config.restart=0
-   uci -q commit openclash
-elif [ "$restart" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ]; then
-   uci -q set openclash.config.restart=1
-   uci -q commit openclash
-else
-   sed -i '/openclash.sh/d' $CRON_FILE 2>/dev/null
-   [ "$(uci -q get openclash.config.auto_update)" -eq 1 ] && [ "$(uci -q get openclash.config.config_auto_update_mode)" -ne 1 ] && echo "0 $(uci -q get openclash.config.auto_update_time) * * $(uci -q get openclash.config.config_update_week_time) /usr/share/openclash/openclash.sh" >> $CRON_FILE
-   /etc/init.d/cron restart
-fi
+dec_job_counter_and_restart "$restart"
 del_lock

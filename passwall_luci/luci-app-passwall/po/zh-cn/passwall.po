@@ -52,6 +52,9 @@ msgstr "规则列表"
 msgid "Access control"
 msgstr "访问控制"
 
+msgid "Watch Logs"
+msgstr "查看日志"
+
 msgid "Node Config"
 msgstr "节点配置"
 
@@ -96,6 +99,9 @@ msgstr "Socks 配置"
 
 msgid "Socks Node"
 msgstr "Socks 节点"
+
+msgid "Current Node"
+msgstr "当前节点"
 
 msgid "Listen Port"
 msgstr "监听端口"
@@ -442,7 +448,7 @@ msgstr "负载均衡策略"
 msgid "Fallback Node"
 msgstr "后备节点"
 
-msgid "Use Custome Probe URL"
+msgid "Use Custom Probe URL"
 msgstr "使用自定义探测网址"
 
 msgid "By default the built-in probe URL will be used, enable this option to use a custom probe URL."
@@ -457,8 +463,14 @@ msgstr "用于检测连接状态的网址。"
 msgid "Probe Interval"
 msgstr "探测间隔"
 
-msgid "The interval between initiating probes. The time format is numbers + units, such as '10s', '2h45m', and the supported time units are <code>ns</code>, <code>us</code>, <code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code>, which correspond to nanoseconds, microseconds, milliseconds, seconds, minutes, and hours, respectively."
-msgstr "发起探测的间隔。时间格式为数字+单位，比如<code>&quot;10s&quot;</code>, <code>&quot;2h45m&quot;</code>，支持的时间单位有 <code>ns</code>，<code>us</code>，<code>ms</code>，<code>s</code>，<code>m</code>，<code>h</code>，分别对应纳秒、微秒、毫秒、秒、分、时。"
+msgid "The interval between initiating probes."
+msgstr "发起探测的间隔。"
+
+msgid "The time format is numbers + units, such as '10s', '2h45m', and the supported time units are <code>s</code>, <code>m</code>, <code>h</code>, which correspond to seconds, minutes, and hours, respectively."
+msgstr "时间格式为数字+单位，比如<code>&quot;10s&quot;</code>, <code>&quot;2h45m&quot;</code>，支持的时间单位有 <code>s</code>，<code>m</code>，<code>h</code>，分别对应秒、分、时。"
+
+msgid "When the unit is not filled in, it defaults to seconds."
+msgstr "未填写单位时，默认为秒。"
 
 msgid "Preferred Node Count"
 msgstr "优选节点数量"
@@ -973,6 +985,12 @@ msgstr "Geo 规则文件目录"
 msgid "This variable specifies a directory where geoip.dat and geosite.dat files are."
 msgstr "此变量指定 geoip.dat 和 geosite.dat 文件所在的目录。"
 
+msgid "Generate Rule List from Geo"
+msgstr "从 Geo 文件生成规则"
+
+msgid "Generate rule lists such as GFW, China domains, and China IP ranges based on Geo files."
+msgstr "根据 Geo 文件生成规则列表，包括 GFW、中国域名和中国 IP 段等。"
+
 msgid "Enable Geo Data Parsing"
 msgstr "开启 Geo 数据解析"
 
@@ -1063,8 +1081,14 @@ msgstr "订阅网址"
 msgid "Subscribe URL Access Method"
 msgstr "订阅网址访问方式"
 
-msgid "Please input the subscription url first, save and submit before manual subscription."
-msgstr "请输入订阅网址保存应用后再手动订阅。"
+msgid "When adding a new subscription, please save and apply before manually subscribing. If you only change the subscription URL, you can subscribe manually, and the system will save it automatically."
+msgstr "新增订阅请先保存并应用后再手动订阅；如仅修改订阅地址，可直接手动订阅，系统将自动保存。"
+
+msgid "Please save and apply before manually subscribing."
+msgstr "请先保存并应用后再手动订阅。"
+
+msgid "Subscribe URL cannot be empty."
+msgstr "订阅网址不能为空。"
 
 msgid "Subscribe via proxy"
 msgstr "通过代理订阅"
@@ -1306,6 +1330,9 @@ msgstr "本地地址"
 msgid "Decimal numbers separated by \",\" or Base64-encoded strings."
 msgstr "用“,”隔开的十进制数字或 Base64 编码字符串。"
 
+msgid "Camouflage Domain"
+msgstr "伪装域名"
+
 msgid "Camouflage Type"
 msgstr "伪装类型"
 
@@ -1384,8 +1411,11 @@ msgstr "TUIC socks5 服务器可以从外部接收的最大数据包大小（以
 msgid "Set if the listening socket should be dual-stack"
 msgstr "设置监听套接字为双栈"
 
-msgid "<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)"
-msgstr "<br />none：默认值，不进行伪装，发送的数据是没有特征的数据包。<br />srtp：伪装成 SRTP 数据包，会被识别为视频通话数据（如 FaceTime）。<br />utp：伪装成 uTP 数据包，会被识别为 BT 下载数据。<br />wechat-video：伪装成微信视频通话的数据包。<br />dtls：伪装成 DTLS 1.2 数据包。<br />wireguard：伪装成 WireGuard 数据包。(并不是真正的 WireGuard 协议)"
+msgid "<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)<br />dns: Disguising traffic as DNS requests."
+msgstr "<br />none：默认值，不进行伪装，发送的数据是没有特征的数据包。<br />srtp：伪装成 SRTP 数据包，会被识别为视频通话数据（如 FaceTime）。<br />utp：伪装成 uTP 数据包，会被识别为 BT 下载数据。<br />wechat-video：伪装成微信视频通话的数据包。<br />dtls：伪装成 DTLS 1.2 数据包。<br />wireguard：伪装成 WireGuard 数据包。(并不是真正的 WireGuard 协议)<br />dns：把流量伪装成 DNS 请求。"
+
+msgid "Use it together with the DNS disguised type. You can fill in any domain."
+msgstr "配合伪装类型 DNS 使用，可随便填一个域名。"
 
 msgid "A legal file path. This file must not exist before running."
 msgstr "一个合法的文件路径。在运行之前，这个文件必须不存在。"
@@ -1691,16 +1721,16 @@ msgid "Protocol parameter. Enable length block encryption."
 msgstr "协议参数。启用长度块加密。"
 
 msgid "ECH Config"
-msgstr "ECH 密钥"
-
-msgid "ECH Key"
 msgstr "ECH 配置"
 
-msgid "PQ signature schemes"
-msgstr "后量子对等证书签名方案"
+msgid "ECH Key"
+msgstr "ECH 密钥"
 
-msgid "Disable adaptive sizing of TLS records"
-msgstr "禁用 TLS 记录的自适应大小调整"
+msgid "ECH Query Policy"
+msgstr "ECH 查询策略"
+
+msgid "Controls the policy used when performing DNS queries for ECH configuration."
+msgstr "控制使用 DNS 查询 ECH 配置时的策略。"
 
 msgid "Enable Multipath TCP, need to be enabled in both server and client configuration."
 msgstr "启用 Multipath TCP，需在服务端和客户端配置中同时启用。"
@@ -1728,6 +1758,12 @@ msgstr "分片间隔"
 
 msgid "Fragmentation interval (ms)"
 msgstr "分片间隔（ms）"
+
+msgid "Split handshake data into multiple TLS records for better censorship evasion. Low overhead. Recommended to enable first."
+msgstr "将握手数据拆分为多个 TLS 记录，提升抗封锁能力，几乎不增加延迟，建议优先启用。"
+
+msgid "Split handshake into multiple TCP segments. Enhances obfuscation. May increase delay. Use only if needed."
+msgstr "将 TLS 握手数据分为多个 TCP 包发送，提高伪装性，可能增加延迟，仅在封锁严重时使用。"
 
 msgid "Noise"
 msgstr "噪声"
@@ -1759,6 +1795,15 @@ msgstr "落地节点"
 msgid "Only support a layer of proxy."
 msgstr "仅支持一层代理。"
 
+msgid ""
+"Chained proxy works only with Xray or Sing-box nodes.<br>"
+"The chained node must be the same type as your subscription node (Xray with Xray, Sing-box with Sing-box).<br>"
+"You can only use manual or imported nodes as chained nodes."
+msgstr ""
+"链式代理仅支持 Xray 与 Sing-box 节点。<br>"
+"链式节点需与订阅节点类型一致（Xray 对应 Xray，Sing-box 对应 Sing-box）。<br>"
+"仅支持手动添加或导入的节点用作链式节点。"
+
 msgid "Only work with using the %s node."
 msgstr "与使用 %s 节点时生效。"
 
@@ -1771,8 +1816,8 @@ msgstr "总行数："
 msgid "Read List"
 msgstr "读取列表"
 
-msgid "Log Maint"
-msgstr "日志维护"
+msgid "Maintain"
+msgstr "维护"
 
 msgid "Backup and Restore"
 msgstr "备份还原"
@@ -1807,6 +1852,15 @@ msgstr "恢复默认配置"
 msgid "Do Reset"
 msgstr "执行重置"
 
+msgid "Please select a file first."
+msgstr "请先选择一个文件。"
+
+msgid "Invalid file type. Please upload a .tar.gz file."
+msgstr "文件类型无效，请上传一个 .tar.gz 文件。"
+
+msgid "File size exceeds 10MB limit."
+msgstr "文件大小超过 10MB 限制。"
+
 msgid "Do you want to restore the client to default settings?"
 msgstr "是否要恢复客户端默认配置？"
 
@@ -1828,9 +1882,6 @@ msgstr "要测试的节点列表，<a target='_blank' href='https://sing-box.sag
 msgid "Test interval"
 msgstr "测试间隔"
 
-msgid "The test interval in seconds."
-msgstr "测试间隔时间（单位：秒）。"
-
 msgid "Test interval must be less or equal than idle timeout."
 msgstr "测试间隔时间必须小于或等于空闲超时时间。"
 
@@ -1843,8 +1894,8 @@ msgstr "测试容差时间（单位：毫秒）。"
 msgid "Idle timeout"
 msgstr "空闲超时"
 
-msgid "The idle timeout in seconds."
-msgstr "空闲超时时间（单位：秒）。"
+msgid "The idle timeout."
+msgstr "空闲超时时间。"
 
 msgid "Interrupt existing connections"
 msgstr "中断现有连接"
@@ -1905,3 +1956,21 @@ msgstr "可以通过输入 GeoIP/Geosite，提取它们所包含的域名/IP。"
 
 msgid "Use the GeoIP/Geosite query function to verify if the entered Geo rules are correct."
 msgstr "利用 GeoIP/Geosite 查询功能，可以验证输入的 Geo 规则是否正确。"
+
+msgid "Private Key Passphrase"
+msgstr "私钥指纹"
+
+msgid "Host Key"
+msgstr "主机密钥"
+
+msgid "Accept any if empty."
+msgstr "留空则不校验。"
+
+msgid "Host Key Algorithms"
+msgstr "主机密钥算法"
+
+msgid "Client Version"
+msgstr "客户端版本"
+
+msgid "Random version will be used if empty."
+msgstr "如留空，则使用随机版本。"

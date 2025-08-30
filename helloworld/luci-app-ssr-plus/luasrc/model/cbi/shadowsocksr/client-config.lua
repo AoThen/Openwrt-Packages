@@ -22,6 +22,22 @@ local function is_installed(e)
 	return luci.model.ipkg.installed(e)
 end
 
+local function showMsg_Redirect(redirectUrl, delay)
+	local redirectUrl = redirectUrl or ""
+	local delay = delay or 3000
+	luci.http.write([[
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+				setTimeout(function() {
+					if ("]] .. redirectUrl .. [[" !== "") {
+						window.location.href = "]] .. redirectUrl .. [[";
+					}
+				}, ]] .. delay .. [[);
+			});
+		</script>
+	]])
+end
+
 local has_ss_rust = is_finded("sslocal") or is_finded("ssserver")
 local has_ss_libev = is_finded("ss-redir") or is_finded("ss-local")
 
@@ -136,6 +152,11 @@ m.redirect = luci.dispatcher.build_url("admin/services/shadowsocksr/servers")
 if m.uci:get("shadowsocksr", sid) ~= "servers" then
 	luci.http.redirect(m.redirect)
 	return
+end
+-- 保存&应用成功后跳转到节点列表
+m.apply_on_parse = true
+m.on_after_apply = function(self)
+	showMsg_Redirect(self.redirect, 4500)
 end
 
 -- [[ Servers Setting ]]--
@@ -387,6 +408,7 @@ o:depends("type", "ssr")
 -- [[ Hysteria2 ]]--
 o = s:option(Value, "hy2_auth", translate("Users Authentication"))
 o:depends("type", "hysteria2")
+o.password = true
 o.rmempty = false
 
 o = s:option(Flag, "flag_port_hopping", translate("Enable Port Hopping"))
@@ -434,6 +456,7 @@ o.placeholder = "salamander"
 
 o = s:option(Value, "salamander", translate("Obfuscation Password"))
 o:depends({type = "hysteria2", flag_obfs = "1"})
+o.password = true
 o.rmempty = true
 o.placeholder = "cry_me_a_r1ver"
 
@@ -554,6 +577,7 @@ o.default="auto"
 -- [[ TUIC ]]
 -- TuicNameId
 o = s:option(Value, "tuic_uuid", translate("TUIC User UUID"))
+o.password = true
 o.rmempty = true
 o.default = uuid
 o:depends("type", "tuic")
@@ -567,6 +591,7 @@ o:depends("type", "tuic")
 
 -- Tuic Password
 o = s:option(Value, "tuic_passwd", translate("TUIC User Password"))
+o.password = true
 o.rmempty = true
 o.default = ""
 o:depends("type", "tuic")
@@ -654,6 +679,7 @@ o:depends({type = "v2ray", v2ray_protocol = "vmess"})
 
 -- VmessId
 o = s:option(Value, "vmess_id", translate("Vmess/VLESS ID (UUID)"))
+o.password = true
 o.rmempty = true
 o.default = uuid
 o:depends({type = "v2ray", v2ray_protocol = "vmess"})
@@ -688,8 +714,7 @@ o:value("raw", "RAW (TCP)")
 o:value("kcp", "mKCP")
 o:value("ws", "WebSocket")
 o:value("httpupgrade", "HTTPUpgrade")
-o:value("splithttp", "SplitHTTP")
-o:value("xhttp", "XHTTP")
+o:value("xhttp", "XHTTP (SplitHTTP)")
 o:value("h2", "HTTP/2")
 o:value("quic", "QUIC")
 o:value("grpc", "gRPC")
@@ -758,30 +783,9 @@ o = s:option(Value, "httpupgrade_path", translate("Httpupgrade Path"))
 o:depends("transport", "httpupgrade")
 o.rmempty = true
 
--- [[ splithttp部分 ]]--
-
--- splithttp域名
-o = s:option(Value, "splithttp_host", translate("Splithttp Host"))
-o:depends({transport = "splithttp", tls = false})
-o.rmempty = true
-
--- splithttp路径
-o = s:option(Value, "splithttp_path", translate("Splithttp Path"))
-o:depends("transport", "splithttp")
-o.rmempty = true
-
 -- [[ XHTTP部分 ]]--
-o = s:option(ListValue, "xhttp_alpn", translate("XHTTP Alpn"))
-o.default = ""
-o:value("", translate("Default"))
-o:value("h3")
-o:value("h2")
-o:value("h3,h2")
-o:value("http/1.1")
-o:value("h2,http/1.1")
-o:value("h3,h2,http/1.1")
-o:depends("transport", "xhttp")
 
+-- XHTTP 模式
 o = s:option(ListValue, "xhttp_mode", translate("XHTTP Mode"))
 o:depends("transport", "xhttp")
 o.default = "auto"
@@ -790,15 +794,19 @@ o:value("packet-up")
 o:value("stream-up")
 o:value("stream-one")
 
+-- XHTTP 主机
 o = s:option(Value, "xhttp_host", translate("XHTTP Host"))
-o:depends({transport = "xhttp", tls = false})
+o.datatype = "hostname"
+o:depends("transport", "xhttp")
 o.rmempty = true
 
+-- XHTTP 路径
 o = s:option(Value, "xhttp_path", translate("XHTTP Path"))
 o.placeholder = "/"
 o:depends("transport", "xhttp")
 o.rmempty = true
 
+-- XHTTP 附加项
 o = s:option(Flag, "enable_xhttp_extra", translate("XHTTP Extra"))
 o.description = translate("Enable this option to configure XHTTP Extra (JSON format).")
 o.rmempty = true
@@ -841,6 +849,18 @@ o.validate = function(self, value)
 
     return value
 end
+
+-- XHTTP ALPN
+o = s:option(ListValue, "xhttp_alpn", translate("XHTTP ALPN"))
+o.default = ""
+o:value("", translate("Default"))
+o:value("h3")
+o:value("h2")
+o:value("h3,h2")
+o:value("http/1.1")
+o:value("h2,http/1.1")
+o:value("h3,h2,http/1.1")
+o:depends({transport = "xhttp", tls = true})
 
 -- [[ H2部分 ]]--
 
@@ -1103,6 +1123,52 @@ if is_finded("xray") then
 	o:value("", translate("disable"))
 	o:depends({type = "v2ray", tls = true})
 	o:depends({type = "v2ray", reality = true})
+
+	o = s:option(Flag, "enable_ech", translate("Enable ECH(optional)"))
+	o.rmempty = true
+	o.default = "0"
+	o:depends({type = "v2ray", tls = true})
+
+	o = s:option(TextValue, "ech_config", translate("ECH Config"))
+	o.description = translate(
+    	"<font><b>" .. translate("If it is not empty, it indicates that the Client has enabled Encrypted Client, see:") .. "</b></font>" ..
+    	" <a href='https://xtls.github.io/config/transport.html#tlsobject' target='_blank'>" ..
+    	"<font style='color:green'><b>" .. translate("Click to the page") .. "</b></font></a>")
+	o:depends("enable_ech", true)
+	o.default = ""
+	o.rows = 5
+	o.wrap = "soft"
+	o.validate = function(self, value)
+    	-- 清理空行和多余换行
+    	return (value:gsub("[\r\n]", "")):gsub("^%s*(.-)%s*$", "%1")
+	end
+
+	o = s:option(ListValue, "ech_ForceQuery", translate("ECH Query Policy"))
+	o.description = translate("Controls the policy used when performing DNS queries for ECH configuration.")
+	o.default = "none"
+	o:value("none")
+	o:value("half")
+	o:value("full")
+	o:depends("enable_ech", true)
+
+	o = s:option(Flag, "enable_mldsa65verify", translate("Enable ML-DSA-65(optional)"))
+	o.rmempty = true
+	o.default = "0"
+	o:depends({type = "v2ray", reality = true})
+
+	o = s:option(TextValue, "reality_mldsa65verify", translate("ML-DSA-65 Public key"))
+	o.description = translate(
+    	"<font><b>" .. translate("The client has not configured mldsa65Verify, but it will not perform the \"additional verification\" step and can still connect normally, see:") .. "</b></font>" ..
+    	" <a href='https://github.com/XTLS/Xray-core/pull/4915' target='_blank'>" ..
+    	"<font style='color:green'><b>" .. translate("Click to the page") .. "</b></font></a>")
+	o:depends("enable_mldsa65verify", true)
+	o.default = ""
+	o.rows = 5
+	o.wrap = "soft"
+	o.validate = function(self, value)
+    	-- 清理空行和多余换行
+    	return (value:gsub("[\r\n]", "")):gsub("^%s*(.-)%s*$", "%1")
+	end
 end
 
 o = s:option(Value, "tls_host", translate("TLS Host"))
@@ -1112,10 +1178,13 @@ o:depends("xtls", true)
 o:depends("reality", true)
 o.rmempty = true
 
-o = s:option(DynamicList, "tls_alpn", translate("TLS ALPN"))
+o = s:option(ListValue, "tls_alpn", translate("TLS ALPN"))
+o.default = ""
+o:value("", translate("Default"))
+o:value("h3")
+o:value("spdy/3.1")
+o:value("h3,spdy/3.1")
 o:depends("type", "tuic")
-o.default = "h3"
-o.rmempty = true
 
 -- [[ allowInsecure ]]--
 o = s:option(Flag, "insecure", translate("allowInsecure"))
@@ -1322,5 +1391,4 @@ if is_finded("kcptun-client") then
 end
 
 return m
-
 

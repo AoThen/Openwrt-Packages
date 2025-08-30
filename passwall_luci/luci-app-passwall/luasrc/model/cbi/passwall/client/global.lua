@@ -741,6 +741,10 @@ s:tab("faq", "FAQ")
 o = s:taboption("faq", DummyValue, "")
 o.template = appname .. "/global/faq"
 
+s:tab("maintain", translate("Maintain"))
+o = s:taboption("maintain", DummyValue, "")
+o.template = appname .. "/global/backup"
+
 -- [[ Socks Server ]]--
 o = s:taboption("Main", Flag, "socks_enabled", "Socks " .. translate("Main switch"))
 o.rmempty = false
@@ -770,6 +774,18 @@ o.rmempty = false
 
 o = s2:option(ListValue, "node", translate("Socks Node"))
 
+o = s2:option(DummyValue, "now_node", translate("Current Node"))
+o.rawhtml = true
+o.cfgvalue = function(_, n)
+	local current_node = api.get_cache_var("socks_" .. n)
+	if current_node then
+		local node = m:get(current_node)
+		if node then
+			return (api.get_node_remarks(node) or ""):gsub("(：)%[", "%1<br>[")
+		end
+	end
+end
+
 local n = 1
 m.uci:foreach(appname, "socks", function(s)
 	if s[".name"] == section then
@@ -784,7 +800,7 @@ o.datatype = "port"
 o.rmempty = false
 
 if has_singbox or has_xray then
-	o = s2:option(Value, "http_port", "HTTP " .. translate("Listen Port") .. " " .. translate("0 is not use"))
+	o = s2:option(Value, "http_port", "HTTP " .. translate("Listen Port"))
 	o.default = 0
 	o.datatype = "port"
 end

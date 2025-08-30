@@ -27,7 +27,7 @@ function IsYmlFile(e)
 end
 
 function default_config_set(f)
-	local cf = uci:get("openclash", "config", "config_path")
+	local cf = fs.uci_get("config", "config_path")
 	if cf == "/etc/openclash/config/"..f or not cf or cf == "" or not fs.isfile(cf) then
 		if CHIF == "1" and cf == "/etc/openclash/config/"..f then
 			return
@@ -119,26 +119,30 @@ HTTP.setfilehandler(
 			elseif fp == "rule-provider" then
 				um.value = translate("File saved to") .. ' "/etc/openclash/rule_provider/"'
 			elseif fp == "clash_meta" then
+				local archive_path = core_dir .. meta.file
 				if string.lower(string.sub(meta.file, -7, -1)) == ".tar.gz" then
 					-- tar.gz
-					os.execute(string.format("tar -C '/etc/openclash/core/core' -xzf '%s' >/dev/null 2>&1", (core_dir .. meta.file)))
-					local first_file_cmd = "find /etc/openclash/core/core -type f 2>/dev/null | head -1"
+					os.execute(string.format("tar -C '/etc/openclash/core/core' -xzf '%s' >/dev/null 2>&1", archive_path))
+					os.execute(string.format("rm -f '%s' >/dev/null 2>&1", archive_path))
+					local first_file_cmd = "find /etc/openclash/core/core -type f ! -name '*.tar.gz' ! -name '*.tar' ! -name '*.gz' 2>/dev/null | head -1"
 					local first_file = io.popen(first_file_cmd):read("*line")
 					if first_file and first_file ~= "" then
 						os.execute(string.format("mv '%s' '/etc/openclash/core/%s' >/dev/null 2>&1", first_file, fp))
 					end
 				elseif string.lower(string.sub(meta.file, -4, -1)) == ".tar" then
 					-- tar
-					os.execute(string.format("tar -C '/etc/openclash/core/core' -xf '%s' >/dev/null 2>&1", (core_dir .. meta.file)))
-					local first_file_cmd = "find /etc/openclash/core/core -type f 2>/dev/null | head -1"
+					os.execute(string.format("tar -C '/etc/openclash/core/core' -xf '%s' >/dev/null 2>&1", archive_path))
+					os.execute(string.format("rm -f '%s' >/dev/null 2>&1", archive_path))
+					local first_file_cmd = "find /etc/openclash/core/core -type f ! -name '*.tar' ! -name '*.gz' 2>/dev/null | head -1"
 					local first_file = io.popen(first_file_cmd):read("*line")
 					if first_file and first_file ~= "" then
 						os.execute(string.format("mv '%s' '/etc/openclash/core/%s' >/dev/null 2>&1", first_file, fp))
 					end
 				elseif string.lower(string.sub(meta.file, -3, -1)) == ".gz" then
 					-- gz
-					os.execute(string.format("gzip -fd '%s' >/dev/null 2>&1", (core_dir .. meta.file)))
-					local first_file_cmd = "find /etc/openclash/core/core -type f 2>/dev/null | head -1"
+					os.execute(string.format("gzip -fd '%s' >/dev/null 2>&1", archive_path))
+					os.execute(string.format("rm -f '%s' >/dev/null 2>&1", archive_path))
+					local first_file_cmd = "find /etc/openclash/core/core -type f ! -name '*.gz' 2>/dev/null | head -1"
 					local first_file = io.popen(first_file_cmd):read("*line")
 					if first_file and first_file ~= "" then
 						os.execute(string.format("mv '%s' '/etc/openclash/core/%s' >/dev/null 2>&1", first_file, fp))
@@ -179,7 +183,7 @@ if fs.mtime(BACKUP_FILE) then
 else
    e[t].mtime=os.date("%Y-%m-%d %H:%M:%S",a.mtime)
 end
-if uci:get("openclash", "config", "config_path") and string.sub(uci:get("openclash", "config", "config_path"), 23, -1) == e[t].name then
+if fs.uci_get("config", "config_path") and string.sub(fs.uci_get("config", "config_path"), 23, -1) == e[t].name then
    e[t].state=translate("Enabled")
 else
    e[t].state=translate("Disabled")
@@ -376,7 +380,7 @@ s.description = align_mid..translate("Support syntax check, press").." "..font_g
 s.anonymous = true
 s.addremove = false
 
-local conf = uci:get("openclash", "config", "config_path")
+local conf = fs.uci_get("config", "config_path")
 local dconf = "/usr/share/openclash/res/default.yaml"
 if not conf then conf = "/etc/openclash/config/config.yaml" end
 local conf_name = fs.basename(conf)
