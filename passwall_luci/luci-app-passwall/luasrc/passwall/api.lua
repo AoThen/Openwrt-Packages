@@ -179,19 +179,15 @@ function exec_call(cmd)
 end
 
 function base64Decode(text)
-	local raw = text
 	if not text then return '' end
-	text = text:gsub("%z", "")
-	text = text:gsub("%c", "")
-	text = text:gsub("_", "/")
-	text = text:gsub("-", "+")
-	local mod4 = #text % 4
-	text = text .. string.sub('====', mod4 + 1)
-	local result = nixio.bin.b64decode(text)
+	local encoded = text:gsub("%z", ""):gsub("%c", ""):gsub("_", "/"):gsub("-", "+")
+	local mod4 = #encoded % 4
+	encoded = encoded .. string.sub('====', mod4 + 1)
+	local result = nixio.bin.b64decode(encoded)
 	if result then
 		return result:gsub("%z", "")
 	else
-		return raw
+		return text
 	end
 end
 
@@ -292,9 +288,13 @@ function url(...)
 	return require "luci.dispatcher".build_url(url)
 end
 
-function trim(text)
-	if not text or text == "" then return "" end
-	return text:match("^%s*(.-)%s*$")
+function trim(s)
+	local len = #s
+	local i, j = 1, len
+	while i <= len and s:byte(i) <= 32 do i = i + 1 end
+	while j >= i and s:byte(j) <= 32 do j = j - 1 end
+	if i > j then return "" end
+	return s:sub(i, j)
 end
 
 -- 分割字符串
@@ -411,22 +411,13 @@ function is_special_node(e)
 end
 
 function is_ip(val)
-	if is_ipv6(val) then
-		val = get_ipv6_only(val)
-	end
-	return datatypes.ipaddr(val)
+	local str = val:match("%[(.-)%]") or val
+	return datatypes.ipaddr(str) or false
 end
 
 function is_ipv6(val)
-	local str = val
-	local address = val:match('%[(.*)%]')
-	if address then
-		str = address
-	end
-	if datatypes.ip6addr(str) then
-		return true
-	end
-	return false
+	local str = val:match("%[(.-)%]") or val
+	return datatypes.ip6addr(str) or false
 end
 
 function is_local_ip(ip)
@@ -442,22 +433,18 @@ function is_local_ip(ip)
 end
 
 function is_ipv6addrport(val)
-	if is_ipv6(val) then
-		local address, port = val:match('%[(.*)%]:([^:]+)$')
-		if port then
-			return datatypes.port(port)
-		end
+	local address, port = val:match("%[(.-)%]:([0-9]+)$")
+	if address and datatypes.ip6addr(address) and datatypes.port(port) then
+		return true
 	end
 	return false
 end
 
 function get_ipv6_only(val)
 	local result = ""
-	if is_ipv6(val) then
-		result = val
-		if val:match('%[(.*)%]') then
-			result = val:match('%[(.*)%]')
-		end
+	local inner = val:match("%[(.-)%]") or val
+	if datatypes.ip6addr(inner) then
+		result = inner
 	end
 	return result
 end
@@ -466,7 +453,7 @@ function get_ipv6_full(val)
 	local result = ""
 	if is_ipv6(val) then
 		result = val
-		if not val:match('%[(.*)%]') then
+		if not val:match("%[.-%]") then
 			result = "[" .. result .. "]"
 		end
 	end
@@ -517,8 +504,10 @@ function get_domain_from_url(url)
 end
 
 function get_valid_nodes()
-	local show_node_info = uci_get_type("@global_other[0]", "show_node_info", "0")
+	local show_node_info = uci_get_type("global_other", "show_node_info", "0")
 	local nodes = {}
+	local default_nodes = {}
+	local other_nodes = {}
 	uci:foreach(appname, "nodes", function(e)
 		e.id = e[".name"]
 		if e.type and e.remarks then
@@ -528,7 +517,11 @@ function get_valid_nodes()
 				if type == "sing-box" then type = "Sing-Box" end
 				e["remark"] = "%s：[%s] " % {type .. " " .. i18n.translatef(e.protocol), e.remarks}
 				e["node_type"] = "special"
-				nodes[#nodes + 1] = e
+				if not e.group or e.group == "" then
+					default_nodes[#default_nodes + 1] = e
+				else
+					other_nodes[#other_nodes + 1] = e
+				end
 			end
 			local port = e.port or e.hysteria_hop or e.hysteria2_hop
 			if port and e.address then
@@ -568,11 +561,17 @@ function get_valid_nodes()
 						e["remark"] = "%s：[%s] %s:%s" % {type, e.remarks, address, port}
 					end
 					e.node_type = "normal"
-					nodes[#nodes + 1] = e
+					if not e.group or e.group == "" then
+						default_nodes[#default_nodes + 1] = e
+					else
+						other_nodes[#other_nodes + 1] = e
+					end
 				end
 			end
 		end
 	end)
+	for i = 1, #default_nodes do nodes[#nodes + 1] = default_nodes[i] end
+	for i = 1, #other_nodes do nodes[#nodes + 1] = other_nodes[i] end
 	return nodes
 end
 
@@ -641,7 +640,15 @@ function gen_short_uuid()
 end
 
 function uci_get_type(type, config, default)
-	local value = uci:get(appname, type, config) or default
+	local value = uci:get_first(appname, type, config, default) or sys.exec("echo -n $(uci -q get " .. appname .. ".@" .. type .."[0]." .. config .. ")")
+	if (value == nil or value == "") and (default and default ~= "") then
+		value = default
+	end
+	return value
+end
+
+function uci_get_type_id(id, config, default)
+	local value = uci:get(appname, id, config, default) or sys.exec("echo -n $(uci -q get " .. appname .. "." .. id .. "." .. config .. ")")
 	if (value == nil or value == "") and (default and default ~= "") then
 		value = default
 	end
@@ -657,7 +664,7 @@ local function chmod_755(file)
 end
 
 function get_customed_path(e)
-	return uci_get_type("@global_app[0]", e .. "_file")
+	return uci_get_type("global_app", e .. "_file")
 end
 
 function finded_com(e)
@@ -716,7 +723,7 @@ end
 function get_app_path(app_name)
 	if com[app_name] then
 		local def_path = com[app_name].default_path
-		local path = uci_get_type("@global_app[0]", app_name:gsub("%-","_") .. "_file")
+		local path = uci_get_type("global_app", app_name:gsub("%-","_") .. "_file")
 		path = path and (#path>0 and path or def_path) or def_path
 		return path
 	end
@@ -1218,7 +1225,7 @@ function get_version()
 	if not version or #version == 0 then
 		version = sys.exec("apk list luci-app-passwall 2>/dev/null | awk '/installed/ {print $1}' | cut -d'-' -f4-")
 	end
-	return version or ""
+	return (version or ""):gsub("\n", "")
 end
 
 function to_check_self()
@@ -1234,7 +1241,7 @@ function to_check_self()
 		}
 	end
 	local local_version  = get_version()
-	local remote_version = sys.exec("echo -n $(grep 'PKG_VERSION' /tmp/passwall_makefile|awk -F '=' '{print $2}')")
+	local remote_version = sys.exec("echo -n $(grep '^PKG_VERSION' /tmp/passwall_makefile | head -n 1 | awk -F '=' '{print $2}')")
 	exec("/bin/rm", {"-f", tmp_file})
 
 	local has_update = compare_versions(local_version, "<", remote_version)
@@ -1329,20 +1336,49 @@ end
 
 function get_std_domain(domain)
 	domain = trim(domain)
-	if domain == "" or domain:find("#") then return "" end
-	-- 删除首尾所有的 .
-	domain = domain:gsub("^[%.]+", ""):gsub("[%.]+$", "")
-	-- 如果 domain 包含 '*'，则分割并删除包含 '*' 的部分及其前面的部分
-	if domain:find("%*") then
-		local parts = {}
-		for part in domain:gmatch("[^%.]+") do
-			table.insert(parts, part)
+	if domain == "" then return "" end
+	-- 含 # → ""
+	for i = 1, #domain do
+		if domain:byte(i) == 35 then return "" end -- '#'
+	end
+	local len = #domain
+	local si, ei = 1, len
+	-- 去前缀 '.'
+	while si <= len and domain:byte(si) == 46 do si = si + 1 end
+	-- 去后缀 '.'
+	while ei >= si and domain:byte(ei) == 46 do ei = ei - 1 end
+	if si > ei then return "" end
+	domain = domain:sub(si, ei)
+	len = #domain
+	-- 是否有 '*'
+	local star = false
+	for i = 1, len do
+		if domain:byte(i) == 42 then star = true break end
+	end
+	if not star then return domain end
+	-- 切割 label
+	local parts, pstart = {}, 1
+	for i = 1, len + 1 do
+		local b = (i <= len) and domain:byte(i) or 46 -- '.' 作为结束
+		if b == 46 then
+			parts[#parts + 1] = domain:sub(pstart, i - 1)
+			pstart = i + 1
 		end
-		for i = #parts, 1, -1 do
-			if parts[i]:find("%*") then
-				-- 删除包含 '*' 的部分及其前面的部分
-				return parts[i + 1] and parts[i + 1] .. "." .. table.concat(parts, ".", i + 2) or ""
+	end
+	-- 从右向左找含 '*' ,并删除包含 '*' 的部分及其左边部分
+	for i = #parts, 1, -1 do
+		local s = parts[i]
+		local has = false
+		for j = 1, #s do
+			if s:byte(j) == 42 then has = true break end
+		end
+		if has then
+			if i == #parts then return "" end
+			local out = parts[i + 1]
+			for k = i + 2, #parts do
+				out = out .. "." .. parts[k]
 			end
+			return out
 		end
 	end
 	return domain

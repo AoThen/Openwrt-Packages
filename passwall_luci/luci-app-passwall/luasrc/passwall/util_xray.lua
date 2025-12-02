@@ -155,6 +155,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 					serverName = node.tls_serverName,
 					allowInsecure = (node.tls_allowInsecure == "1") and true or false,
 					fingerprint = (node.type == "Xray" and node.utls == "1" and node.fingerprint and node.fingerprint ~= "") and node.fingerprint or nil,
+					pinnedPeerCertificateChainSha256 = node.tls_chain_fingerprint and { node.tls_chain_fingerprint } or nil,
 					echConfigList = (node.ech == "1") and node.ech_config or nil,
 					echForceQuery = (node.ech == "1") and (node.ech_ForceQuery or "none") or nil
 				} or nil,
@@ -170,7 +171,13 @@ function gen_outbound(flag, node, tag, proxy_table)
 					header = {
 						type = node.tcp_guise,
 						request = (node.tcp_guise == "http") and {
-							path = node.tcp_guise_http_path or {"/"},
+							path = node.tcp_guise_http_path and (function()
+									local t, r = node.tcp_guise_http_path, {}
+									for _, v in ipairs(t) do
+										r[#r + 1] = (v == "" and "/" or v)
+									end
+									return r
+								end)() or {"/"},
 							headers = {
 								Host = node.tcp_guise_http_host or {}
 							}
@@ -216,7 +223,7 @@ function gen_outbound(flag, node, tag, proxy_table)
 					host = node.xhttp_host,
 					-- 如果包含 "extra" 节，取 "extra" 内的内容，否则直接赋值给 extra
 					extra = node.xhttp_extra and (function()
-						local success, parsed = pcall(jsonc.parse, node.xhttp_extra)
+							local success, parsed = pcall(jsonc.parse, api.base64Decode(node.xhttp_extra))
 							if success then
 								return parsed.extra or parsed
 							else
@@ -235,9 +242,12 @@ function gen_outbound(flag, node, tag, proxy_table)
 								id = node.uuid,
 								level = 0,
 								security = (node.protocol == "vmess") and node.security or nil,
-								encryption = node.encryption or "none",
-								flow = (node.protocol == "vless" and node.tls == "1" and (node.transport == "raw" or node.transport == "tcp" or node.transport == "xhttp") and node.flow and node.flow ~= "") and node.flow or nil
-
+								encryption = (node.protocol == "vless") and ((node.encryption and node.encryption ~= "") and node.encryption or "none") or nil,
+								flow = (node.protocol == "vless"
+									and (node.tls == "1" or (node.encryption and node.encryption ~= "" and node.encryption ~= "none"))
+									and (node.transport == "raw" or node.transport == "tcp" or node.transport == "xhttp")
+									and node.flow and node.flow ~= ""
+								) and node.flow or nil
 							}
 						}
 					}
@@ -312,7 +322,7 @@ function gen_config_server(node)
 			end
 			settings = {
 				clients = clients,
-				decryption = node.decryption or "none"
+				decryption = (node.protocol == "vless") and ((node.decryption and node.decryption ~= "") and node.decryption or "none") or nil
 			}
 		end
 	elseif node.protocol == "socks" then
@@ -463,7 +473,13 @@ function gen_config_server(node)
 						header = {
 							type = node.tcp_guise,
 							request = (node.tcp_guise == "http") and {
-								path = node.tcp_guise_http_path or {"/"},
+								path = node.tcp_guise_http_path and (function()
+										local t, r = node.tcp_guise_http_path, {}
+										for _, v in ipairs(t) do
+											r[#r + 1] = (v == "" and "/" or v)
+										end
+										return r
+									end)() or {"/"},
 								headers = {
 									Host = node.tcp_guise_http_host or {}
 								}
@@ -565,6 +581,8 @@ function gen_config(var)
 	local direct_dns_udp_server = var["-direct_dns_udp_server"]
 	local direct_dns_tcp_server = var["-direct_dns_tcp_server"]
 	local direct_dns_query_strategy = var["-direct_dns_query_strategy"]
+	local remote_dns_udp_server = var["-remote_dns_udp_server"]
+	local remote_dns_udp_port = var["-remote_dns_udp_port"]
 	local remote_dns_tcp_server = var["-remote_dns_tcp_server"]
 	local remote_dns_tcp_port = var["-remote_dns_tcp_port"]
 	local remote_dns_doh_url = var["-remote_dns_doh_url"]
@@ -1160,7 +1178,7 @@ function gen_config(var)
 		end
 	end
 
-	if remote_dns_tcp_server and remote_dns_tcp_port then
+	if (remote_dns_udp_server and remote_dns_udp_port) or (remote_dns_tcp_server and remote_dns_tcp_port) then
 		if not routing then
 			routing = {
 				domainStrategy = "IPOnDemand",
@@ -1215,8 +1233,13 @@ function gen_config(var)
 		local _remote_dns = {
 			--tag = "dns-global-remote",
 			queryStrategy = (remote_dns_query_strategy and remote_dns_query_strategy ~= "") and remote_dns_query_strategy or "UseIPv4",
-			address = "tcp://" .. remote_dns_tcp_server .. ":" .. tonumber(remote_dns_tcp_port) or 53
 		}
+		if remote_dns_udp_server then
+			_remote_dns.address = remote_dns_udp_server
+			_remote_dns.port = tonumber(remote_dns_udp_port) or 53
+		else
+			_remote_dns.address = "tcp://" .. remote_dns_tcp_server .. ":" .. tonumber(remote_dns_tcp_port) or 53
+		end
 
 		local _remote_dns_host
 		if remote_dns_doh_url and remote_dns_doh_host then
@@ -1286,6 +1309,7 @@ function gen_config(var)
 			end
 		end
 
+		local dns_rule_position = 1
 		if dns_listen_port then
 			table.insert(inbounds, {
 				listen = "127.0.0.1",
@@ -1293,8 +1317,8 @@ function gen_config(var)
 				protocol = "dokodemo-door",
 				tag = "dns-in",
 				settings = {
-					address = remote_dns_tcp_server,
-					port = tonumber(remote_dns_tcp_port),
+					address = remote_dns_udp_server or remote_dns_tcp_server,
+					port = tonumber(remote_dns_udp_port) or tonumber(remote_dns_tcp_port),
 					network = "tcp,udp"
 				}
 			})
@@ -1306,9 +1330,9 @@ function gen_config(var)
 					tag = dns_outbound_tag
 				} or nil,
 				settings = {
-					address = remote_dns_tcp_server,
-					port = tonumber(remote_dns_tcp_port),
-					network = "tcp",
+					address = remote_dns_udp_server or remote_dns_tcp_server,
+					port = tonumber(remote_dns_udp_port) or tonumber(remote_dns_tcp_port),
+					network = remote_dns_udp_server and "udp" or "tcp",
 					nonIPQuery = "drop"
 				}
 			})
@@ -1319,16 +1343,18 @@ function gen_config(var)
 				},
 				outboundTag = "dns-out"
 			})
+			dns_rule_position = dns_rule_position + 1
 		end
 
 		if COMMON.default_outbound_tag == "direct" then
 			if direct_dns_udp_server or direct_dns_tcp_server then
-				table.insert(routing.rules, {
+				table.insert(routing.rules, dns_rule_position, {
 					inboundTag = {
 						"dns-global-direct"
 					},
 					outboundTag = "direct"
 				})
+				dns_rule_position = dns_rule_position + 1
 			end
 		end
 
@@ -1361,11 +1387,12 @@ function gen_config(var)
 							balancerTag  = nil
 						end
 						table.insert(dns.servers, dns_server)
-						table.insert(routing.rules, {
+						table.insert(routing.rules, dns_rule_position, {
 							inboundTag = { dns_server.tag },
 							outboundTag = outboundTag,
 							balancerTag = balancerTag
 						})
+						dns_rule_position = dns_rule_position + 1
 					end
 				end
 			end
@@ -1379,11 +1406,12 @@ function gen_config(var)
 			_outboundTag = "direct"
 			_balancerTag  = nil
 		end
-		table.insert(routing.rules, {
+		table.insert(routing.rules, dns_rule_position, {
 			inboundTag = { "dns-global" },
 			balancerTag = _balancerTag,
 			outboundTag = _outboundTag
 		})
+		dns_rule_position = dns_rule_position + 1
 
 		local default_rule_index = nil
 		for index, value in ipairs(routing.rules) do

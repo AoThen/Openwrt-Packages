@@ -83,6 +83,10 @@ o = s:option(Value, _n("decryption"), translate("Encrypt Method") .. " (decrypti
 o.default = "none"
 o.placeholder = "none"
 o:depends({ [_n("protocol")] = "vless" })
+o.validate = function(self, value)
+	value = api.trim(value)
+	return (value == "" and "none" or value)
+end
 
 o = s:option(ListValue, _n("x_ss_method"), translate("Encrypt Method"))
 o.rewrite_option = "method"
@@ -186,7 +190,7 @@ o:value("h3,h2")
 o:value("http/1.1")
 o:value("h2,http/1.1")
 o:value("h3,h2,http/1.1")
-o:depends({ [_n("tls")] = true })
+o:depends({ [_n("tls")] = true, [_n("reality")] = false })
 
 o = s:option(Flag, _n("use_mldsa65Seed"), translate("ML-DSA-65"))
 o.default = "0"

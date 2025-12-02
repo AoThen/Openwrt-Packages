@@ -9,6 +9,31 @@ local uci = require "luci.model.uci".cursor()
 local json = require "luci.jsonc"
 local datatype = require "luci.cbi.datatypes"
 
+-- 优化 CBI UI（新版 LuCI 专用）
+local function optimize_cbi_ui()
+	luci.http.write([[
+		<script type="text/javascript">
+			// 修正上移、下移按钮名称
+			document.querySelectorAll("input.btn.cbi-button.cbi-button-up").forEach(function(btn) {
+				btn.value = "]] .. translate("Move up") .. [[";
+			});
+			document.querySelectorAll("input.btn.cbi-button.cbi-button-down").forEach(function(btn) {
+				btn.value = "]] .. translate("Move down") .. [[";
+			});
+			// 删除控件和说明之间的多余换行
+			document.querySelectorAll("div.cbi-value-description").forEach(function(descDiv) {
+				var prev = descDiv.previousSibling;
+				while (prev && prev.nodeType === Node.TEXT_NODE && prev.textContent.trim() === "") {
+					prev = prev.previousSibling;
+				}
+				if (prev && prev.nodeType === Node.ELEMENT_NODE && prev.tagName === "BR") {
+					prev.remove();
+				}
+			});
+		</script>
+	]])
+end
+
 font_green = [[<b style=color:green>]]
 font_red = [[<b style=color:red>]]
 font_off = [[</b>]]
@@ -148,8 +173,8 @@ o.description = translate("Automatically Append Compliant DNS to default-nameser
 o.default = 1
 
 if op_mode == "fake-ip" then
-o = s:taboption("dns", Value, "fakeip_range", translate("Fake-IP Range (IPv4 Cidr)"))
-o.description = translate("Set Fake-IP Range (IPv4 Cidr)")
+o = s:taboption("dns", Value, "fakeip_range", translate("Fake-IP Range").." (IPv4 Cidr)")
+o.description = translate("Set Fake-IP Range").." (IPv4 Cidr)"
 o:value("0", translate("Disable"))
 o:value("198.18.0.1/16")
 o.default = "0"
@@ -352,16 +377,24 @@ o.description = font_red..bold_on..translate("Auto Switch Url-test and Load-bala
 o.default = 0
 
 o = s:taboption("smart", ListValue, "smart_strategy", translate("Node Select Strategy"))
+o:value("0", translate("Disable"))
 o:value("sticky-sessions", translate("Sticky-sessions"))
 o:value("round-robin", translate("Round-robin"))
-o.default = "sticky-sessions"
-o:depends("auto_smart_switch", "1")
+o.default = "0"
 o.description = translate("Before Node Data Collect Completely, The Default is Sticky-sessions")
 
 o = s:taboption("smart", Value, "smart_policy_priority", translate("Policy Priority"))
 o.default = ""
 o.placeholder = "Premium:0.9;SG:1.3"
 o.description = translate("Nodes Weight Priority, <1 Means Lower Priority, >1 Means Higher Priority, The Default is 1, Pattern Support Regex and String")
+
+o = s:taboption("smart", Flag, "smart_prefer_asn", font_red..bold_on..translate("Prefer-ASN")..bold_off..font_off)
+o.description = translate("Select Nodes Force Lookup and Use Target ASN Info First For More Stable Experience")
+o.default = 0
+
+o = s:taboption("smart", Flag, "smart_enable_lgbm", font_red..bold_on..translate("Enable LightGBM Model")..bold_off..font_off)
+o.description = font_red..bold_on..translate("Use LightGBM Model To Predict Weight")..bold_off..font_off
+o.default = 0
 
 o = s:taboption("smart", Flag, "smart_collect", translate("Colletct Training Data"))
 o.default = 0
@@ -552,6 +585,12 @@ function ss.create(...)
 		return
 	end
 end
+ss.render = function(self, ...)
+	Map.render(self, ...)
+	if type(optimize_cbi_ui) == "function" then
+		optimize_cbi_ui()
+	end
+end
 
 o = ss:option(Flag, "enabled", translate("Enable"))
 o.rmempty     = false
@@ -586,6 +625,12 @@ s.addremove = true
 s.sortable = false
 s.template = "cbi/tblsection"
 s.rmempty = false
+s.render = function(self, ...)
+	Map.render(self, ...)
+	if type(optimize_cbi_ui) == "function" then
+		optimize_cbi_ui()
+	end
+end
 
 ---- enable flag
 o = s:option(Flag, "enabled", translate("Enable"))
@@ -632,5 +677,3 @@ m:append(Template("openclash/config_editor"))
 m:append(Template("openclash/toolbar_show"))
 
 return m
-
-

@@ -20,7 +20,7 @@
    DASH_TYPE="$2"
    DASH_FILE_DIR="/tmp/dash.zip"
    DASH_FILE_TMP="/tmp/dash/"
-   github_address_mod=$(uci_get "github_address_mod" || echo 0)
+   github_address_mod=$(uci_get_config "github_address_mod" || echo 0)
    if [ "$DASH_NAME" == "Dashboard" ]; then
       UNPACK_FILE_DIR="/usr/share/openclash/ui/dashboard/"
       BACKUP_FILE_DIR="/usr/share/openclash/ui/dashboard_backup/"
@@ -44,8 +44,8 @@
   elif [ "$DASH_NAME" == "Zashboard" ]; then
       UNPACK_FILE_DIR="/usr/share/openclash/ui/zashboard/"
       BACKUP_FILE_DIR="/usr/share/openclash/ui/zashboard_backup/"
-      DOWNLOAD_PATH="https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip"
-      FILE_PATH_INCLUDE="dist"
+      DOWNLOAD_PATH="https://codeload.github.com/Zephyruso/zashboard/zip/refs/heads/gh-pages-cdn-fonts"
+      FILE_PATH_INCLUDE="zashboard-gh-pages-cdn-fonts"
    else
       UNPACK_FILE_DIR="/usr/share/openclash/ui/metacubexd/"
       BACKUP_FILE_DIR="/usr/share/openclash/ui/metacubexd_backup/"

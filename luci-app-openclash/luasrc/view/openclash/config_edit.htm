@@ -798,7 +798,7 @@ var ConfigEditor = {
         if (tabs) tabs.style.display = 'flex';
 
         var layoutBtn = document.getElementById('config-editor-layout');
-        if (layoutBtn) layoutBtn.style.display = 'inline-block';
+        if (layoutBtn) layoutBtn.style.display = 'inline-flex';
 
         if (!configFile) {
             alert('<%:Please select a config file first%>');
@@ -2680,6 +2680,8 @@ var ConfigEditor = {
             } else {
                 formData.append('enable', '0');
             }
+            formData.append('order', sub.order || 1);
+
             var progressContainer = form.querySelector('#overwrite-upload-progress');
             var progressFill = form.querySelector('#overwrite-progress-fill');
             var progressText = form.querySelector('#overwrite-progress-text');
