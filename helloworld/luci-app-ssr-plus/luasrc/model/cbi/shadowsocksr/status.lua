@@ -73,7 +73,16 @@ if Process_list:find("tcp.udp.ssr.retcp") then
 	reudp_run = 1
 end
 
+if Process_list:find("nft.ssr.retcp") then
+	redir_run = 1
+end
+
 if Process_list:find("local.ssr.retcp") then
+	redir_run = 1
+	sock5_run = 1
+end
+
+if Process_list:find("local.nft.ssr.retcp") then
 	redir_run = 1
 	sock5_run = 1
 end

@@ -77,19 +77,22 @@ for k, e in ipairs(api.get_valid_nodes()) do
 			id = e[".name"],
 			remark = e["remark"],
 			type = e["type"],
-			chain_proxy = e["chain_proxy"]
+			chain_proxy = e["chain_proxy"],
+			group = e["group"]
 		}
 	end
 	if e.protocol == "_iface" then
 		iface_table[#iface_table + 1] = {
 			id = e[".name"],
-			remark = e["remark"]
+			remark = e["remark"],
+			group = e["group"]
 		}
 	end
 	if e.protocol == "_urltest" then
 		urltest_table[#urltest_table + 1] = {
 			id = e[".name"],
-			remark = e["remark"]
+			remark = e["remark"],
+			group = e["group"]
 		}
 	end
 end
@@ -99,34 +102,49 @@ m.uci:foreach(appname, "socks", function(s)
 	if s.enabled == "1" and s.node then
 		socks_list[#socks_list + 1] = {
 			id = "Socks_" .. s[".name"],
-			remark = translate("Socks Config") .. " " .. string.format("[%s %s]", s.port, translate("Port"))
+			remark = translate("Socks Config") .. " " .. string.format("[%s %s]", s.port, translate("Port")),
+			group = "Socks"
 		}
 	end
 end)
 
 --[[ URLTest ]]
-o = s:option(DynamicList, _n("urltest_node"), translate("URLTest node list"), translate("List of nodes to test, <a target='_blank' href='https://sing-box.sagernet.org/configuration/outbound/urltest'>document</a>"))
+o = s:option(MultiValue, _n("urltest_node"), translate("URLTest node list"), translate("List of nodes to test, <a target='_blank' href='https://sing-box.sagernet.org/configuration/outbound/urltest'>document</a>"))
 o:depends({ [_n("protocol")] = "_urltest" })
-local valid_ids = {}
-for k, v in pairs(nodes_table) do
+o.widget = "checkbox"
+o.template = appname .. "/cbi/nodes_multivalue"
+o.group = {}
+for k, v in pairs(socks_list) do
 	o:value(v.id, v.remark)
-	valid_ids[v.id] = true
+	o.group[#o.group+1] = v.group or ""
 end
--- 去重并禁止自定义非法输入
+for i, v in pairs(nodes_table) do
+	o:value(v.id, v.remark)
+	o.group[#o.group+1] = v.group or ""
+end
+-- 读取旧 DynamicList
+function o.cfgvalue(self, section)
+	return m.uci:get_list(appname, section, "urltest_node") or {}
+end
+-- 写入保持 DynamicList
 function o.custom_write(self, section, value)
-	local result = {}
-	if type(value) == "table" then
-		local seen = {}
-		for _, v in ipairs(value) do
-			if v and not seen[v] and valid_ids[v] then
-				table.insert(result, v)
-				seen[v] = true
-			end
-		end
-	else
-		result = { value }
+	local old = m.uci:get_list(appname, section, "urltest_node") or {}
+	local new, set = {}, {}
+	for v in value:gmatch("%S+") do
+		new[#new + 1] = v
+		set[v] = 1
 	end
-	m.uci:set_list(appname, section, "urltest_node", result)
+	for _, v in ipairs(old) do
+		if not set[v] then
+			m.uci:set_list(appname, section, "urltest_node", new)
+			return
+		end
+		set[v] = nil
+	end
+	for _ in pairs(set) do
+		m.uci:set_list(appname, section, "urltest_node", new)
+		return
+	end
 end
 
 o = s:option(Value, _n("urltest_url"), translate("Probe URL"))
@@ -175,17 +193,23 @@ if #nodes_table > 0 then
 
 	o = s:option(ListValue, _n("main_node"), string.format('<a style="color:red">%s</a>', translate("Preproxy Node")), translate("Set the node to be used as a pre-proxy. Each rule (including <code>Default</code>) has a separate switch that controls whether this rule uses the pre-proxy or not."))
 	o:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true })
+	o.template = appname .. "/cbi/nodes_listvalue"
+	o.group = {}
 	for k, v in pairs(socks_list) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	for k, v in pairs(urltest_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	for k, v in pairs(iface_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	for k, v in pairs(nodes_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 end
 m.uci:foreach(appname, "shunt_rules", function(e)
@@ -196,22 +220,28 @@ m.uci:foreach(appname, "shunt_rules", function(e)
 		o:value("_direct", translate("Direct Connection"))
 		o:value("_blackhole", translate("Blackhole"))
 		o:depends({ [_n("protocol")] = "_shunt" })
+		o.template = appname .. "/cbi/nodes_listvalue"
+		o.group = {"","","",""}
 
 		if #nodes_table > 0 then
 			for k, v in pairs(socks_list) do
 				o:value(v.id, v.remark)
+				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 			end
 			for k, v in pairs(urltest_table) do
 				o:value(v.id, v.remark)
+				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 			end
 			for k, v in pairs(iface_table) do
 				o:value(v.id, v.remark)
+				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 			end
 			local pt = s:option(ListValue, _n(e[".name"] .. "_proxy_tag"), string.format('* <a style="color:red">%s</a>', e.remarks .. " " .. translate("Preproxy")))
 			pt:value("", translate("Close"))
 			pt:value("main", translate("Preproxy Node"))
 			for k, v in pairs(nodes_table) do
 				o:value(v.id, v.remark)
+				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 				pt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n(e[".name"])] = v.id })
 			end
 		end
@@ -230,22 +260,28 @@ local o = s:option(ListValue, _n("default_node"), string.format('* <a style="col
 o:depends({ [_n("protocol")] = "_shunt" })
 o:value("_direct", translate("Direct Connection"))
 o:value("_blackhole", translate("Blackhole"))
+o.template = appname .. "/cbi/nodes_listvalue"
+o.group = {"",""}
 
 if #nodes_table > 0 then
 	for k, v in pairs(socks_list) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	for k, v in pairs(urltest_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	for k, v in pairs(iface_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 	local dpt = s:option(ListValue, _n("default_proxy_tag"), string.format('* <a style="color:red">%s</a>', translate("Default Preproxy")), translate("When using, localhost will connect this node first and then use this node to connect the default node."))
 	dpt:value("", translate("Close"))
 	dpt:value("main", translate("Preproxy Node"))
 	for k, v in pairs(nodes_table) do
 		o:value(v.id, v.remark)
+		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 		dpt:depends({ [_n("protocol")] = "_shunt", [_n("preproxy_enabled")] = true, [_n("default_node")] = v.id })
 	end
 end
@@ -669,6 +705,13 @@ o = s:option(Flag, _n("grpc_permit_without_stream"), translate("Permit without s
 o.default = "0"
 o:depends({ [_n("grpc_health_check")] = true })
 
+-- [[ User-Agent ]]--
+o = s:option(Value, _n("user_agent"), translate("User-Agent"))
+o:depends({ [_n("tcp_guise")] = "http" })
+o:depends({ [_n("transport")] = "http" })
+o:depends({ [_n("transport")] = "ws" })
+o:depends({ [_n("transport")] = "httpupgrade" })
+
 -- [[ Mux ]]--
 o = s:option(Flag, _n("mux"), translate("Mux"))
 o.rmempty = false
@@ -787,16 +830,22 @@ for i, v in ipairs(s.fields[_n("protocol")].keylist) do
 	end
 end
 
-o = s:option(ListValue, _n("preproxy_node"), translate("Preproxy Node"), translate("Only support a layer of proxy."))
-o:depends({ [_n("chain_proxy")] = "1" })
+o1 = s:option(ListValue, _n("preproxy_node"), translate("Preproxy Node"), translate("Only support a layer of proxy."))
+o1:depends({ [_n("chain_proxy")] = "1" })
+o1.template = appname .. "/cbi/nodes_listvalue"
+o1.group = {}
 
-o = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Only support a layer of proxy."))
-o:depends({ [_n("chain_proxy")] = "2" })
+o2 = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Only support a layer of proxy."))
+o2:depends({ [_n("chain_proxy")] = "2" })
+o2.template = appname .. "/cbi/nodes_listvalue"
+o2.group = {}
 
 for k, v in pairs(nodes_table) do
 	if v.type == "sing-box" and v.id ~= arg[1] and (not v.chain_proxy or v.chain_proxy == "") then
-		s.fields[_n("preproxy_node")]:value(v.id, v.remark)
-		s.fields[_n("to_node")]:value(v.id, v.remark)
+		o1:value(v.id, v.remark)
+		o1.group[#o1.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+		o2:value(v.id, v.remark)
+		o2.group[#o2.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
 end
 

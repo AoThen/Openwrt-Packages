@@ -47,10 +47,10 @@ function set_apply_on_parse(map)
 		map.on_after_apply = function(self)
 			showMsg_Redirect(self.redirect, 3000)
 		end
-	end
-	map.render = function(self, ...)
-		getmetatable(self).__index.render(self, ...) -- 保持原渲染流程
-		optimize_cbi_ui()
+		map.render = function(self, ...)
+			getmetatable(self).__index.render(self, ...) -- 保持原渲染流程
+			optimize_cbi_ui()
+		end
 	end
 end
 
@@ -289,9 +289,9 @@ function url(...)
 end
 
 function trim(s)
-	local len = #s
-	local i, j = 1, len
-	while i <= len and s:byte(i) <= 32 do i = i + 1 end
+	if type(s) ~= "string" then return "" end
+	local i, j = 1, #s
+	while i <= j and s:byte(i) <= 32 do i = i + 1 end
 	while j >= i and s:byte(j) <= 32 do j = j - 1 end
 	if i > j then return "" end
 	return s:sub(i, j)
