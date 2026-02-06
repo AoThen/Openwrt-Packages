@@ -12,6 +12,8 @@ local m, s, o
 
 local sid = arg[1]
 local uuid = luci.sys.exec("cat /proc/sys/kernel/random/uuid")
+local xray_version = nil
+local xray_version_val = 0
 
 -- 确保正确判断程序是否存在
 local function is_finded(e)
@@ -22,124 +24,59 @@ local function is_installed(e)
 	return luci.model.ipkg.installed(e)
 end
 
--- 判断系统是否 JS 版 LuCI
-local function is_js_luci()
-    return luci.sys.call('[ -f "/www/luci-static/resources/uci.js" ]') == 0
+-- 获取 Xray 版本号
+if is_finded("xray") then
+	local version = luci.sys.exec("xray version 2>&1")
+	if version and version ~= "" then
+		xray_version = version:match("Xray%s+([%d%.]+)")
+	end
 end
 
--- 显示提示条
-local function showMsg_Redirect(redirectUrl, delay)
-	local message = translate("Applying configuration changes… %ds")
-	luci.http.write([[
-		<script type="text/javascript">
-			document.addEventListener('DOMContentLoaded', function() {
-				// 创建遮罩层
-				var overlay = document.createElement('div');
-				overlay.style.position = 'fixed';
-				overlay.style.top = '0';
-				overlay.style.left = '0';
-				overlay.style.width = '100%';
-				overlay.style.height = '100%';
-				overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-				overlay.style.zIndex = '9999';
-				// 创建提示条
-				var messageDiv = document.createElement('div');
-				messageDiv.style.position = 'fixed';
-				messageDiv.style.top = '20%';
-				messageDiv.style.left = '50%';
-				messageDiv.style.transform = 'translateX(-50%)';
-				messageDiv.style.width = '81%';
-				//messageDiv.style.maxWidth = '1200px';
-				messageDiv.style.background = '#ffffff';
-				messageDiv.style.border = '1px solid #000000';
-				messageDiv.style.borderRadius = '5px';
-				messageDiv.style.padding = '18px 20px';
-				messageDiv.style.color = '#000000';
-				//messageDiv.style.fontWeight = 'bold';
-				messageDiv.style.fontFamily = 'Arial, Helvetica, sans-serif';
-				messageDiv.style.textAlign = 'left';
-				messageDiv.style.zIndex = '10000';
-				var spinner = document.createElement('span');
-				spinner.style.display = 'inline-block';
-				spinner.style.width = '20px';
-				spinner.style.height = '20px';
-				spinner.style.marginRight = '10px';
-				spinner.style.border = '3px solid #666';
-				spinner.style.borderTopColor = '#000';
-				spinner.style.borderRadius = '50%';
-				spinner.style.animation = 'spin 1s linear infinite';
-				messageDiv.appendChild(spinner);
-                var textSpan = document.createElement('span');
-                var remaining = Math.ceil(]] .. 90000 .. [[ / 1000);
-                function updateMessage() {
-                    textSpan.textContent = "]] .. message .. [[".replace("%ds", remaining + "s");
-                }
-                updateMessage();
-                messageDiv.appendChild(textSpan);
-				document.body.appendChild(messageDiv);
-				var style = document.createElement('style');
-				style.innerHTML = `
-				@keyframes spin {
-					0% { transform: rotate(0deg); }
-					100% { transform: rotate(360deg); }
-				}`;
-				document.head.appendChild(style);
-                var countdownInterval = setInterval(function() {
-                    remaining--;
-                    if (remaining < 0) remaining = 0;
-                    updateMessage();
-                    if (remaining <= 0) clearInterval(countdownInterval);
-                }, 1000);
-				// 将遮罩层和提示条添加到页面
-				document.body.appendChild(overlay);
-				document.body.appendChild(messageDiv);
-				// 重定向或隐藏提示条和遮罩层
-				var redirectUrl = ']] .. (redirectUrl or "") .. [[';
-				var delay = ]] .. (delay or 3000) .. [[;
-				setTimeout(function() {
-					if (redirectUrl) {
-						window.location.href = redirectUrl;
-					} else {
-						if (messageDiv && messageDiv.parentNode) {
-							messageDiv.parentNode.removeChild(messageDiv);
-						}
-						if (overlay && overlay.parentNode) {
-							overlay.parentNode.removeChild(overlay);
-						}
-						window.location.href = window.location.href;
-					}
-				}, delay);
-			});
-		</script>
-	]])
+-- 将 Xray 版本号转换为数字
+if xray_version and xray_version ~= "" then
+	local major, minor, patch =
+		xray_version:match("(%d+)%.?(%d*)%.?(%d*)")
+
+	major = tonumber(major) or 0
+	minor = tonumber(minor) or 0
+	patch = tonumber(patch) or 0
+
+	xray_version_val = major * 10000 + minor * 100 + patch
 end
 
--- 兼容新旧版本 LuCI
-local function set_apply_on_parse(map)
-    if not map then
-        return
-    end
-
-    if is_js_luci() then
-        -- JS 版 LuCI：显示提示条并延迟跳转
-        map.apply_on_parse = false
-        map.on_after_apply = function(self)
-            luci.http.prepare_content("text/html")
-			showMsg_Redirect(self.redirect or luci.dispatcher.build_url() , 3000)
-        end
-    else
-        -- Lua 版 LuCI：直接跳转
-        map.apply_on_parse = true
-        map.on_after_apply = function(self)
-            luci.http.redirect(self.redirect)
-        end
-    end
-    
-    -- 保持原渲染流程
-    map.render = function(self, ...)
-        getmetatable(self).__index.render(self, ...) -- 保持原渲染流程
-    end
+-- 默认的保存并应用行为
+local function apply_redirect(m)
+	local tmp_uci_file = "/etc/config/" .. "shadowsocksr" .. "_redirect"
+	if m.redirect and m.redirect ~= "" then
+		if nixio.fs.access(tmp_uci_file) then
+			local redirect
+			for line in io.lines(tmp_uci_file) do
+				redirect = line:match("option%s+url%s+['\"]([^'\"]+)['\"]")
+				if redirect and redirect ~= "" then break end
+			end
+			if redirect and redirect ~= "" then
+				luci.sys.call("/bin/rm -f " .. tmp_uci_file)
+				luci.http.redirect(redirect)
+			end
+		else
+			nixio.fs.writefile(tmp_uci_file, "config redirect\n")
+		end
+		m.on_after_save = function(self)
+			local redirect = self.redirect
+			if redirect and redirect ~= "" then
+				uci:set("shadowsocksr" .. "_redirect", "@redirect[0]", "url", redirect)
+			end
+		end
+	else
+		luci.sys.call("/bin/rm -f " .. tmp_uci_file)
+	end
 end
+
+local has_xray = is_finded("xray")
+local has_hysteria2 = is_finded("hysteria")
+
+-- 读取当前存储的 xray_hy2_type
+local xray_hy2_type = uci:get_first("shadowsocksr", "server_subscribe", "xray_hy2_type")
 
 local has_ss_rust = is_finded("sslocal") or is_finded("ssserver")
 local has_ss_libev = is_finded("ss-redir") or is_finded("ss-local")
@@ -257,7 +194,7 @@ if m.uci:get("shadowsocksr", sid) ~= "servers" then
 	return
 end
 -- 保存&应用成功后跳转到节点列表
-set_apply_on_parse(m)
+apply_redirect(m)
 
 -- [[ Servers Setting ]]--
 s = m:section(NamedSection, sid, "servers")
@@ -268,6 +205,43 @@ o = s:option(DummyValue, "ssr_url", "SS/SSR/V2RAY/TROJAN/TUIC/HYSTERIA2 URL")
 o.rawhtml = true
 o.template = "shadowsocksr/ssrurl"
 o.value = sid
+
+-- 新增一个选择框，用于选择 Xray 或 Hysteria2 核心
+o = s:option(ListValue, "xray_hy2_type", string.format("<b><span style='color:red;'>%s</span></b>", translatef("%s Node Use Type", "Hysteria2")))
+o.description = translate("The configured type also applies to the core specified when manually importing nodes.")
+-- 设置默认 Xray 或 Hysteria2 核心
+-- 动态添加选项
+if has_xray then
+	o:value("xray", translate("Xray"))
+end
+if has_hysteria2 then
+	o:value("hysteria2", translate("Hysteria2"))
+end
+-- 设置默认值
+if xray_hy2_type == "xray" then
+	o.default = "xray"
+elseif xray_hy2_type == "hysteria2" then
+	o.default = "hysteria2"
+end
+o.write = function(self, section, value)
+	-- 更新 Hysteria 节点的 xray_hy2_type
+	uci:foreach("shadowsocksr", "servers", function(s)
+		local node_type = uci:get("shadowsocksr", s[".name"], "type")  -- 获取节点类型
+		if node_type == "hysteria2" then  -- 仅修改 Hysteria 节点
+			local old_value = uci:get("shadowsocksr", s[".name"], "xray_hy2_type")
+			if old_value ~= value then
+				uci:set("shadowsocksr", s[".name"], "xray_hy2_type", value)
+			end
+		end
+	end)
+	-- 更新 server_subscribe 的 xray_hy2_type
+	local old_value = uci:get("shadowsocksr", "server_subscribe", "xray_hy2_type")
+	if old_value ~= value then
+        uci:set("shadowsocksr", "@server_subscribe[0]", "xray_hy2_type", value)
+	end
+	-- 更新当前 section 的 xray_hy2_type
+	ListValue.write(self, section, value)
+end
 
 o = s:option(ListValue, "type", translate("Server Node Type"))
 if is_finded("xray") or is_finded("v2ray") then
@@ -315,43 +289,41 @@ o:depends("type", "tun")
 o.description = translate("Redirect traffic to this network interface")
 
 -- 新增一个选择框，用于选择 Shadowsocks 版本
-o = s:option(ListValue, "has_ss_type", string.format("<b><span style='color:red;'>%s</span></b>", translate("ShadowSocks Node Use Version")))
+o = s:option(ListValue, "has_ss_type", string.format("<b><span style='color:red;'>%s</span></b>", translatef("%s Node Use Version", "ShadowSocks")))
 o.description = translate("Selection ShadowSocks Node Use Version.")
 -- 设置默认 Shadowsocks 版本
 -- 动态添加选项
 if has_ss_rust then
-    o:value("ss-rust", translate("ShadowSocks-rust Version"))
+	o:value("ss-rust", translate("ShadowSocks-rust Version"))
 end
 if has_ss_libev then
-    o:value("ss-libev", translate("ShadowSocks-libev Version"))
+	o:value("ss-libev", translate("ShadowSocks-libev Version"))
 end
 -- 设置默认值
 if ss_type == "ss-rust" then
-    o.default = "ss-rust"
+	o.default = "ss-rust"
 elseif ss_type == "ss-libev" then
-    o.default = "ss-libev"
+	o.default = "ss-libev"
 end
 o:depends("type", "ss")
 o.write = function(self, section, value)
-    -- 更新 Shadowsocks 节点的 has_ss_type
-    uci:foreach("shadowsocksr", "servers", function(s)
-        local node_type = uci:get("shadowsocksr", s[".name"], "type")  -- 获取节点类型
-        if node_type == "ss" then  -- 仅修改 Shadowsocks 节点
-            local old_value = uci:get("shadowsocksr", s[".name"], "has_ss_type")
-            if old_value ~= value then
-                uci:set("shadowsocksr", s[".name"], "has_ss_type", value)
-            end
-        end
-    end)
-
-    -- 更新 server_subscribe 的 ss_type
-    local old_value = uci:get("shadowsocksr", "server_subscribe", "ss_type")
-    if old_value ~= value then
-        uci:set("shadowsocksr", "@server_subscribe[0]", "ss_type", value)
-    end
-
-    -- 更新当前 section 的 has_ss_type
-    Value.write(self, section, value)
+	-- 更新 Shadowsocks 节点的 has_ss_type
+	uci:foreach("shadowsocksr", "servers", function(s)
+		local node_type = uci:get("shadowsocksr", s[".name"], "type")  -- 获取节点类型
+		if node_type == "ss" then  -- 仅修改 Shadowsocks 节点
+			local old_value = uci:get("shadowsocksr", s[".name"], "has_ss_type")
+			if old_value ~= value then
+				uci:set("shadowsocksr", s[".name"], "has_ss_type", value)
+			end
+		end
+	end)
+	-- 更新 server_subscribe 的 ss_type
+	local old_value = uci:get("shadowsocksr", "server_subscribe", "ss_type")
+	if old_value ~= value then
+		uci:set("shadowsocksr", "@server_subscribe[0]", "ss_type", value)
+	end
+	-- 更新当前 section 的 has_ss_type
+	ListValue.write(self, section, value)
 end
 
 o = s:option(ListValue, "v2ray_protocol", translate("V2Ray/XRay protocol"))
@@ -361,6 +333,9 @@ o:value("trojan", translate("Trojan"))
 o:value("shadowsocks", translate("ShadowSocks"))
 if is_finded("xray") then
 	o:value("wireguard", translate("WireGuard"))
+end
+if is_finded("xray") then
+	o:value("hysteria2", translate("Hysteria2"))
 end
 o:value("socks", translate("Socks"))
 o:value("http", translate("HTTP"))
@@ -508,17 +483,20 @@ o:depends("type", "ssr")
 -- [[ Hysteria2 ]]--
 o = s:option(Value, "hy2_auth", translate("Users Authentication"))
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.password = true
 o.rmempty = false
 
 o = s:option(Flag, "flag_port_hopping", translate("Enable Port Hopping"))
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.rmempty = true
 o.default = "0"
 
 o = s:option(Value, "port_range", translate("Port hopping range"))
 o.description = translate("Format as 10000:20000 or 10000-20000 Multiple groups are separated by commas (,).")
 o:depends({type = "hysteria2", flag_port_hopping = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_port_hopping = true})
 --o.datatype = "portrange"
 o.rmempty = true
 
@@ -535,12 +513,14 @@ o.rmempty = true
 
 o = s:option(Value, "hopinterval", translate("Port Hopping Interval(Unit:Second)"))
 o:depends({type = "hysteria2", flag_transport = true, flag_port_hopping = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_port_hopping = true})
 o.datatype = "uinteger"
 o.rmempty = true
 o.default = "30"
 
 o = s:option(Flag, "flag_obfs", translate("Enable Obfuscation"))
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.rmempty = true
 o.default = "0"
 
@@ -550,61 +530,71 @@ o.rmempty = true
 o.default = "0"
 
 o = s:option(Value, "obfs_type", translate("Obfuscation Type"))
-o:depends({type = "hysteria2", flag_obfs = "1"})
+o:depends({type = "hysteria2", flag_obfs = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_obfs = true})
 o.rmempty = true
 o.placeholder = "salamander"
 
 o = s:option(Value, "salamander", translate("Obfuscation Password"))
-o:depends({type = "hysteria2", flag_obfs = "1"})
+o:depends({type = "hysteria2", flag_obfs = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_obfs = true})
 o.password = true
 o.rmempty = true
 o.placeholder = "cry_me_a_r1ver"
 
 o = s:option(Flag, "flag_quicparam", translate("Hysterir QUIC parameters"))
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.rmempty = true
 o.default = "0"
 
 o = s:option(Flag, "disablepathmtudiscovery", translate("Disable QUIC path MTU discovery"))
-o:depends({type = "hysteria2",flag_quicparam = "1"})
+o:depends({type = "hysteria2",flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.rmempty = true
 o.default = false
 
 --[[Hysteria2 QUIC parameters setting]]
 o = s:option(Value, "initstreamreceivewindow", translate("QUIC initStreamReceiveWindow"))
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.datatype = "uinteger"
 o.rmempty = true
 o.default = "8388608"
 
 o = s:option(Value, "maxstreamreceivewindow", translate("QUIC maxStreamReceiveWindow"))
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.datatype = "uinteger"
 o.rmempty = true
 o.default = "8388608"
 
 o = s:option(Value, "initconnreceivewindow", translate("QUIC initConnReceiveWindow"))
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.datatype = "uinteger"
 o.rmempty = true
 o.default = "20971520"
 
 o = s:option(Value, "maxconnreceivewindow", translate("QUIC maxConnReceiveWindow"))
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.datatype = "uinteger"
 o.rmempty = true
 o.default = "20971520"
 
 o = s:option(Value, "maxidletimeout", translate("QUIC maxIdleTimeout(Unit:second)"))
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.rmempty = true
 o.datatype = "uinteger"
 o.default = "30"
 
 o = s:option(Value, "keepaliveperiod", translate("The keep-alive period.(Unit:second)"))
 o.description = translate("Default value 0 indicatesno heartbeat.")
-o:depends({type = "hysteria2", flag_quicparam = "1"})
+o:depends({type = "hysteria2", flag_quicparam = true})
 o:depends({type = "v2ray", v2ray_protocol = "wireguard"})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", flag_quicparam = true})
 o.rmempty = true
 o.datatype = "uinteger"
 o.default = "10"
@@ -1068,6 +1058,7 @@ o = s:option(Value, "uplink_capacity", translate("Uplink Capacity(Default:Mbps)"
 o.datatype = "uinteger"
 o:depends("transport", "kcp")
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.placeholder = 5
 o.rmempty = true
 
@@ -1075,6 +1066,7 @@ o = s:option(Value, "downlink_capacity", translate("Downlink Capacity(Default:Mb
 o.datatype = "uinteger"
 o:depends("transport", "kcp")
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 o.placeholder = 20
 o.rmempty = true
 
@@ -1144,6 +1136,7 @@ o:depends({type = "v2ray", v2ray_protocol = "vless", reality = false})
 o:depends({type = "v2ray", v2ray_protocol = "vmess", reality = false})
 o:depends({type = "v2ray", v2ray_protocol = "trojan", reality = false})
 o:depends({type = "v2ray", v2ray_protocol = "shadowsocks", reality = false})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2", reality = false})
 o:depends({type = "v2ray", v2ray_protocol = "socks", socks_ver = "5", reality = false})
 o:depends({type = "v2ray", v2ray_protocol = "http", reality = false})
 o:depends("type", "trojan")
@@ -1269,7 +1262,6 @@ o:value("http/1.1")
 o:value("h2,http/1.1")
 o:value("h3,h2,http/1.1")
 o:depends("tls", true)
-o:depends({type = "hysteria2", tls = true})
 
 -- TUIC ALPN
 o = s:option(ListValue, "tuic_alpn", translate("TUIC ALPN"))
@@ -1296,11 +1288,27 @@ o:depends("tuic_dual_stack", true)
 -- [[ allowInsecure ]]--
 o = s:option(Flag, "insecure", translate("allowInsecure"))
 o.rmempty = false
-o:depends("tls", true)
 o:depends("type", "hysteria2")
+o:depends("type", "trojan")
 o:depends("type", "tuic")
-o:depends({type = "v2ray", v2ray_protocol = "vless", reality = true})
 o.description = translate("If true, allowss insecure connection at TLS client, e.g., TLS server uses unverifiable certificates.")
+-- Xray 版本判断
+if xray_version_val < 260131 then
+	-- Xray 版本小于 26.1.31
+	o:depends("tls", true)
+	o:depends({ type = "v2ray", v2ray_protocol = "vless", reality = true })
+else
+	-- Xray 版本大于等于 26.1.31
+	-- [[ Xray TLS pinSHA256 ]] --
+	o = s:option(Value, "tls_CertSha", translate("TLS Chain Fingerprint (SHA256)"), translate("Once set, connects only when the server’s chain fingerprint matches."))
+	o.rmempty = true
+	o:depends({type = "v2ray", tls = true})
+
+	-- [[ Xray TLS verify leaf certificate name ]] --
+	o = s:option(Value, "tls_CertByName", translate("TLS Certificate Name (CertName)"), translate("TLS is used to verify the leaf certificate name."))
+	o.rmempty = true
+	o:depends({type = "v2ray", tls = true})
+end
 
 -- [[ Hysteria2 TLS pinSHA256 ]] --
 o = s:option(Value, "pinsha256", translate("Certificate fingerprint"))
@@ -1366,10 +1374,10 @@ o:value("skip", translate("skip"))
 o:depends("mux", true)
 
 -- [[ XHTTP TCP Fast Open ]]--
-o = s:option(Flag, "tcpfastopen", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
-o.rmempty = true
-o.default = "0"
-o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp"})
+--o = s:option(Flag, "tcpfastopen", translate("TCP Fast Open"), translate("Enabling TCP Fast Open Requires Server Support."))
+--o.rmempty = true
+--o.default = "0"
+--o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp"})
 
 -- [[ MPTCP ]]--
 o = s:option(Flag, "mptcp", translate("MPTCP"), translate("Enable Multipath TCP, need to be enabled in both server and client configuration."))
@@ -1403,6 +1411,17 @@ o:depends({type = "v2ray", v2ray_protocol = "shadowsocks"})
 o:depends({type = "v2ray", v2ray_protocol = "socks"})
 o:depends({type = "v2ray", v2ray_protocol = "http"})
 
+-- [[ HYSTERIA2_tcpcongestion 连接服务器节点的 TCP 拥塞控制算法 ]]--
+o = s:option(ListValue, "hy2_tcpcongestion", translate("custom_tcpcongestion"))
+o.rmempty = true
+o.default = ""
+o:value("", translate("comment_tcpcongestion_disable"))
+o:value("bbr", translate("BBR"))
+o:value("brutal", translate("BRUTAL"))
+o:value("force-brutal", translate("FORCE BRUTAL"))
+o:value("reno", translate("Reno"))
+o:value("cubic", translate("CUBIC"))
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 
 -- [[ Cert ]]--
 o = s:option(Flag, "certificate", translate("Self-signed Certificate"))
@@ -1462,6 +1481,8 @@ o:depends("type", "ssr")
 o:depends("type", "ss")
 o:depends("type", "trojan")
 o:depends("type", "hysteria2")
+o:depends({type = "v2ray", v2ray_protocol = "vless", transport = "xhttp"})
+o:depends({type = "v2ray", v2ray_protocol = "hysteria2"})
 
 o = s:option(Flag, "switch_enable", translate("Enable Auto Switch"))
 o.rmempty = false
