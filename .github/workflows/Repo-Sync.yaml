@@ -86,10 +86,10 @@ jobs:
           git clone --depth 1 https://github.com/fw876/helloworld.git helloworld
 
           rm -rf passwall_packages
-          git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall-packages  passwall_packages
+          git clone --depth 1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages  passwall_packages
 
           rm -rf passwall_luci
-          git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall.git  passwall_luci
+          git clone --depth 1 https://github.com/Openwrt-Passwall/openwrt-passwall.git  passwall_luci
 
           rm -rf luci-app-mosdns
           git clone --depth 1 https://github.com/sbwml/luci-app-mosdns.git  luci-app-mosdns
