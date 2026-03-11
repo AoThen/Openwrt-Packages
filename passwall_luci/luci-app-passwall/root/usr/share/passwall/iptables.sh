@@ -2,6 +2,7 @@
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 MY_PATH=$DIR/iptables.sh
+UTILS_PATH=$DIR/utils.sh
 IPSET_LOCAL="passwall_local"
 IPSET_WAN="passwall_wan"
 IPSET_LAN="passwall_lan"
@@ -28,8 +29,6 @@ FORCE_INDEX=2
 
 USE_SHUNT_TCP=0
 USE_SHUNT_UDP=0
-
-. /lib/functions/network.sh
 
 ipt=$(command -v iptables-legacy || command -v iptables)
 ip6t=$(command -v ip6tables-legacy || command -v ip6tables)
@@ -60,7 +59,7 @@ dst() {
 
 comment() {
 	local name=$(echo $1 | sed 's/ /_/g')
-	echo "-m comment --comment '$name'"
+	echo "-m comment --comment "${name}""
 }
 
 #解决端口超过15个ipt无效，支持单端口、端口范围
@@ -195,41 +194,6 @@ get_jump_ipt() {
 	esac
 }
 
-gen_lanlist() {
-	cat $RULES_PATH/lanlist_ipv4 | tr -s '\n' | grep -v "^#"
-}
-
-gen_lanlist_6() {
-	cat $RULES_PATH/lanlist_ipv6 | tr -s '\n' | grep -v "^#"
-}
-
-get_wan_ips() {
-	local family="$1"
-	local NET_ADDR
-	local iface
-	local INTERFACES=$(ubus call network.interface dump | jsonfilter -e '@.interface[!(@.interface ~ /lan/) && @.route[0]].interface')
-	for iface in $INTERFACES; do
-		local addr
-		if [ "$family" = "ip6" ]; then
-			network_get_ipaddr6 addr "$iface"
-			case "$addr" in
-				""|fe80*) continue ;;
-			esac
-		else
-			network_get_ipaddr addr "$iface"
-			case "$addr" in
-				""|"0.0.0.0") continue ;;
-			esac
-		fi
-
-		case " $NET_ADDR " in
-			*" $addr "*) ;;
-			*) NET_ADDR="${NET_ADDR:+$NET_ADDR }$addr" ;;
-		esac
-	done
-	echo "$NET_ADDR"
-}
-
 load_acl() {
 	([ "$ENABLED_ACLS" == 1 ] || ([ "$ENABLED_DEFAULT_ACL" == 1 ] && [ "$CLIENT_PROXY" == 1 ])) && echolog "  - 访问控制："
 	[ "$ENABLED_ACLS" == 1 ] && {
@@ -318,7 +282,6 @@ load_acl() {
 				local _ipt_source _ipv4
 				local msg
 				if [ -n "${interface}" ]; then
-					. /lib/functions/network.sh
 					local gateway device
 					network_get_gateway gateway "${interface}"
 					network_get_device device "${interface}"
@@ -1350,8 +1313,8 @@ add_firewall_rule() {
 
 	[ -d "${TMP_IFACE_PATH}" ] && {
 		for iface in $(ls ${TMP_IFACE_PATH}); do
-			$ipt_n -I PSW_OUTPUT -o $iface -j RETURN
-			$ipt_m -I PSW_OUTPUT -o $iface -j RETURN
+			$ipt_n -A PSW_OUTPUT -o $iface -j RETURN
+			$ipt_m -A PSW_OUTPUT -o $iface -j RETURN
 		done
 	}
 
@@ -1433,6 +1396,7 @@ gen_include() {
 	local __ipt=""
 	[ -n "${ipt}" ] && {
 		__ipt=$(cat <<- EOF
+			. $UTILS_PATH
 			mangle_output_psw=\$(${ipt}-save -t mangle | grep "PSW" | grep "mangle\-OUTPUT\-PSW" | sed "s#-A OUTPUT ##g")
 			$ipt-save -c | grep -v "PSW" | $ipt-restore -c
 			$ipt-restore -n <<-EOT
@@ -1450,20 +1414,20 @@ gen_include() {
 			\$(${MY_PATH} insert_rule_before "$ipt_m" "PREROUTING" "mwan3" "-j PSW")
 			\$(${MY_PATH} insert_rule_before "$ipt_m" "PREROUTING" "PSW" "-p tcp -m socket -j PSW_DIVERT")
 
-			WAN_IP=\$(${MY_PATH} get_wan_ips ip4)
+			WAN_IP=\$(get_wan_ips ip4)
 			[ ! -z "\${WAN_IP}" ] && {
 				ipset -F $IPSET_WAN
 				for wan_ip in \$WAN_IP; do
 					ipset -! add $IPSET_WAN \${wan_ip}
 				done
 			}
-			fi
 		EOF
 		)
 	}
 	local __ip6t=""
 	[ -n "${ip6t}" ] && {
 		__ip6t=$(cat <<- EOF
+			. $UTILS_PATH
 			mangle_output_psw=\$(${ip6t}-save -t mangle | grep "PSW" | grep "mangle\-OUTPUT\-PSW" | sed "s#-A OUTPUT ##g")
 			$ip6t-save -c | grep -v "PSW" | $ip6t-restore -c
 			$ip6t-restore -n <<-EOT
@@ -1480,7 +1444,7 @@ gen_include() {
 			\$(${MY_PATH} insert_rule_before "$ip6t_m" "PREROUTING" "mwan3" "-j PSW")
 			\$(${MY_PATH} insert_rule_before "$ip6t_m" "PREROUTING" "PSW" "-p tcp -m socket -j PSW_DIVERT")
 
-			WAN6_IP=\$(${MY_PATH} get_wan_ips ip6)
+			WAN6_IP=\$(get_wan_ips ip6)
 			[ ! -z "\${WAN6_IP}" ] && {
 				ipset -F $IPSET_WAN6
 				for wan6_ip in \$WAN6_IP; do
@@ -1521,8 +1485,9 @@ stop() {
 		uci -q delete ${CONFIG}.@global[0].flush_set
 		uci -q commit ${CONFIG}
 		flush_ipset
-		rm -rf /tmp/etc/passwall_tmp/singbox*
-		rm -rf /tmp/etc/passwall_tmp/dnsmasq*
+		rm -rf $TMP_PATH2/singbox*
+		rm -rf $TMP_PATH2/dnsmasq*
+		rm -rf $TMP_PATH2/geo_output
 	}
 	flush_include
 }
@@ -1544,9 +1509,6 @@ get_ipt_bin)
 	;;
 get_ip6t_bin)
 	get_ip6t_bin
-	;;
-get_wan_ips)
-	get_wan_ips
 	;;
 filter_direct_node_list)
 	filter_direct_node_list

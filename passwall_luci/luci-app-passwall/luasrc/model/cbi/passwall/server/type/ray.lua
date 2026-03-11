@@ -20,6 +20,10 @@ local x_ss_method_list = {
 	"none", "plain", "aes-128-gcm", "aes-256-gcm", "chacha20-poly1305", "xchacha20-poly1305", "2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305"
 }
 
+local header_type_list = {
+	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
+}
+
 -- [[ Xray ]]
 
 s.fields["type"]:value(type_name, "Xray")
@@ -314,17 +318,11 @@ o:depends({ [_n("tcp_guise")] = "http" })
 -- [[ mKCP部分 ]]--
 
 o = s:option(ListValue, _n("mkcp_guise"), translate("Camouflage Type"), translate('<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)<br />dns: Disguising traffic as DNS requests.'))
-o:value("none", "none")
-o:value("header-srtp", "srtp")
-o:value("header-utp", "utp")
-o:value("header-wechat", "wechat-video")
-o:value("header-dtls", "dtls")
-o:value("header-wireguard", "wireguard")
-o:value("header-dns", "dns")
+for a, t in ipairs(header_type_list) do o:value(t) end
 o:depends({ [_n("transport")] = "mkcp" })
 
 o = s:option(Value, _n("mkcp_domain"), translate("Camouflage Domain"), translate("Use it together with the DNS disguised type. You can fill in any domain."))
-o:depends({ [_n("mkcp_guise")] = "header-dns" })
+o:depends({ [_n("mkcp_guise")] = "dns" })
 
 o = s:option(Value, _n("mkcp_mtu"), translate("KCP MTU"))
 o.default = "1350"
@@ -360,7 +358,45 @@ o:depends({ [_n("transport")] = "mkcp" })
 o = s:option(Value, _n("grpc_serviceName"), "ServiceName")
 o:depends({ [_n("transport")] = "grpc" })
 
+--[[FinalMask]]
+o = s:option(Flag, _n("use_finalmask"), "FinalMask")
+o.default = "0"
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "vmess" })
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "vless" })
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "trojan" })
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "shadowsocks" })
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "wireguard" })
+o:depends({ [_n("custom")] = false, [_n("protocol")] = "hysteria2" })
+
+o = s:option(TextValue, _n("finalmask"), "FinalMask JSON")
+o:depends({ [_n("use_finalmask")] = true })
+o.rows = 10
+o.wrap = "off"
+o.custom_cfgvalue = function(self, section, value)
+	local raw = m:get(section, "finalmask")
+	if raw then
+		return api.base64Decode(raw)
+	end
+end
+o.custom_write = function(self, section, value)
+	m:set(section, "finalmask", api.base64Encode(value) or "")
+end
+o.validate = function(self, value)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
+	if api.jsonc.parse(value) then
+		return value
+	else
+		return nil, "FinalMask " .. translate("Must be JSON text!")
+	end
+end
+
+--[[acceptProxyProtocol]]
 o = s:option(Flag, _n("acceptProxyProtocol"), translate("acceptProxyProtocol"), translate("Whether to receive PROXY protocol, when this node want to be fallback or forwarded by proxy, it must be enable, otherwise it cannot be used."))
+o.default = "0"
+o:depends({ [_n("custom")] = false })
+
+--[[Fast Open]]
+o = s:option(Flag, _n("tcp_fast_open"), "TCP " .. translate("Fast Open"))
 o.default = "0"
 o:depends({ [_n("custom")] = false })
 
@@ -449,7 +485,7 @@ o.validate = function(self, value, t)
 	if value and api.jsonc.parse(value) then
 		return value
 	else
-		return nil, translate("Must be JSON text!")
+		return nil, translate("Custom Config") .. " " .. translate("Must be JSON text!")
 	end
 end
 o.custom_cfgvalue = function(self, section, value)
@@ -459,7 +495,7 @@ o.custom_cfgvalue = function(self, section, value)
 	end
 end
 o.custom_write = function(self, section, value)
-	m:set(section, "config_str", api.base64Encode(value))
+	m:set(section, "config_str", api.base64Encode(value) or "")
 end
 
 o = s:option(Flag, _n("log"), translate("Log"))

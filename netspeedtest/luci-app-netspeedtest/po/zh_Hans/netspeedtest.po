@@ -19,14 +19,29 @@ msgstr "网速测试"
 msgid "A tool for testing network speed in multiple aspects"
 msgstr "一个用于从多方面测试本地和宽带网络速度的测速工具"
 
-msgid "Lan Speedtest Iperf3"
-msgstr "本地iperf3测速"
+msgid "Throughput speedtest Iperf3"
+msgstr "吞吐iperf3测速"
 
-msgid "Lan Speedtest Homebox"
-msgstr "本地homebox测速"
+msgid "Throughput speedtest Homebox"
+msgstr "吞吐homebox测速"
 
-msgid "Wan Ookla SpeedTest"
-msgstr "宽带Ookla测速"
+msgid "Wan SpeedTest"
+msgstr "宽带测速"
+
+msgid "Select Test Version"
+msgstr "选择测速版本"
+
+msgid "Select Server"
+msgstr "选择测速服务节点"
+
+msgid "Auto (Let speedtest decide)"
+msgstr "自动（由速度测试决定）"
+
+msgid "Server not obtained"
+msgstr "未获取到测速服务节点"
+
+msgid "View detailed results"
+msgstr "查看详细结果"
 
 msgid "Online SpeedTest"
 msgstr "在线宽带测速"
@@ -103,16 +118,16 @@ msgstr "Homebox服务端未运行"
 msgid "Open Web Interface"
 msgstr "打开WEB页面"
 
-msgid "Start Ookla SpeedTest"
-msgstr "开始宽带测速"
+msgid "Start Speed Test"
+msgstr "开始测速"
 
-msgid "Click to execute"
-msgstr "点击执行"
+msgid "Click to start speed test"
+msgstr "点击开始测速"
 
-msgid "SpeedTesting in progress..."
+msgid "Speed testing in progress..."
 msgstr "测速中,请稍候..."
 
-msgid "Test failed."
+msgid "Test Failed"
 msgstr "测速失败"
 
 msgid "No test results yet."

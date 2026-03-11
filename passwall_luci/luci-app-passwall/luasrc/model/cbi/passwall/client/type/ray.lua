@@ -38,6 +38,10 @@ local ss_method_list = {
 
 local security_list = { "none", "auto", "aes-128-gcm", "chacha20-poly1305", "zero" }
 
+local header_type_list = {
+	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
+}
+
 local xray_version = api.get_app_version("xray")
 
 o = s:option(ListValue, _n("protocol"), translate("Protocol"))
@@ -75,72 +79,41 @@ if not arg_select_proto:find("_") then
 	load_normal_options = true
 end
 
-local nodes_list = {}
-local balancing_list = {}
+local node_list = api.get_node_list()
 local fallback_list = {}
-local iface_list = {}
 local is_balancer = nil
-for k, e in ipairs(api.get_valid_nodes()) do
-	if e.node_type == "normal" then
-		nodes_list[#nodes_list + 1] = {
-			id = e[".name"],
+for k, e in ipairs(node_list.balancing_list or {}) do
+	if e.id ~= arg[1] then
+		fallback_list[#fallback_list + 1] = {
+			id = e["id"],
 			remark = e["remark"],
-			type = e["type"],
-			address = e["address"],
-			chain_proxy = e["chain_proxy"],
-			group = e["group"]
+			group = e["group"],
+			fallback = e.o["fallback_node"],
 		}
-	end
-	if e.protocol == "_balancing" then
-		balancing_list[#balancing_list + 1] = {
-			id = e[".name"],
-			remark = e["remark"],
-			group = e["group"]
-		}
-		if e[".name"] ~= arg[1] then
-			fallback_list[#fallback_list + 1] = {
-				id = e[".name"],
-				remark = e["remark"],
-				fallback = e["fallback_node"],
-				group = e["group"]
-			}
-		else
-			is_balancer = true
-		end
-	end
-	if e.protocol == "_iface" then
-		iface_list[#iface_list + 1] = {
-			id = e[".name"],
-			remark = e["remark"],
-			group = e["group"]
-		}
+	else
+		is_balancer = true
 	end
 end
 
-local socks_list = {}
-m.uci:foreach(appname, "socks", function(s)
-	if s.enabled == "1" and s.node then
-		socks_list[#socks_list + 1] = {
-			id = "Socks_" .. s[".name"],
-			remark = translate("Socks Config") .. " " .. string.format("[%s %s]", s.port, translate("Port")),
-			group = "Socks"
-		}
-	end
-end)
-
-if load_balancing_options then -- [[ 负载均衡 Start ]]
-	o = s:option(MultiValue, _n("balancing_node"), translate("Load balancing node list"), translate("Load balancing node list, <a target='_blank' href='https://xtls.github.io/config/routing.html#balancerobject'>document</a>"))
+if load_balancing_options then -- [[ Load balancing Start ]]
+	o = s:option(ListValue, _n("node_add_mode"), translate("Node Addition Method"))
 	o:depends({ [_n("protocol")] = "_balancing" })
+	o.default = "manual"
+	o:value("manual", translate("Manual"))
+	o:value("batch", translate("Batch"))
+
+	o = s:option(MultiValue, _n("balancing_node"), translate("Load balancing node list"), translate("Load balancing node list, <a target='_blank' href='https://xtls.github.io/config/routing.html#balancerobject'>document</a>"))
+	o:depends({ [_n("node_add_mode")] = "manual" })
 	o.widget = "checkbox"
 	o.template = appname .. "/cbi/nodes_multivalue"
 	o.group = {}
-	for k, v in pairs(socks_list) do
-		o:value(v.id, v.remark)
-		o.group[#o.group+1] = v.group or ""
-	end
-	for i, v in pairs(nodes_list) do
-		o:value(v.id, v.remark)
-		o.group[#o.group+1] = v.group or ""
+	for k1, v1 in pairs(node_list) do
+		if k1 == "socks_list" or k1 == "normal_list" then
+			for i, v in ipairs(v1) do
+				o:value(v.id, v.remark)
+				o.group[#o.group+1] = v.group or ""
+			end
+		end
 	end
 	-- 读取旧 DynamicList
 	function o.cfgvalue(self, section)
@@ -166,6 +139,22 @@ if load_balancing_options then -- [[ 负载均衡 Start ]]
 			return
 		end
 	end
+
+	o = s:option(MultiValue, _n("node_group"), translate("Select Group"))
+	o:depends({ [_n("node_add_mode")] = "batch" })
+	o.widget = "checkbox"
+	o:value("default", translate("default"))
+	for k, v in pairs(groups) do
+		o:value(api.UrlEncode(k), k)
+	end
+
+	o = s:option(Value, _n("node_match_rule"), translate("Node Matching Rules"))
+	o:depends({ [_n("node_add_mode")] = "batch" })
+	local descrStr = "Example: <code>^A && B && !C && D$</code><br>"
+	descrStr = descrStr .. "This means the node remark must start with A (^), include B, exclude C (!), and end with D ($).<br>"
+	descrStr = descrStr .. "Conditions are joined by <code>&&</code>, and their order does not affect the result."
+	o.description = translate(descrStr) .. string.format("<br><font color='red'>%s</font>",
+			translate("Keep the match scope small. Too many nodes can impact router performance."))
 
 	o = s:option(ListValue, _n("balancingStrategy"), translate("Balancing Strategy"))
 	o:depends({ [_n("protocol")] = "_balancing" })
@@ -193,17 +182,17 @@ if load_balancing_options then -- [[ 负载均衡 Start ]]
 	if is_balancer then
 		check_fallback_chain(arg[1])
 	end
-	for k, v in pairs(socks_list) do
+	for i, v in ipairs(fallback_list) do
 		o:value(v.id, v.remark)
 		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
 	end
-	for k, v in pairs(fallback_list) do
-		o:value(v.id, v.remark)
-		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
-	end
-	for k, v in pairs(nodes_list) do
-		o:value(v.id, v.remark)
-		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+	for k1, v1 in pairs(node_list) do
+		if k1 == "socks_list" or k1 == "normal_list" then
+			for i, v in ipairs(v1) do
+				o:value(v.id, v.remark)
+				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+			end
+		end
 	end
 
 	-- 探测地址
@@ -255,12 +244,17 @@ o.datatype = "port"
 local protocols = s.fields[_n("protocol")].keylist
 if #protocols > 0 then
 	for index, value in ipairs(protocols) do
-		if not value:find("_") then
+		if not value:find("^_") then
 			s.fields[_n("address")]:depends({ [_n("protocol")] = value })
 			s.fields[_n("port")]:depends({ [_n("protocol")] = value })
 		end
 	end
 end
+
+o = s:option(Value, _n("uuid"), translate("ID"))
+o.password = true
+o:depends({ [_n("protocol")] = "vmess" })
+o:depends({ [_n("protocol")] = "vless" })
 
 o = s:option(Value, _n("username"), translate("Username"))
 o:depends({ [_n("protocol")] = "http" })
@@ -300,11 +294,6 @@ o:depends({ [_n("protocol")] = "shadowsocks", [_n("ss_method")] = "xchacha20-pol
 o = s:option(Flag, _n("uot"), translate("UDP over TCP"))
 o:depends({ [_n("protocol")] = "shadowsocks" })
 
-o = s:option(Value, _n("uuid"), translate("ID"))
-o.password = true
-o:depends({ [_n("protocol")] = "vmess" })
-o:depends({ [_n("protocol")] = "vless" })
-
 o = s:option(ListValue, _n("flow"), translate("flow"))
 o.default = ""
 o:value("", translate("Disable"))
@@ -333,7 +322,7 @@ o:value("salamander")
 o:depends({ [_n("protocol")] = "hysteria2" })
 
 o = s:option(Value, _n("hysteria2_obfs_password"), translate("Obfs Password"))
-o:depends({ [_n("protocol")] = "hysteria2" })
+o:depends({ [_n("hysteria2_obfs_type")] = "salamander" })
 
 o = s:option(Value, _n("hysteria2_auth_password"), translate("Auth Password"))
 o.password = true
@@ -524,17 +513,11 @@ o:depends({ [_n("tcp_guise")] = "http" })
 -- [[ mKCP部分 ]]--
 
 o = s:option(ListValue, _n("mkcp_guise"), translate("Camouflage Type"), translate('<br />none: default, no masquerade, data sent is packets with no characteristics.<br />srtp: disguised as an SRTP packet, it will be recognized as video call data (such as FaceTime).<br />utp: packets disguised as uTP will be recognized as bittorrent downloaded data.<br />wechat-video: packets disguised as WeChat video calls.<br />dtls: disguised as DTLS 1.2 packet.<br />wireguard: disguised as a WireGuard packet. (not really WireGuard protocol)<br />dns: Disguising traffic as DNS requests.'))
-o:value("none", "none")
-o:value("header-srtp", "srtp")
-o:value("header-utp", "utp")
-o:value("header-wechat", "wechat-video")
-o:value("header-dtls", "dtls")
-o:value("header-wireguard", "wireguard")
-o:value("header-dns", "dns")
+for a, t in ipairs(header_type_list) do o:value(t) end
 o:depends({ [_n("transport")] = "mkcp" })
 
 o = s:option(Value, _n("mkcp_domain"), translate("Camouflage Domain"), translate("Use it together with the DNS disguised type. You can fill in any domain."))
-o:depends({ [_n("mkcp_guise")] = "header-dns" })
+o:depends({ [_n("mkcp_guise")] = "dns" })
 
 o = s:option(Value, _n("mkcp_mtu"), translate("KCP MTU"))
 o.default = "1350"
@@ -634,9 +617,9 @@ o = s:option(Flag, _n("use_xhttp_extra"), translate("XHTTP Extra"))
 o.default = "0"
 o:depends({ [_n("transport")] = "xhttp" })
 
-o = s:option(TextValue, _n("xhttp_extra"), " ", translate("An XHttpObject in JSON format, used for sharing."))
+o = s:option(TextValue, _n("xhttp_extra"), "　", translate("An XHttpObject in JSON format, used for sharing."))
 o:depends({ [_n("use_xhttp_extra")] = true })
-o.rows = 15
+o.rows = 10
 o.wrap = "off"
 o.custom_cfgvalue = function(self, section, value)
 	local raw = m:get(section, "xhttp_extra")
@@ -645,7 +628,7 @@ o.custom_cfgvalue = function(self, section, value)
 	end
 end
 o.custom_write = function(self, section, value)
-	m:set(section, "xhttp_extra", api.base64Encode(value))
+	m:set(section, "xhttp_extra", api.base64Encode(value) or "")
 	local success, data = pcall(jsonc.parse, value)
 	if success and data then
 		local address = (data.extra and data.extra.downloadSettings and data.extra.downloadSettings.address)
@@ -661,11 +644,12 @@ o.custom_write = function(self, section, value)
 	end
 end
 o.validate = function(self, value)
-	value = value:gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
-	if value:sub(-1) == "\n" then
-		value = value:sub(1, -2)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
+	if api.jsonc.parse(value) then
+		return value
+	else
+		return nil, "XHTTP Extra " .. translate("Must be JSON text!")
 	end
-	return value
 end
 o.custom_remove = function(self, section, value)
 	m:del(section, "xhttp_extra")
@@ -678,6 +662,7 @@ o:depends({ [_n("tcp_guise")] = "http" })
 o:depends({ [_n("transport")] = "ws" })
 o:depends({ [_n("transport")] = "httpupgrade" })
 o:depends({ [_n("transport")] = "xhttp" })
+o:depends({ [_n("transport")] = "grpc" })
 
 -- [[ Mux.Cool ]]--
 o = s:option(Flag, _n("mux"), "Mux", translate("Enable Mux.Cool"))
@@ -699,7 +684,40 @@ o = s:option(Value, _n("xudp_concurrency"), translate("XUDP Mux concurrency"))
 o.default = 8
 o:depends({ [_n("mux")] = true })
 
-o = s:option(Flag, _n("tcp_fast_open"), "TCP " .. translate("Fast Open"))
+--[[FinalMask]]
+o = s:option(Flag, _n("use_finalmask"), "FinalMask")
+o.default = "0"
+o:depends({ [_n("protocol")] = "vmess" })
+o:depends({ [_n("protocol")] = "vless" })
+o:depends({ [_n("protocol")] = "trojan" })
+o:depends({ [_n("protocol")] = "shadowsocks" })
+o:depends({ [_n("protocol")] = "wireguard" })
+o:depends({ [_n("protocol")] = "hysteria2" })
+
+o = s:option(TextValue, _n("finalmask"), "　", translate("An FinalMaskObject in JSON format, used for sharing."))
+o:depends({ [_n("use_finalmask")] = true })
+o.rows = 10
+o.wrap = "off"
+o.custom_cfgvalue = function(self, section, value)
+	local raw = m:get(section, "finalmask")
+	if raw then
+		return api.base64Decode(raw)
+	end
+end
+o.custom_write = function(self, section, value)
+	m:set(section, "finalmask", api.base64Encode(value) or "")
+end
+o.validate = function(self, value)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
+	if api.jsonc.parse(value) then
+		return value
+	else
+		return nil, "FinalMask " .. translate("Must be JSON text!")
+	end
+end
+
+--[[Fast Open]]
+o = s:option(Flag, _n("tcp_fast_open"), "TCP " .. translate("Fast Open"), translate("Need node support required"))
 o.default = 0
 
 --[[tcpMptcp]]
@@ -711,45 +729,50 @@ o.datatype = "uinteger"
 o.placeholder = 0
 o:depends({ [_n("protocol")] = "vless" })
 
-o = s:option(ListValue, _n("chain_proxy"), translate("Chain Proxy"))
-o:value("", translate("Close(Not use)"))
-o:value("1", translate("Preproxy Node"))
-o:value("2", translate("Landing Node"))
 for i, v in ipairs(s.fields[_n("protocol")].keylist) do
-	if not v:find("_") then
-		o:depends({ [_n("protocol")] = v })
-	end
-end
-
-o1 = s:option(ListValue, _n("preproxy_node"), translate("Preproxy Node"), translate("Only support a layer of proxy."))
-o1:depends({ [_n("chain_proxy")] = "1" })
-o1.template = appname .. "/cbi/nodes_listvalue"
-o1.group = {}
-
-o2 = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Only support a layer of proxy."))
-o2:depends({ [_n("chain_proxy")] = "2" })
-o2.template = appname .. "/cbi/nodes_listvalue"
-o2.group = {}
-
-for k, v in pairs(nodes_list) do
-	if v.type == "Xray" and v.id ~= arg[1] and (not v.chain_proxy or v.chain_proxy == "") then
-		o1:value(v.id, v.remark)
-		o1.group[#o1.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
-		o2:value(v.id, v.remark)
-		o2.group[#o2.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
-	end
-end
-
-for i, v in ipairs(s.fields[_n("protocol")].keylist) do
-	if not v:find("_") and v ~= "hysteria2" then
+	if not v:find("^_") and v ~= "hysteria2" then
 		s.fields[_n("tcp_fast_open")]:depends({ [_n("protocol")] = v })
 		s.fields[_n("tcpMptcp")]:depends({ [_n("protocol")] = v })
-		s.fields[_n("chain_proxy")]:depends({ [_n("protocol")] = v })
 	end
 end
-
 end
 -- [[ Normal single node End ]]
+
+if not load_shunt_options then
+	o = s:option(ListValue, _n("chain_proxy"), translate("Chain Proxy"))
+	o:value("", translate("Close(Not use)"))
+	if not (load_iface_options or load_balancing_options) then
+		-- Special node cannot be use pre-proxy.
+		o:value("1", translate("Preproxy Node"))
+	end
+	o:value("2", translate("Landing Node"))
+
+	o1 = s:option(ListValue, _n("preproxy_node"), translate("Preproxy Node"), translate("Only support a layer of proxy."))
+	o1:depends({ [_n("chain_proxy")] = "1" })
+	o1.template = appname .. "/cbi/nodes_listvalue"
+	o1.group = {}
+
+	o2 = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Only support a layer of proxy."))
+	o2:depends({ [_n("chain_proxy")] = "2" })
+	o2.template = appname .. "/cbi/nodes_listvalue"
+	o2.group = {}
+
+	for k1, v1 in pairs(node_list) do
+		if k1 ~= "shunt_list" and k1 ~= "iface_list" then
+			for i, v in ipairs(v1) do
+				if v.id ~= arg[1] then
+					o1:value(v.id, v.remark)
+					o1.group[#o1.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+					if k1 == "normal_list" then
+						-- Landing Node not support use special node.
+						o2:value(v.id, v.remark)
+						o2.group[#o2.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+					end
+				end
+			end
+		end
+	end
+end
 
 api.luci_types(arg[1], m, s, type_name, option_prefix)
 
@@ -759,9 +782,6 @@ if load_shunt_options then
 	setfenv(shunt_lua, getfenv(1))(m, s, {
 		node_id = arg[1],
 		node = current_node,
-		socks_list = socks_list,
-		balancing_list = balancing_list,
-		iface_list = iface_list,
-		normal_list = nodes_list
+		node_list = node_list,
 	})
 end

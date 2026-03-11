@@ -11,21 +11,11 @@ local has_singbox = api.finded_com("sing-box")
 local has_xray = api.finded_com("xray")
 local has_hysteria2 = api.finded_com("hysteria")
 
-local function get_core(field, candidates)
-	local v = map:get("@global_subscribe[0]", field)
-	if not v or v == "" then
-		for _, c in ipairs(candidates) do
-			if c[1] then return c[2] end
-		end
-	end
-	return v
-end
-
-local ss_type = get_core("ss_type", {{has_ss,"shadowsocks-libev"},{has_ss_rust,"shadowsocks-rust"},{has_singbox,"sing-box"},{has_xray,"xray"}})
-local trojan_type = get_core("trojan_type", {{has_trojan_plus,"trojan-plus"},{has_singbox,"sing-box"},{has_xray,"xray"}})
-local vmess_type = get_core("vmess_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
-local vless_type = get_core("vless_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
-local hysteria2_type = get_core("hysteria2_type", {{has_hysteria2,"hysteria2"},{has_singbox,"sing-box"}, {has_xray,"xray"}})
+local ss_type = api.get_core("ss_type", {{has_ss,"shadowsocks-libev"},{has_ss_rust,"shadowsocks-rust"},{has_singbox,"sing-box"},{has_xray,"xray"}})
+local trojan_type = api.get_core("trojan_type", {{has_trojan_plus,"trojan-plus"},{has_singbox,"sing-box"},{has_xray,"xray"}})
+local vmess_type = api.get_core("vmess_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
+local vless_type = api.get_core("vless_type", {{has_xray,"xray"},{has_singbox,"sing-box"}})
+local hysteria2_type = api.get_core("hysteria2_type", {{has_hysteria2,"hysteria2"},{has_singbox,"sing-box"}, {has_xray,"xray"}})
 
 local current_node = map:get(section)
 -%>
@@ -243,6 +233,9 @@ local current_node = map:get(section)
 			}
 
 			var params = "";
+
+			opt.get(dom_prefix + "tcp_fast_open")?.checked && (params += "&tfo=1");
+
 			var v_plugin_dom = opt.get(dom_prefix + "plugin");
 			if (v_plugin_dom) {
 				var v_plugin = v_plugin_dom.value;
@@ -270,11 +263,11 @@ local current_node = map:get(section)
 						var ws_maxEarlyData = opt.get(dom_prefix + "ws_maxEarlyData").value;
 						params += "?ed=" + ws_maxEarlyData;
 					}
-				} else if (v_transport === "h2") {
-					v_transport = "http";
-					params += opt.query("host", dom_prefix + "h2_host");
-					params += opt.query("path", dom_prefix + "h2_path");
+				} else if (v_transport === "http") {
+					params += opt.query("host", dom_prefix + "http_host");
+					params += opt.query("path", dom_prefix + "http_path");
 				} else if (v_transport === "raw" || v_transport === "tcp") {
+					v_transport = "tcp";
 					params += opt.query("headerType", dom_prefix + "tcp_guise");
 					params += opt.query("host", dom_prefix + "tcp_guise_http_host");
 					params += opt.query("path", dom_prefix + "tcp_guise_http_path");
@@ -320,6 +313,11 @@ local current_node = map:get(section)
 					params += opt.query("pcs", dom_prefix + "tls_CertSha");
 					params += opt.query("vcn", dom_prefix + "tls_CertByName");
 					params += opt.query("ech", dom_prefix + "ech_config");
+				}
+
+				opt.get(dom_prefix + "uot")?.checked && (params += "&udp=1");
+				if (opt.get(dom_prefix + "use_finalmask")?.checked) {
+					params += opt.query("fm", dom_prefix + "finalmask");
 				}
 
 				if (opt.get(dom_prefix + "shadowtls")?.checked) {
@@ -387,10 +385,11 @@ local current_node = map:get(section)
 					var ws_maxEarlyData = opt.get(dom_prefix + "ws_maxEarlyData").value;
 					info.path = info.path + "?ed=" + ws_maxEarlyData;
 				}
-			} else if (v_transport === "h2") {
-				info.host = opt.get(dom_prefix + "h2_host").value;
-				info.path = opt.get(dom_prefix + "h2_path").value;
+			} else if (v_transport === "http") {
+				info.host = opt.get(dom_prefix + "http_host").value;
+				info.path = opt.get(dom_prefix + "http_path").value;
 			} else if (v_transport === "raw" || v_transport === "tcp") {
+				v_transport = "tcp";
 				info.type = opt.get(dom_prefix + "tcp_guise").value;
 				if (info.type === "http") {
 					info.host = opt.get(dom_prefix + "tcp_guise_http_host").value;
@@ -418,6 +417,13 @@ local current_node = map:get(section)
 				info.tls = "tls";
 				info.sni = opt.get(dom_prefix + "tls_serverName").value;
 			}
+
+			opt.get(dom_prefix + "tcp_fast_open")?.checked && (info.tfo = "1");
+			if (opt.get(dom_prefix + "use_finalmask")?.checked) {
+				info.fm = opt.get(dom_prefix + "finalmask").value;
+				if (info.fm) info.fm = encodeURI(info.fm);
+			}
+
 			url = b64EncodeUnicode(JSON.stringify(info));
 		} else if ((v_type === "sing-box" || v_type === "Xray") && opt.get(dom_prefix + "protocol").value === "vless") {
 			protocol = "vless";
@@ -436,11 +442,11 @@ local current_node = map:get(section)
 					var ws_maxEarlyData = opt.get(dom_prefix + "ws_maxEarlyData").value;
 					params += encodeURIComponent("?ed=" + ws_maxEarlyData);
 				}
-			} else if (v_transport === "h2") {
-				v_transport = "http";
-				params += opt.query("host", dom_prefix + "h2_host");
-				params += opt.query("path", dom_prefix + "h2_path");
+			} else if (v_transport === "http") {
+				params += opt.query("host", dom_prefix + "http_host");
+				params += opt.query("path", dom_prefix + "http_path");
 			} else if (v_transport === "raw" || v_transport === "tcp") {
+				v_transport = "tcp";
 				params += opt.query("headerType", dom_prefix + "tcp_guise");
 				params += opt.query("host", dom_prefix + "tcp_guise_http_host");
 				params += opt.query("path", dom_prefix + "tcp_guise_http_path");
@@ -502,6 +508,11 @@ local current_node = map:get(section)
 				params += opt.query("ech", dom_prefix + "ech_config");
 			}
 
+			opt.get(dom_prefix + "tcp_fast_open")?.checked && (params += "&tfo=1");
+			if (opt.get(dom_prefix + "use_finalmask")?.checked) {
+				params += opt.query("fm", dom_prefix + "finalmask");
+			}
+
 			params += "#" + encodeURI(v_alias.value);
 			if (params[0] == "&") {
 				params = params.substring(1);
@@ -523,11 +534,11 @@ local current_node = map:get(section)
 					var ws_maxEarlyData = opt.get(dom_prefix + "ws_maxEarlyData").value;
 					params += "?ed=" + ws_maxEarlyData;
 				}
-			} else if (v_transport === "h2") {
-				v_transport = "http";
-				params += opt.query("host", dom_prefix + "h2_host");
-				params += opt.query("path", dom_prefix + "h2_path");
+			} else if (v_transport === "http") {
+				params += opt.query("host", dom_prefix + "http_host");
+				params += opt.query("path", dom_prefix + "http_path");
 			} else if (v_transport === "raw" || v_transport === "tcp") {
+				v_transport = "tcp";
 				params += opt.query("headerType", dom_prefix + "tcp_guise");
 				params += opt.query("host", dom_prefix + "tcp_guise_http_host");
 				params += opt.query("path", dom_prefix + "tcp_guise_http_path");
@@ -567,6 +578,12 @@ local current_node = map:get(section)
 				params += opt.query("vcn", dom_prefix + "tls_CertByName");
 				params += opt.query("ech", dom_prefix + "ech_config");
 			}
+
+			opt.get(dom_prefix + "tcp_fast_open")?.checked && (params += "&tfo=1");
+			if (opt.get(dom_prefix + "use_finalmask")?.checked) {
+				params += opt.query("fm", dom_prefix + "finalmask");
+			}
+
 			params += "#" + encodeURI(v_alias.value);
 			if (params[0] == "&") {
 				params = params.substring(1);
@@ -600,6 +617,9 @@ local current_node = map:get(section)
 					params += opt.query("obfs-password", dom_prefix + "hysteria2_obfs_password");
 				}
 				params += opt.query("mport", dom_prefix + "hysteria2_hop");
+				if (opt.get(dom_prefix + "use_finalmask")?.checked) {
+					params += opt.query("fm", dom_prefix + "finalmask");
+				}
 			}
 			params = params.replace(/^&/, "");
 			url =
@@ -622,6 +642,7 @@ local current_node = map:get(section)
 
 			var params = "";
 			params += opt.query("sni", dom_prefix + "tls_serverName");
+			params += opt.query("disable_sni", dom_prefix + "tls_disable_sni");
 			params += opt.query("alpn", dom_prefix + "tuic_alpn");
 			params += opt.query("congestion_control", dom_prefix + "tuic_congestion_control");
 			params += opt.query("udp_relay_mode", dom_prefix + "tuic_udp_relay_mode");
@@ -944,11 +965,14 @@ local current_node = map:get(section)
 				pluginOpts = pluginParams.join(";");
 			}
 
-			if (has_xray && ((ss_type !== "xray" && ss_type !== "sing-box" && queryParam.type) || ss_type == "xray" || queryParam.type == "xhttp")) {
+			const needUpgrade = ss_type !== "Xray" && ss_type !== "sing-box" &&
+					queryParam.type && queryParam.type !== "tcp" &&
+					queryParam.headerType && queryParam.headerType !== "none";
+			if (has_xray && (ss_type == "xray" || needUpgrade || queryParam.type === "xhttp")) {
 				dom_prefix = "xray_"
 				opt.set('type', "Xray");
 				opt.set(dom_prefix + 'protocol', "shadowsocks");
-			} else if (has_singbox && ((ss_type !== "xray" && ss_type !== "sing-box" && queryParam.type) || ss_type == "sing-box")) {
+			} else if (has_singbox && (ss_type == "sing-box" || needUpgrade)) {
 				dom_prefix = "singbox_"
 				opt.set('type', "sing-box");
 				opt.set(dom_prefix + 'protocol', "shadowsocks");
@@ -977,6 +1001,7 @@ local current_node = map:get(section)
 			opt.set(dom_prefix + 'password', password || "");
 			opt.set(dom_prefix + 'method', method || "");
 			opt.set(dom_prefix + 'ss_method', method || "");
+			opt.set(dom_prefix + 'tcp_fast_open', queryParam.tfo);
 			if (plugin && plugin != "none") {
 				plugin = (plugin === "simple-obfs") ? "obfs-local" : plugin;
 				opt.set(dom_prefix + 'plugin_enabled', true);
@@ -1114,6 +1139,10 @@ local current_node = map:get(section)
 					opt.set(dom_prefix + 'use_xhttp_extra', !!queryParam.extra);
 					opt.set(dom_prefix + 'xhttp_extra', queryParam.extra || "");
 				}
+
+				opt.set(dom_prefix + 'uot', queryParam.udp);
+				opt.set(dom_prefix + 'use_finalmask', !!queryParam.fm);
+				opt.set(dom_prefix + 'finalmask', queryParam.fm || "");
 			
 				if (queryParam["shadow-tls"]) {
 					//解析SS Shadow-TLS 插件参数
@@ -1273,6 +1302,10 @@ local current_node = map:get(section)
 				opt.set(dom_prefix + 'tls_allowInsecure', false);
 			}
 
+			opt.set(dom_prefix + 'tcp_fast_open', queryParam.tfo);
+			opt.set(dom_prefix + 'use_finalmask', !!queryParam.fm);
+			opt.set(dom_prefix + 'finalmask', queryParam.fm || "");
+
 			if (m.hash) {
 				opt.set('remarks', decodeURIComponent(m.hash.substr(1)));
 			}
@@ -1367,6 +1400,9 @@ local current_node = map:get(section)
 			} else if (ssm.net === "grpc") {
 				opt.set(dom_prefix + 'grpc_serviceName', ssm.path);
 			}
+			opt.set(dom_prefix + 'tcp_fast_open', ssm.tfo);
+			opt.set(dom_prefix + 'use_finalmask', !!ssm.fm);
+			opt.set(dom_prefix + 'finalmask', ssm.fm || "");
 		}
 		if (ssu[0] === "vless") {
 			if (vless_type == "sing-box" && has_singbox) {
@@ -1518,6 +1554,10 @@ local current_node = map:get(section)
 				opt.set(dom_prefix + 'httpupgrade_path', queryParam.path || "");
 			}
 
+			opt.set(dom_prefix + 'tcp_fast_open', queryParam.tfo);
+			opt.set(dom_prefix + 'use_finalmask', !!queryParam.fm);
+			opt.set(dom_prefix + 'finalmask', queryParam.fm || "");
+
 			if (m.hash) {
 				opt.set('remarks', decodeURIComponent(m.hash.substr(1)));
 			}
@@ -1551,6 +1591,8 @@ local current_node = map:get(section)
 					opt.set(dom_prefix + 'hysteria2_obfs_password', queryParam["obfs-password"] || queryParam["obfs_password"]);
 				}
 				opt.set(dom_prefix + 'hysteria2_hop', queryParam.mport || "");
+				opt.set(dom_prefix + 'use_finalmask', !!queryParam.fm);
+				opt.set(dom_prefix + 'finalmask', queryParam.fm || "");
 			} else if (has_hysteria2) {
 				opt.set('type', "Hysteria2");
 				dom_prefix = "hysteria2_"
@@ -1590,6 +1632,14 @@ local current_node = map:get(section)
 			var port = _parsedUrl.port;
 			var search = _parsedUrl.search;
 			var hash = _parsedUrl.hash;
+			if (!username || !password) {  //修正某些链接会把uuid和password之间的:进行编码
+				const decoded = decodeURIComponent(username || password || "");
+				const i = decoded.indexOf(":");
+				if (i > -1) {
+					username = decoded.slice(0, i);
+					password = decoded.slice(i + 1);
+				}
+			}
 			opt.set(dom_prefix + 'uuid', decodeURIComponent(username));
 			opt.set(dom_prefix + 'password', decodeURIComponent(password));
 			opt.set(dom_prefix + 'address', unbracketIP(hostname));
@@ -1609,6 +1659,7 @@ local current_node = map:get(section)
 			opt.set(dom_prefix + 'tuic_udp_relay_mode', queryParam.udp_relay_mode || 'native');
 			opt.set(dom_prefix + 'tuic_alpn', queryParam.alpn || 'default');
 			opt.set(dom_prefix + 'tls_serverName', queryParam.sni || '');
+			opt.set(dom_prefix + 'tls_disable_sni', queryParam.disable_sni === "1");
 			opt.set(dom_prefix + 'tls_allowInsecure', true);
 			if ((queryParam.allowinsecure ?? '0') === '0' && (queryParam.insecure ?? '0') === '0') {
 				opt.set(dom_prefix + 'tls_allowInsecure', false);
@@ -1697,12 +1748,14 @@ local current_node = map:get(section)
 	}
 
 	document.addEventListener("DOMContentLoaded", function () {
-		const fromUrlCache = JSON.parse(sessionStorage.getItem("fromUrl"));
-		if (fromUrlCache && fromUrlCache.savetime && (Date.now() - fromUrlCache.timestamp) < fromUrlCache.savetime) {
-			fromUrl(null, fromUrlCache.urlname, fromUrlCache.sid, fromUrlCache)
-		} else {
-			sessionStorage.removeItem("fromUrl");
-		}
+		setTimeout(function () {
+			const fromUrlCache = JSON.parse(sessionStorage.getItem("fromUrl"));
+			if (fromUrlCache && fromUrlCache.savetime && (Date.now() - fromUrlCache.timestamp) < fromUrlCache.savetime) {
+				fromUrl(null, fromUrlCache.urlname, fromUrlCache.sid, fromUrlCache)
+			} else {
+				sessionStorage.removeItem("fromUrl");
+			}
+		}, 500);
 	})
 
 //]]></script>
@@ -1736,7 +1789,7 @@ local current_node = map:get(section)
 </style>
 <div class="share-toolbar">
 	<div class="toolbar-buttons">
-		<% if not current_node.protocol or not current_node.protocol:find("_") then -%>
+		<% if not current_node.protocol or not current_node.protocol:find("^_") then -%>
 		<input id="fromUrlBtn" type="button" class="btn cbi-button cbi-button-apply" value='<%:From Share URL%>' onclick="return fromUrl(this, '<%=self.option%>', '<%=self.value%>')" />
 		<input id="exportUrlBtn" type="button" class="btn cbi-button cbi-button-apply" value='<%:Build Share URL%>' onclick="return exportUrl(this, '<%=self.option%>', '<%=self.value%>')" />
 		<input id="genQrcodeBtn" type="button" class="btn cbi-button cbi-button-apply" value='<%:Generate QRCode%>' onclick="return genQrcode(this, '<%=self.option%>', '<%=self.value%>')" />

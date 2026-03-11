@@ -3,8 +3,7 @@
     "description": "Grant access to netspeedtest procedures",
     "read": {
       "file": {
-        "/etc/init.d/netspeedtest": [ "exec" ],
-        "/usr/lib/netspeedtest/speedtest": [ "exec" ],
+        "/usr/bin/netspeedtest.sh": [ "exec" ],
         "/usr/bin/pgrep": [ "exec" ],
         "/bin/ps": [ "exec" ],
         "/usr/bin/homebox": [ "exec" ],
@@ -12,18 +11,28 @@
         "/bin/sh": [ "exec" ],
         "/bin/cat": [ "exec" ],
         "/usr/bin/iperf3": [ "exec" ],
-	"/usr/bin/nohup": [ "exec" ],
+        "/usr/bin/nohup": [ "exec" ],
         "/usr/bin/speedtest": [ "exec" ],
-        "/tmp/speedtest_result": [ "read" ],
+        "/usr/bin/ookla-speedtest": [ "exec" ],
+        "/tmp/netspeedtest_result": [ "read" ],
+        "/tmp/netspeedtest_progress": [ "read" ],
+        "/var/run/netspeedtest.pid": [ "read" ],
         "/tmp/netspeedtest.log": [ "read" ]
       },
       "ubus": {
-        "service": [ "list" ]
-      },
-      "uci": [ "netspeedtest" ,"netspeedtest"]
+        "luci.netspeedtest": [ "get_servers" ]
+      }
     },
     "write": {
-      "uci": [ "netspeedtest","netspeedtest" ]
+      "file": {
+        "/tmp/netspeedtest_result": [ "write" ],
+        "/tmp/netspeedtest_progress": [ "write" ],
+        "/var/run/netspeedtest.pid": [ "write" ],
+        "/tmp/netspeedtest.log": [ "write" ]
+      },
+      "ubus": {
+        "luci.netspeedtest": [ "get_servers" ]
+      }
     }
   }
 }

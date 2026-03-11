@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=speedtest-cli
+PKG_NAME:=ookla-speedtest
 PKG_VERSION:=1.2.0
 PKG_RELEASE:=1
 
@@ -55,7 +55,7 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/speedtest $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/speedtest $(1)/usr/bin/ookla-speedtest
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

@@ -106,6 +106,18 @@ o.write = function(self, section, value)
 			if e["group"] and e["group"]:lower() == old:lower() then
 				m.uci:set(appname, e[".name"], "group", value)
 			end
+			if e["protocol"] and (e["protocol"] == "_balancing" or e["protocol"] == "_urltest") and e["node_group"] then
+				local gs = ""
+				for g in e["node_group"]:gmatch("%S+") do
+					if api.UrlEncode(old) == g then
+						gs = gs .. " " .. api.UrlEncode(value)
+					else
+						gs = gs .. " " .. g
+					end
+				end
+				gs = api.trim(gs)
+				m.uci:set(appname, e[".name"], "node_group", gs)
+			end
 		end)
 	end
 	return Value.write(self, section, value)
@@ -198,6 +210,9 @@ o:value("prefer_ipv6", translate("Prefer IPv6"))
 o:value("ipv4_only", translate("IPv4 Only"))
 o:value("ipv6_only", translate("IPv6 Only"))
 
+o = s:option(Flag, "boot_update", translate("Update Once on Boot"), translate("Updates the subscription the first time PassWall runs automatically after each system boot."))
+o.default = 0
+
 ---- Enable auto update subscribe
 o = s:option(Flag, "auto_update", translate("Enable auto update subscribe"))
 o.default = 0
@@ -259,7 +274,6 @@ o:value("1", translate("Preproxy Node"))
 o:value("2", translate("Landing Node"))
 
 local descrStr = "Chained proxy works only with Xray or Sing-box nodes.<br>"
-descrStr = descrStr .. "The chained node must be the same type as your subscription node (Xray with Xray, Sing-box with Sing-box).<br>"
 descrStr = descrStr .. "You can only use manual or imported nodes as chained nodes."
 descrStr = translate(descrStr) .. "<br>" .. translate("Only support a layer of proxy.")
 
