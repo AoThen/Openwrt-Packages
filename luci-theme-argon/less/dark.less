@@ -39,12 +39,14 @@ body {
 }
 
 .login-page .login-container {
+    background-color: rgba(0, 0, 0, var(--blur-opacity-dark));
+    -webkit-backdrop-filter: blur(var(--blur-radius-dark));
+    backdrop-filter: blur(var(--blur-radius-dark));
 
     .login-form {
-        background-color: #1e1e1e;
-        -webkit-backdrop-filter: blur(var(--blur-radius-dark)) brightness(0);
-        backdrop-filter: blur(var(--blur-radius-dark)) brightness(0);
-        background-color: rgba(0, 0, 0, var(--blur-opacity-dark));
+        background-color: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
 
         .brand {
             color: #adb5bd;
@@ -1069,10 +1071,10 @@ input,
         .developer-container {
             background: transparent !important;
         }
-    }
 
-    .config-upload-content{
-        background: #1e1e1e !important;
+        .config-upload-content{
+          background: #1e1e1e !important;
+        }
     }
 
     .cbi-tabmenu::-webkit-scrollbar-thumb {
@@ -1085,6 +1087,20 @@ input,
 
     #tab {
         border-color: #3c3c3c;
+    }
+
+    [id^="tab-header-openclash-"]>ul.cbi-tabmenu>li {
+        border-right-color: #374151 !important;
+    }
+
+    [id^="tab-header-openclash-"]>ul.cbi-tabmenu>li:not(.cbi-tab):hover,
+    [id^="tab-header-openclash-"]>ul.cbi-tabmenu>li:not(.cbi-tab):focus {
+        border-right-color: #3b82f6 !important;
+        border-bottom: 1px solid #3b82f6 !important;
+    }
+
+    [id^="tab-header-openclash-"]>ul.cbi-tabmenu>li[class~="cbi-tab"] {
+        border-bottom: 1px solid #374151 !important;
     }
 
     #diag-rc-output > pre,
@@ -1219,4 +1235,20 @@ input,
 .btn {
     background-color: rgb(112, 112, 112);
     color: #fff;
+}
+
+[data-page="admin-system-admin-repokeys"] #key-input {
+  background-color: #1e1e1e;
+  color: #ccc;
+  border: 1px solid #3c3c3c !important;
+}
+
+[data-page="admin-system-package-manager"] #modal_overlay textarea{
+  background-color: #1e1e1e;
+  color: #ccc;
+  border: 1px solid #3c3c3c !important;
+}
+
+.cbi-dropdown[open]>ul.dropdown>li[selected] {
+  color: #fff;
 }

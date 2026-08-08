@@ -25,7 +25,6 @@ local function _n(name)
 	return option_prefix .. name
 end
 
-local formvalue_key = "cbid." .. appname .. "." .. arg[1] .. "."
 local formvalue_proto = luci.http.formvalue(formvalue_key .. _n("protocol"))
 
 if formvalue_proto then s.val["protocol"] = formvalue_proto end
@@ -33,10 +32,10 @@ if formvalue_proto then s.val["protocol"] = formvalue_proto end
 local arg_select_proto = luci.http.formvalue("select_proto") or ""
 
 local ss_method_list = {
-	"none", "plain", "aes-128-gcm", "aes-256-gcm", "chacha20-poly1305", "chacha20-ietf-poly1305", "xchacha20-poly1305", "xchacha20-ietf-poly1305", "2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305"
+	"aes-128-gcm", "aes-256-gcm", "chacha20-poly1305", "chacha20-ietf-poly1305", "xchacha20-poly1305", "xchacha20-ietf-poly1305", "2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305"
 }
 
-local security_list = { "none", "auto", "aes-128-gcm", "chacha20-poly1305", "zero" }
+local security_list = { "auto", "aes-128-gcm", "chacha20-poly1305" }
 
 local header_type_list = {
 	"none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
@@ -45,10 +44,10 @@ local header_type_list = {
 local xray_version = api.get_app_version("xray")
 
 o = s:option(ListValue, _n("protocol"), translate("Protocol"))
+o:value("socks", translate("Socks"))
+o:value("http", translate("HTTP"))
 o:value("vmess", translate("Vmess"))
 o:value("vless", translate("VLESS"))
-o:value("http", translate("HTTP"))
-o:value("socks", translate("Socks"))
 o:value("shadowsocks", translate("Shadowsocks"))
 o:value("trojan", translate("Trojan"))
 o:value("wireguard", translate("WireGuard"))
@@ -79,6 +78,7 @@ if not arg_select_proto:find("_") then
 	load_normal_options = true
 end
 
+local netdev_list = api.get_network_devices()
 local node_list = api.get_node_list()
 local fallback_list = {}
 local is_balancer = nil
@@ -152,9 +152,10 @@ if load_balancing_options then -- [[ Load balancing Start ]]
 	o:depends({ [_n("node_add_mode")] = "batch" })
 	local descrStr = "Example: <code>^A && B && !C && D$</code><br>"
 	descrStr = descrStr .. "This means the node remark must start with A (^), include B, exclude C (!), and end with D ($).<br>"
-	descrStr = descrStr .. "Conditions are joined by <code>&&</code>, and their order does not affect the result."
-	o.description = translate(descrStr) .. string.format("<br><font color='red'>%s</font>",
-			translate("Keep the match scope small. Too many nodes can impact router performance."))
+	descrStr = descrStr .. "Conditions are joined by <code>&&</code> (AND), and their order does not affect the result.<br>"
+	descrStr = descrStr .. "Multiple groups can be separated by <code>||</code> (OR), matching succeeds if any group matches.<br>"
+	descrStr = descrStr .. "Example: <code>A && B || C && D</code> means (A AND B) OR (C AND D)."
+	o.description = translate(descrStr)
 
 	o = s:option(ListValue, _n("balancingStrategy"), translate("Balancing Strategy"))
 	o:depends({ [_n("protocol")] = "_balancing" })
@@ -166,28 +167,66 @@ if load_balancing_options then -- [[ Load balancing Start ]]
 
 	-- Fallback Node
 	o = s:option(ListValue, _n("fallback_node"), translate("Fallback Node"))
+	o.group = {"",""}
 	o:value("", translate("Close(Not use)"))
+	o:value("_direct", translate("Direct Connection"))
 	o:depends({ [_n("protocol")] = "_balancing" })
 	o.template = appname .. "/cbi/nodes_listvalue"
-	o.group = {""}
-	local function check_fallback_chain(fb)
-		for k, v in pairs(fallback_list) do
-			if v.fallback == fb then
-				fallback_list[k] = nil
-				check_fallback_chain(v.id)
+	-- 最大 fallback 套娃层数
+	local MAX_FALLBACK_DEPTH = 3
+	-- 检查是否会形成回环
+	local function will_loop(start_id, target_id, depth)
+		depth = depth or 0
+		-- 超过最大深度后停止递归
+		if depth >= MAX_FALLBACK_DEPTH then
+			return false
+		end
+		for _, v in ipairs(fallback_list) do
+			if v.id == target_id then
+				local fb = v.fallback
+				-- 没有 fallback
+				if not fb or fb == "" or fb == "_direct" then
+					return false
+				end
+				-- 检测到回环
+				if fb == start_id then
+					return true
+				end
+				-- 继续递归检查
+				return will_loop(start_id, fb, depth + 1)
 			end
 		end
+		return false
 	end
-	-- 检查fallback链，去掉会形成闭环的balancer节点
-	if is_balancer then
-		check_fallback_chain(arg[1])
+	-- 获取 fallback 链深度
+	local function get_fallback_depth(id, depth)
+		depth = depth or 0
+		if depth >= MAX_FALLBACK_DEPTH then
+			return depth
+		end
+		for _, v in ipairs(fallback_list) do
+			if v.id == id then
+				local fb = v.fallback
+				if not fb or fb == "" or fb == "_direct" then
+					return depth
+				end
+				return get_fallback_depth(fb, depth + 1)
+			end
+		end
+		return depth
 	end
-	for i, v in ipairs(fallback_list) do
-		o:value(v.id, v.remark)
-		o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
+	for _, v in ipairs(fallback_list) do
+		local depth = get_fallback_depth(v.id)
+		-- 超过最大套娃层数后，不允许继续选择 balancer
+		if depth < MAX_FALLBACK_DEPTH
+			and not will_loop(arg[1], v.id)
+		then
+			o:value(v.id, v.remark)
+			o.group[#o.group + 1] = (v.group and v.group ~= "") and v.group or translate("default")
+		end
 	end
 	for k1, v1 in pairs(node_list) do
-		if k1 == "socks_list" or k1 == "normal_list" then
+		if k1 == "socks_list" or k1 == "normal_list" or k1 == "urltest_list" then
 			for i, v in ipairs(v1) do
 				o:value(v.id, v.remark)
 				o.group[#o.group+1] = (v.group and v.group ~= "") and v.group or translate("default")
@@ -207,6 +246,7 @@ if load_balancing_options then -- [[ Load balancing Start ]]
 	o:value("https://www.youtube.com/generate_204", "YouTube")
 	o:value("https://connect.rom.miui.com/generate_204", "MIUI (CN)")
 	o:value("https://connectivitycheck.platform.hicloud.com/generate_204", "HiCloud (CN)")
+	o:value("https://wifi.vivo.com.cn/generate_204", "VIVO (CN)")
 	o.default = o.keylist[3]
 	o.description = translate("The URL used to detect the connection status.")
 
@@ -225,12 +265,21 @@ if load_balancing_options then -- [[ Load balancing Start ]]
 	o.default = "2"
 	o.placeholder = "2"
 	o.description = translate("The load balancer selects the optimal number of nodes, and traffic is randomly distributed among them.")
+
+	o = s:option(Value, _n("tolerance"), translate("Failure Tolerance (%)"))
+	o:depends({ [_n("balancingStrategy")] = "leastLoad" })
+	o.datatype = "uinteger"
+	o.default = "10"
+	o.placeholder = "10"
+	o.description = translate("The maximum acceptable speed test failure rate. For example, 1 means allowing a 1% failure rate.")
 end  -- [[ 负载均衡 End ]]
 
 if load_iface_options then -- [[ 自定义接口 Start ]]
 	o = s:option(Value, _n("iface"), translate("Interface"))
-	o.default = "eth1"
 	o:depends({ [_n("protocol")] = "_iface" })
+	for _, d in ipairs(netdev_list) do
+		o:value(d.name, d.label)
+	end
 end -- [[ 自定义接口 End ]]
 
 
@@ -240,16 +289,6 @@ o = s:option(Value, _n("address"), translate("Address (Support Domain Name)"))
 
 o = s:option(Value, _n("port"), translate("Port"))
 o.datatype = "port"
-
-local protocols = s.fields[_n("protocol")].keylist
-if #protocols > 0 then
-	for index, value in ipairs(protocols) do
-		if not value:find("^_") then
-			s.fields[_n("address")]:depends({ [_n("protocol")] = value })
-			s.fields[_n("port")]:depends({ [_n("protocol")] = value })
-		end
-	end
-end
 
 o = s:option(Value, _n("uuid"), translate("ID"))
 o.password = true
@@ -285,30 +324,70 @@ o.rewrite_option = "method"
 for a, t in ipairs(ss_method_list) do o:value(t) end
 o:depends({ [_n("protocol")] = "shadowsocks" })
 
-o = s:option(Flag, _n("iv_check"), translate("IV Check"))
-o:depends({ [_n("protocol")] = "shadowsocks", [_n("ss_method")] = "aes-128-gcm" })
-o:depends({ [_n("protocol")] = "shadowsocks", [_n("ss_method")] = "aes-256-gcm" })
-o:depends({ [_n("protocol")] = "shadowsocks", [_n("ss_method")] = "chacha20-poly1305" })
-o:depends({ [_n("protocol")] = "shadowsocks", [_n("ss_method")] = "xchacha20-poly1305" })
-
-o = s:option(Flag, _n("uot"), translate("UDP over TCP"))
-o:depends({ [_n("protocol")] = "shadowsocks" })
-
 o = s:option(ListValue, _n("flow"), translate("flow"))
 o.default = ""
 o:value("", translate("Disable"))
 o:value("xtls-rprx-vision")
+o:value("xtls-rprx-vision-udp443")
 o:depends({ [_n("protocol")] = "vless" })
 
 ---- [[hysteria2]]
 o = s:option(Value, _n("hysteria2_hop"), translate("Port hopping range"))
 o.description = translate("Format as 1000:2000 or 1000-2000 Multiple groups are separated by commas (,).")
+o:depends({ [_n("protocol")] = "hysteria2", [_n("hysteria2_realms")] = false })
+
+o = s:option(Value, _n("hysteria2_hop_interval"), translate("Hop Interval(second)"), translate("Supports a fixed value or a random range (e.g., 30, 5-30), minimum 5."))
+o.datatype = "or(uinteger,portrange)"
+o.placeholder = "30"
+o.default = "30"
+o:depends({ [_n("protocol")] = "hysteria2", [_n("hysteria2_realms")] = false })
+
+o = s:option(Flag, _n("hysteria2_realms"), translate("Realms"))
+o.default = "0"
+if api.compare_versions(xray_version, ">", "26.5.9") then
+	o:depends({ [_n("protocol")] = "hysteria2"})
+else
+	o:depends({ [_n("protocol")] = "__hide"})
+end
+
+o = s:option(Value, _n("hysteria2_realm_url"), translate("Realm URL"), translate("Example:") .. "realm://public@realm.hy2.io/your-realm-name")
+o:depends({ [_n("hysteria2_realms")] = "1" })
+o.validate = function(self, value)
+	value = api.trim(value)
+	local realm = api.parse_realm_uri(value)
+	if realm then return value end
+	return nil, translate("Invalid Realm URL.")
+end
+
+o = s:option(DynamicList, _n("hysteria2_realm_stun"), translate("Realm STUN"))
+o.default = { "stun.sip.us:3478", "stun.nextcloud.com:3478", "global.stun.twilio.com:3478" }
+o:depends({ [_n("hysteria2_realms")] = "1" })
+
+o = s:option(Value, _n("hysteria2_auth_password"), translate("Auth Password"))
+o.password = true
+o:depends({ [_n("protocol")] = "hysteria2"})
+
+o = s:option(ListValue, _n("hysteria2_obfs_type"), translate("Obfs Type"))
+o:value("", translate("Disable"))
+o:value("salamander")
+o:value("gecko")
 o:depends({ [_n("protocol")] = "hysteria2" })
 
-o = s:option(Value, _n("hysteria2_hop_interval"), translate("Hop Interval"), translate("Example:") .. "30s (≥5s)")
-o.placeholder = "30s"
-o.default = "30s"
-o:depends({ [_n("protocol")] = "hysteria2" })
+o = s:option(Value, _n("hysteria2_obfs_password"), translate("Obfs Password"))
+o:depends({ [_n("hysteria2_obfs_type")] = "salamander" })
+o:depends({ [_n("hysteria2_obfs_type")] = "gecko" })
+
+o = s:option(Value, _n("hysteria2_obfs_MinPacketSize"), translate("Gecko Packet Size (min)"))
+o.datatype = "uinteger"
+o.placeholder = "512"
+o.default = "512"
+o:depends({ [_n("hysteria2_obfs_type")] = "gecko" })
+
+o = s:option(Value, _n("hysteria2_obfs_MaxPacketSize"), translate("Gecko Packet Size (max)"))
+o.datatype = "uinteger"
+o.placeholder = "1200"
+o.default = "1200"
+o:depends({ [_n("hysteria2_obfs_type")] = "gecko" })
 
 o = s:option(Value, _n("hysteria2_up_mbps"), translate("Max upload Mbps"))
 o:depends({ [_n("protocol")] = "hysteria2" })
@@ -316,19 +395,12 @@ o:depends({ [_n("protocol")] = "hysteria2" })
 o = s:option(Value, _n("hysteria2_down_mbps"), translate("Max download Mbps"))
 o:depends({ [_n("protocol")] = "hysteria2" })
 
-o = s:option(ListValue, _n("hysteria2_obfs_type"), translate("Obfs Type"))
-o:value("", translate("Disable"))
-o:value("salamander")
-o:depends({ [_n("protocol")] = "hysteria2" })
-
-o = s:option(Value, _n("hysteria2_obfs_password"), translate("Obfs Password"))
-o:depends({ [_n("hysteria2_obfs_type")] = "salamander" })
-
-o = s:option(Value, _n("hysteria2_auth_password"), translate("Auth Password"))
-o.password = true
+o = s:option(Value, _n("hysteria2_idle_timeout"), translate("Idle Timeout"), translate("Units:seconds") .. " (4~120)")
+o.datatype = "range(4,120)"
 o:depends({ [_n("protocol")] = "hysteria2"})
 
-o = s:option(Value, _n("hysteria2_idle_timeout"), translate("Idle Timeout"), translate("Example:") .. "30s (4s-120s)")
+o = s:option(Value, _n("hysteria2_keep_alive_period"), translate("QUIC KeepAlive interval"), translate("Units:seconds") .. " (2~60)")
+o.datatype = "range(2,60)"
 o:depends({ [_n("protocol")] = "hysteria2"})
 
 o = s:option(Flag, _n("hysteria2_disable_mtu_discovery"), translate("Disable MTU detection"))
@@ -340,8 +412,6 @@ o = s:option(Flag, _n("tls"), translate("TLS"))
 o.default = 0
 o:depends({ [_n("protocol")] = "vmess" })
 o:depends({ [_n("protocol")] = "vless" })
-o:depends({ [_n("protocol")] = "http" })
-o:depends({ [_n("protocol")] = "socks" })
 o:depends({ [_n("protocol")] = "trojan" })
 o:depends({ [_n("protocol")] = "shadowsocks" })
 
@@ -363,38 +433,45 @@ o:value("http/1.1")
 o:value("h2,http/1.1")
 o:value("h3,h2,http/1.1")
 o:depends({ [_n("tls")] = true, [_n("reality")] = false })
-o:depends({ [_n("protocol")] = "hysteria2" })
 
 -- o = s:option(Value, _n("minversion"), translate("minversion"))
 -- o.default = "1.3"
 -- o:value("1.3")
 -- o:depends({ [_n("tls")] = true })
 
-o = s:option(Value, _n("tls_serverName"), translate("Domain"))
+o = s:option(Value, _n("tls_serverName"), "SNI " .. translate("Domain"))
 o:depends({ [_n("tls")] = true })
 o:depends({ [_n("protocol")] = "hysteria2" })
 
-if api.compare_versions(os.date("%Y.%m.%d"), "<", "2026.6.1") then
-	o = s:option(Flag, _n("tls_allowInsecure"), translate("allowInsecure"), translate("Whether unsafe connections are allowed. When checked, Certificate validation will be skipped."))
-	o.default = "0"
-	o:depends({ [_n("tls")] = true, [_n("reality")] = false })
-	o:depends({ [_n("protocol")] = "hysteria2" })
-end
+o = s:option(Value, _n("tls_pinSHA256"), translate("TLS Chain Fingerprint (SHA256)"))
+o:depends({ [_n("tls")] = true, [_n("reality")] = false })
+o:depends({ [_n("protocol")] = "hysteria2" })
+o.description = translate("Once set, connects only when the server’s chain fingerprint matches.") ..
+		string.format("<a href='javascript:void(0)' onclick='javascript:fetchCertSha256(this)'>%s</a>", "→ " .. translate("Fetch Manually"))
 
-if api.compare_versions(xray_version, ">=", "26.1.31") then
-	o = s:option(Value, _n("tls_CertSha"), translate("TLS Chain Fingerprint (SHA256)"), translate("Once set, connects only when the server’s chain fingerprint matches."))
-	o:depends({ [_n("tls")] = true, [_n("reality")] = false })
-	o:depends({ [_n("protocol")] = "hysteria2" })
+o = s:option(Value, _n("tls_CertByName"), translate("TLS Certificate Name (CertName)"), translate("TLS is used to verify the leaf certificate name."))
+o:depends({ [_n("tls")] = true, [_n("reality")] = false })
+o:depends({ [_n("protocol")] = "hysteria2" })
 
-	o = s:option(Value, _n("tls_CertByName"), translate("TLS Certificate Name (CertName)"), translate("TLS is used to verify the leaf certificate name."))
-	o:depends({ [_n("tls")] = true, [_n("reality")] = false })
-	o:depends({ [_n("protocol")] = "hysteria2" })
+o = s:option(Flag, _n("tls_certificate"), translate("TLS Certificate (PEM)"))
+o.default = "0"
+o:depends({ [_n("tls")] = true, [_n("reality")] = false })
+o:depends({ [_n("protocol")] = "hysteria2" })
+
+o = s:option(TextValue, _n("tls_certificate_pem"), "　", translate("Full certificate (chain), PEM format."))
+o.default = ""
+o.rows = 5
+o.wrap = "off"
+o:depends({ [_n("tls_certificate")] = true })
+o.validate = function(self, value)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("[ \t]*\n[ \t]*", "\n"):gsub("\n+", "\n")
+	return value
 end
 
 o = s:option(Flag, _n("ech"), translate("ECH"))
 o.default = "0"
 o:depends({ [_n("tls")] = true, [_n("reality")] = false })
-o:depends({ [_n("protocol")] = "hysteria2" })
+o:depends({ [_n("protocol")] = "hysteria2", [_n("hysteria2_realms")] = false })
 
 o = s:option(TextValue, _n("ech_config"), translate("ECH Config"))
 o.default = ""
@@ -404,13 +481,6 @@ o:depends({ [_n("ech")] = true })
 o.validate = function(self, value)
 	return api.trim(value:gsub("[\r\n]", ""))
 end
-
-o = s:option(ListValue, _n("ech_ForceQuery"), translate("ECH Query Policy"), translate("Controls the policy used when performing DNS queries for ECH configuration."))
-o.default = "none"
-o:value("none")
-o:value("half")
-o:value("full")
-o:depends({ [_n("ech")] = true })
 
 -- [[ REALITY部分 ]] --
 o = s:option(Value, _n("reality_publicKey"), translate("Public Key"))
@@ -438,6 +508,7 @@ o:value("ios")
 o:value("android")
 o:value("random")
 o:value("randomized")
+o:value("unsafe")
 o.default = "chrome"
 o:depends({ [_n("tls")] = true, [_n("utls")] = true })
 o:depends({ [_n("tls")] = true, [_n("reality")] = true })
@@ -464,7 +535,6 @@ o:value("httpupgrade", "HttpUpgrade")
 o:value("xhttp", "XHTTP")
 o:depends({ [_n("protocol")] = "vmess" })
 o:depends({ [_n("protocol")] = "vless" })
-o:depends({ [_n("protocol")] = "socks" })
 o:depends({ [_n("protocol")] = "shadowsocks" })
 o:depends({ [_n("protocol")] = "trojan" })
 
@@ -520,30 +590,8 @@ o = s:option(Value, _n("mkcp_domain"), translate("Camouflage Domain"), translate
 o:depends({ [_n("mkcp_guise")] = "dns" })
 
 o = s:option(Value, _n("mkcp_mtu"), translate("KCP MTU"))
-o.default = "1350"
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Value, _n("mkcp_tti"), translate("KCP TTI"))
-o.default = "20"
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Value, _n("mkcp_uplinkCapacity"), translate("KCP uplinkCapacity"))
-o.default = "5"
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Value, _n("mkcp_downlinkCapacity"), translate("KCP downlinkCapacity"))
-o.default = "20"
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Flag, _n("mkcp_congestion"), translate("KCP Congestion"))
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Value, _n("mkcp_readBufferSize"), translate("KCP readBufferSize"))
-o.default = "1"
-o:depends({ [_n("transport")] = "mkcp" })
-
-o = s:option(Value, _n("mkcp_writeBufferSize"), translate("KCP writeBufferSize"))
-o.default = "1"
+o.datatype = "uinteger"
+o.default = 1350
 o:depends({ [_n("transport")] = "mkcp" })
 
 o = s:option(Value, _n("mkcp_seed"), translate("KCP Seed"))
@@ -621,6 +669,14 @@ o = s:option(TextValue, _n("xhttp_extra"), "　", translate("An XHttpObject in J
 o:depends({ [_n("use_xhttp_extra")] = true })
 o.rows = 10
 o.wrap = "off"
+o.datatype = "json"
+local o_validate = o.validate
+o.validate = function(self, value)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
+	local v = o_validate(self, value)
+	if v then return v end
+	return nil, "XHTTP Extra " .. translate("Must be JSON text!")
+end
 o.custom_cfgvalue = function(self, section, value)
 	local raw = m:get(section, "xhttp_extra")
 	if raw then
@@ -643,14 +699,6 @@ o.custom_write = function(self, section, value)
 		m:del(section, "download_address")
 	end
 end
-o.validate = function(self, value)
-	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
-	if api.jsonc.parse(value) then
-		return value
-	else
-		return nil, "XHTTP Extra " .. translate("Must be JSON text!")
-	end
-end
 o.custom_remove = function(self, section, value)
 	m:del(section, "xhttp_extra")
 	m:del(section, "download_address")
@@ -658,6 +706,14 @@ end
 
 -- [[ User-Agent ]]--
 o = s:option(Value, _n("user_agent"), translate("User-Agent"))
+o.default = ""
+o:value("", translate("default"))
+o:value("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36", "chrome")
+o:value("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0", "firefox")
+o:value("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15", "safari")
+o:value("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.70", "edge")
+o:value("Go-http-client/1.1", "golang")
+o:value("curl/7.68.0", "curl")
 o:depends({ [_n("tcp_guise")] = "http" })
 o:depends({ [_n("transport")] = "ws" })
 o:depends({ [_n("transport")] = "httpupgrade" })
@@ -671,8 +727,6 @@ o:depends({ [_n("protocol")] = "vless", [_n("transport")] = "raw" })
 o:depends({ [_n("protocol")] = "vless", [_n("transport")] = "ws" })
 o:depends({ [_n("protocol")] = "vless", [_n("transport")] = "grpc" })
 o:depends({ [_n("protocol")] = "vless", [_n("transport")] = "httpupgrade" })
-o:depends({ [_n("protocol")] = "http" })
-o:depends({ [_n("protocol")] = "socks" })
 o:depends({ [_n("protocol")] = "shadowsocks" })
 o:depends({ [_n("protocol")] = "trojan" })
 
@@ -692,12 +746,22 @@ o:depends({ [_n("protocol")] = "vless" })
 o:depends({ [_n("protocol")] = "trojan" })
 o:depends({ [_n("protocol")] = "shadowsocks" })
 o:depends({ [_n("protocol")] = "wireguard" })
-o:depends({ [_n("protocol")] = "hysteria2" })
+o:depends({ [_n("protocol")] = "hysteria2", [_n("hysteria2_realms")] = false })
 
-o = s:option(TextValue, _n("finalmask"), "　", translate("An FinalMaskObject in JSON format, used for sharing."))
+o = s:option(TextValue, _n("finalmask"), "　")
 o:depends({ [_n("use_finalmask")] = true })
 o.rows = 10
 o.wrap = "off"
+o.description = translate("An FinalMaskObject in JSON format, used for sharing.") .. "<br>" ..
+		translate("Custom finalmask overrides mkcp, hysteria2, fragment, noise, and related settings.")
+o.datatype = "json"
+local o_validate = o.validate
+o.validate = function(self, value)
+	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
+	local v = o_validate(self, value)
+	if v then return v end
+	return nil, "FinalMask " .. translate("Must be JSON text!")
+end
 o.custom_cfgvalue = function(self, section, value)
 	local raw = m:get(section, "finalmask")
 	if raw then
@@ -706,14 +770,6 @@ o.custom_cfgvalue = function(self, section, value)
 end
 o.custom_write = function(self, section, value)
 	m:set(section, "finalmask", api.base64Encode(value) or "")
-end
-o.validate = function(self, value)
-	value = api.trim(value):gsub("\r\n", "\n"):gsub("^[ \t]*\n", ""):gsub("\n[ \t]*$", ""):gsub("\n[ \t]*\n", "\n")
-	if api.jsonc.parse(value) then
-		return value
-	else
-		return nil, "FinalMask " .. translate("Must be JSON text!")
-	end
 end
 
 --[[Fast Open]]
@@ -724,15 +780,61 @@ o.default = 0
 o = s:option(Flag, _n("tcpMptcp"), "tcpMptcp", translate("Enable Multipath TCP, need to be enabled in both server and client configuration."))
 o.default = 0
 
-o = s:option(Value, _n("preconns"), translate("Pre-connections"), translate("Number of early established connections to reduce latency."))
-o.datatype = "uinteger"
-o.placeholder = 0
-o:depends({ [_n("protocol")] = "vless" })
+o = s:option(ListValue, _n("domain_resolver"), translate("Domain DNS Resolve"))
+o.description = translate("If the node address is a domain name, this DNS will be used for resolution.") .. "<br>" .. string.format('<font color="red">%s</font>',
+		translate("Note: For node-specific DNS only. Keep Auto to avoid extra overhead."))
+o:value("", translate("Auto"))
+o:value("tcp", "TCP")
+o:value("udp", "UDP")
+o:value("https", "DoH")
 
-for i, v in ipairs(s.fields[_n("protocol")].keylist) do
-	if not v:find("^_") and v ~= "hysteria2" then
-		s.fields[_n("tcp_fast_open")]:depends({ [_n("protocol")] = v })
-		s.fields[_n("tcpMptcp")]:depends({ [_n("protocol")] = v })
+o = s:option(Value, _n("domain_resolver_dns"), "DNS")
+o.datatype = "or(ipaddr,ipaddrport)"
+o:value("114.114.114.114")
+o:value("223.5.5.5:53")
+o.default = o.keylist[1]
+o:depends({ [_n("domain_resolver")] = "tcp" })
+o:depends({ [_n("domain_resolver")] = "udp" })
+
+o = s:option(Value, _n("domain_resolver_dns_https"), "DNS")
+o:value("https://120.53.53.53/dns-query", "DNSPod")
+o:value("https://223.5.5.5/dns-query", "AliDNS")
+o.default = o.keylist[1]
+o:depends({ [_n("domain_resolver")] = "https" })
+
+o = s:option(ListValue, _n("domain_strategy"), translate("Domain Strategy"), translate("If is domain name, The requested domain name will be resolved to IP before connect."))
+o.default = ""
+o:value("", translate("Auto"))
+o:value("UseIPv4v6", translate("Prefer IPv4"))
+o:value("UseIPv6v4", translate("Prefer IPv6"))
+o:value("UseIPv4", translate("IPv4 Only"))
+o:value("UseIPv6", translate("IPv6 Only"))
+
+o = s:option(Flag, _n("happy_eyeballs"), translate("Enable Happy Eyeballs"), translate("Attempts IPv4 and IPv6 simultaneously; automatically uses the faster connection."))
+o.default = 0
+
+local protocols = s.fields[_n("protocol")].keylist
+if #protocols > 0 then
+	for i, v in ipairs(protocols) do
+		if not v:find("^_") then
+			local depends_condition = { [_n("protocol")] = v }
+			if v == "hysteria2" then
+				depends_condition[_n("hysteria2_realms")] = false
+			end
+			s.fields[_n("address")]:depends(depends_condition)
+			s.fields[_n("port")]:depends(depends_condition)
+			s.fields[_n("domain_resolver")]:depends(depends_condition)
+			s.fields[_n("happy_eyeballs")]:depends(depends_condition)
+
+			local strategy_depends = api.clone(depends_condition)
+			strategy_depends[_n("happy_eyeballs")] = false
+			s.fields[_n("domain_strategy")]:depends(strategy_depends)
+
+			if v ~= "hysteria2" then
+				s.fields[_n("tcp_fast_open")]:depends({ [_n("protocol")] = v })
+				s.fields[_n("tcpMptcp")]:depends({ [_n("protocol")] = v })
+			end
+		end
 	end
 end
 end
@@ -744,16 +846,24 @@ if not load_shunt_options then
 	if not (load_iface_options or load_balancing_options) then
 		-- Special node cannot be use pre-proxy.
 		o:value("1", translate("Preproxy Node"))
+		o:value("3", translate("Outbound Interface"))
 	end
 	o:value("2", translate("Landing Node"))
 
 	o1 = s:option(ListValue, _n("preproxy_node"), translate("Preproxy Node"), translate("Only support a layer of proxy."))
-	o1:depends({ [_n("chain_proxy")] = "1" })
+	o1:depends({ [_n("chain_proxy")] = "1", [_n("hysteria2_realms")] = false })
 	o1.template = appname .. "/cbi/nodes_listvalue"
 	o1.group = {}
 
+	o3 = s:option(Value, _n("outbound_iface"), translate("Outbound Interface"))
+	o3:depends({ [_n("chain_proxy")] = "3" })
+	o3:value("", translate("All"))
+	for _, d in ipairs(netdev_list) do
+		o3:value(d.name, d.label)
+	end
+
 	o2 = s:option(ListValue, _n("to_node"), translate("Landing Node"), translate("Only support a layer of proxy."))
-	o2:depends({ [_n("chain_proxy")] = "2" })
+	o2:depends({ [_n("chain_proxy")] = "2", [_n("hysteria2_realms")] = false })
 	o2.template = appname .. "/cbi/nodes_listvalue"
 	o2.group = {}
 

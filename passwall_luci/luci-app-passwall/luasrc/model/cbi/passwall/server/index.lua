@@ -1,4 +1,7 @@
 local api = require "luci.passwall.api"
+local appname = api.appname
+
+api.set_default_cbi()
 
 m = Map("passwall_server", translate("Server-Side"))
 api.set_apply_on_parse(m)
@@ -10,7 +13,13 @@ t.addremove = false
 e = t:option(Flag, "enable", translate("Enable"))
 e.rmempty = false
 
-t = m:section(TypedSection, "user", translate("Users Manager"))
+e = t:option(Value, "start_delay", translate("Delay Start"), translate("Units:seconds"))
+e.default = "90"
+e.datatype = "range(0,600)"
+e.rmempty = false
+
+local cfgname = "user"
+t = m:section(TypedSection, cfgname, translate("Users Manager"))
 t.anonymous = true
 t.addremove = true
 t.sortable = true
@@ -85,7 +94,14 @@ e = t:option(Flag, "log", translate("Log"))
 e.default = "1"
 e.rmempty = false
 
-m:append(Template("passwall/server/log"))
+local sortable = Template(appname .. "/cbi/sortable")
+sortable.api = api
+sortable.appname = m.config
+sortable.target_cfgname = cfgname
+m:append(sortable)
 
-m:append(Template("passwall/server/users_list_status"))
-return m
+m:append(Template(appname .. "/server/log"))
+
+m:append(Template(appname .. "/server/users_list_status"))
+
+return api.return_map(m)

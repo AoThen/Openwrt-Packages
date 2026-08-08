@@ -163,7 +163,6 @@ function add_rule(var)
 	local DEFAULT_DNS = var["-DEFAULT_DNS"]
 	local LOCAL_DNS = var["-LOCAL_DNS"]
 	local TUN_DNS = var["-TUN_DNS"]
-	local REMOTE_FAKEDNS = var["-REMOTE_FAKEDNS"]
 	local USE_DEFAULT_DNS = var["-USE_DEFAULT_DNS"]
 	local CHINADNS_DNS = var["-CHINADNS_DNS"]
 	local TCP_NODE = var["-TCP_NODE"]
@@ -182,13 +181,14 @@ function add_rule(var)
 	local CACHE_TEXT_FILE = CACHE_DNS_PATH .. ".txt"
 	local USE_CHINADNS_NG = "0"
 	local IS_SHUNT_NODE = uci:get(appname, TCP_NODE, "protocol") == "_shunt"
-
-	if IS_SHUNT_NODE then
-		REMOTE_FAKEDNS = uci:get(appname, TCP_NODE, "fakedns") or "0"
-	end
+	local USE_GEOVIEW = uci:get(appname, "@global_rules[0]", "enable_geoview")
 
 	local list1 = {}
 	local excluded_domain = {}
+
+	if not api.is_finded("geoview") then
+		USE_GEOVIEW = "0"
+	end
 
 	local function log(...)
 		if NO_LOGIC_LOG == "1" then
@@ -286,25 +286,45 @@ function add_rule(var)
 		if domain == "" or domain:find("#") then
 			return
 		end
-		table.insert(excluded_domain, domain)
+		excluded_domain[domain] = true
 	end
 
 	local function check_excluded_domain(domain)
 		if domain == "" or domain:find("#") then
 			return false
 		end
-		for k,v in ipairs(excluded_domain) do
-			if domain == v or domain:sub(-#("."..v)) == "."..v then
+		if excluded_domain[domain] then
+			return true
+		end
+		local pos = domain:find(".", 1, true)
+		while pos do
+			if excluded_domain[domain:sub(pos + 1)] then
 				return true
 			end
+			pos = domain:find(".", pos + 1, true)
 		end
 		return false
+	end
+
+	local function foreach_geosite(list_arg, callback)
+		local geosite_path = uci:get(appname, "@global_rules[0]", "v2ray_location_asset") or "/usr/share/v2ray/"
+		geosite_path = geosite_path:match("^(.*)/") .. "/geosite.dat"
+		if not fs.access(geosite_path) then return end
+		local bin = api.finded_com("geoview")
+		if not (bin and list_arg) then return end
+		local cmd = string.format("%q -type geosite -action extract -input %q -list %q -lowmem=true", bin, geosite_path, list_arg)
+		local pipe = io.popen(cmd)
+		if not pipe then return end
+		for line in pipe:lines() do
+			if line ~= "" then callback(line) end
+		end
+		pipe:close()
 	end
 
 	local cache_text = ""
 	local nodes_address_md5 = sys.exec("echo -n $(uci show passwall | grep '\\.address') | md5sum")
 	local new_rules = sys.exec("echo -n $(find /usr/share/passwall/rules -type f | xargs md5sum)")
-	local new_text = TMP_DNSMASQ_PATH .. DNSMASQ_CONF_FILE .. DEFAULT_DNS .. LOCAL_DNS .. TUN_DNS .. REMOTE_FAKEDNS .. USE_DEFAULT_DNS .. CHINADNS_DNS .. USE_DIRECT_LIST .. USE_PROXY_LIST .. USE_BLOCK_LIST .. USE_GFW_LIST .. CHN_LIST .. DEFAULT_PROXY_MODE .. NO_PROXY_IPV6 .. nodes_address_md5 .. new_rules .. NFTFLAG
+	local new_text = TMP_DNSMASQ_PATH .. DNSMASQ_CONF_FILE .. DEFAULT_DNS .. LOCAL_DNS .. TUN_DNS .. USE_DEFAULT_DNS .. CHINADNS_DNS .. USE_DIRECT_LIST .. USE_PROXY_LIST .. USE_BLOCK_LIST .. USE_GFW_LIST .. CHN_LIST .. DEFAULT_PROXY_MODE .. NO_PROXY_IPV6 .. nodes_address_md5 .. new_rules .. NFTFLAG
 	if fs.access(CACHE_TEXT_FILE) then
 		for line in io.lines(CACHE_TEXT_FILE) do
 			cache_text = line
@@ -346,14 +366,28 @@ function add_rule(var)
 		fs.mkdir(CACHE_DNS_PATH)
 
 		--屏蔽列表
-		if USE_CHINADNS_NG == "0" then
-			if USE_BLOCK_LIST == "1" then
-				for line in io.lines("/usr/share/passwall/rules/block_host") do
-					line = api.get_std_domain(line)
-					if line ~= "" and not line:find("#") and not line:find(":") then
-						set_domain_address(line, "")
+		if USE_CHINADNS_NG == "0" and USE_BLOCK_LIST == "1" then
+			local geosite_arg = ""
+			local f = io.open("/usr/share/passwall/rules/block_host")
+			if f then
+				for line in f:lines() do
+					if not line:find("#") and line:find("geosite:") then
+						line = string.match(line, ":([^:]+)$")
+						geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+					else
+						line = api.get_std_domain(line)
+						if line ~= "" and not line:find("#") and not line:find(":") then
+							set_domain_address(line, "")
+						end
 					end
 				end
+				f:close()
+			end
+			if USE_GEOVIEW == "1" and geosite_arg ~= "" then
+				foreach_geosite(geosite_arg, function(line)
+					set_domain_address(line, "")
+				end)
+				log("  - 解析[屏蔽列表] Geosite 到屏蔽域名表(blocklist)完成")
 			end
 		end
 
@@ -367,11 +401,12 @@ function add_rule(var)
 				fwd_dns = nil
 			else
 				local sets = {
-					setflag_4 .. "passwall_vps",
-					setflag_6 .. "passwall_vps6"
+					setflag_4 .. "psw_vps",
+					setflag_6 .. "psw_vps6"
 				}
 				local function process_address(address)
-					if address == "engage.cloudflareclient.com" then return end
+					address = (address or ""):lower()
+					if api.vps_domain_exclude(address) then return end
 					if datatypes.hostname(address) then
 						set_domain_dns(address, fwd_dns)
 						set_domain_ipset(address, table.concat(sets, ","))
@@ -380,6 +415,10 @@ function add_rule(var)
 				uci:foreach(appname, "nodes", function(t)
 					process_address(t.address)
 					process_address(t.download_address)
+					local dns, _ = api.get_domain_port_from_url(t.domain_resolver_dns or t.domain_resolver_dns_https or "")
+					if dns and dns ~= "" then
+						process_address(dns)
+					end
 				end)
 				uci:foreach(appname, "subscribe_list", function(t)  --订阅链接
 					local url, _ = api.get_domain_port_from_url(t.url or "")
@@ -393,94 +432,124 @@ function add_rule(var)
 
 		--直连（白名单）列表
 		if USE_DIRECT_LIST == "1" then
-			if fs.access("/usr/share/passwall/rules/direct_host") then
-				fwd_dns = LOCAL_DNS
-				if USE_CHINADNS_NG == "1" then
-					fwd_dns = nil
-				end
-				if fwd_dns then
-					local sets = {
-						setflag_4 .. "passwall_white",
-						setflag_6 .. "passwall_white6"
-					}
-					--始终用国内DNS解析直连（白名单）列表
-					for line in io.lines("/usr/share/passwall/rules/direct_host") do
-						line = api.get_std_domain(line)
-						if line ~= "" and not line:find("#") and not line:find(":") then
-							add_excluded_domain(line)
-							set_domain_dns(line, fwd_dns)
-							set_domain_ipset(line, table.concat(sets, ","))
+			fwd_dns = LOCAL_DNS
+			if USE_CHINADNS_NG == "1" then
+				fwd_dns = nil
+			end
+			if fwd_dns then
+				local sets = {
+					setflag_4 .. "psw_white",
+					setflag_6 .. "psw_white6"
+				}
+				--始终用国内DNS解析直连（白名单）列表
+				local geosite_arg = ""
+				local f = io.open("/usr/share/passwall/rules/direct_host")
+				if f then
+					for line in f:lines() do
+						if not line:find("#") and line:find("geosite:") then
+							line = string.match(line, ":([^:]+)$")
+							geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+						else
+							line = api.get_std_domain(line)
+							if line ~= "" and not line:find("#") and not line:find(":") then
+								add_excluded_domain(line)
+								set_domain_dns(line, fwd_dns)
+								set_domain_ipset(line, table.concat(sets, ","))
+							end
 						end
 					end
+					f:close()
 					log(string.format("  - 域名白名单(whitelist)：%s", fwd_dns or "默认"))
+				end
+				if USE_GEOVIEW == "1" and geosite_arg ~= "" then
+					foreach_geosite(geosite_arg, function(line)
+						add_excluded_domain(line)
+						set_domain_dns(line, fwd_dns)
+						set_domain_ipset(line, table.concat(sets, ","))
+					end)
+					log("  - 解析[直连列表] Geosite 到域名白名单(whitelist)完成")
 				end
 			end
 		end
 
 		--代理（黑名单）列表
 		if USE_PROXY_LIST == "1" then
-			if fs.access("/usr/share/passwall/rules/proxy_host") then
-				fwd_dns = TUN_DNS
-				if USE_CHINADNS_NG == "1" then
-					fwd_dns = nil
+			fwd_dns = TUN_DNS
+			if USE_CHINADNS_NG == "1" then
+				fwd_dns = nil
+			end
+			if fwd_dns then
+				local set_name = "psw_black"
+				local set6_name = "psw_black6"
+				if FLAG ~= "default" then
+					set_name = "psw_" .. FLAG .. "_black"
+					set6_name = "psw_" .. FLAG .. "_black6"
 				end
-				if fwd_dns then
-					local set_name = "passwall_black"
-					local set6_name = "passwall_black6"
-					if FLAG ~= "default" then
-						set_name = "passwall_" .. FLAG .. "_black"
-						set6_name = "passwall_" .. FLAG .. "_black6"
-					end
-					local sets = {
-						setflag_4 .. set_name
-					}
-					if NO_PROXY_IPV6 ~= "1" then
-						table.insert(sets, setflag_6 .. set6_name)
-					end
-					if REMOTE_FAKEDNS == "1" then
-						sets = {}
-					end
-					--始终使用远程DNS解析代理（黑名单）列表
-					for line in io.lines("/usr/share/passwall/rules/proxy_host") do
-						line = api.get_std_domain(line)
-						if line ~= "" and not line:find("#") and not line:find(":") then
-							add_excluded_domain(line)
-							if NO_PROXY_IPV6 == "1" then
-								set_domain_address(line, "::")
+				local sets = {
+					setflag_4 .. set_name
+				}
+				if NO_PROXY_IPV6 ~= "1" then
+					table.insert(sets, setflag_6 .. set6_name)
+				end
+				--始终使用远程DNS解析代理（黑名单）列表
+				local geosite_arg = ""
+				local f = io.open("/usr/share/passwall/rules/proxy_host")
+				if f then
+					for line in f:lines() do
+						if not line:find("#") and line:find("geosite:") then
+							line = string.match(line, ":([^:]+)$")
+							geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+						else
+							line = api.get_std_domain(line)
+							if line ~= "" and not line:find("#") and not line:find(":") then
+								add_excluded_domain(line)
+								if NO_PROXY_IPV6 == "1" then
+									set_domain_address(line, "::")
+								end
+								set_domain_dns(line, fwd_dns)
+								set_domain_ipset(line, table.concat(sets, ","))
 							end
-							set_domain_dns(line, fwd_dns)
-							set_domain_ipset(line, table.concat(sets, ","))
 						end
 					end
+					f:close()
 					log(string.format("  - 代理域名表(blacklist)：%s", fwd_dns or "默认"))
+				end
+				if USE_GEOVIEW == "1" and geosite_arg ~= "" then
+					foreach_geosite(geosite_arg, function(line)
+						add_excluded_domain(line)
+						if NO_PROXY_IPV6 == "1" then
+							set_domain_address(line, "::")
+						end
+						set_domain_dns(line, fwd_dns)
+						set_domain_ipset(line, table.concat(sets, ","))
+					end)
+					log("  - 解析[代理列表] Geosite 到代理域名表(blacklist)完成")
 				end
 			end
 		end
 
 		--GFW列表
 		if USE_GFW_LIST == "1" then
-			if fs.access("/usr/share/passwall/rules/gfwlist") then
-				fwd_dns = TUN_DNS
-				if USE_CHINADNS_NG == "1" then
-					fwd_dns = nil
+			fwd_dns = TUN_DNS
+			if USE_CHINADNS_NG == "1" then
+				fwd_dns = nil
+			end
+			if fwd_dns then
+				local set_name = "psw_gfw"
+				local set6_name = "psw_gfw6"
+				if FLAG ~= "default" then
+					set_name = "psw_" .. FLAG .. "_gfw"
+					set6_name = "psw_" .. FLAG .. "_gfw6"
 				end
-				if fwd_dns then
-					local set_name = "passwall_gfw"
-					local set6_name = "passwall_gfw6"
-					if FLAG ~= "default" then
-						set_name = "passwall_" .. FLAG .. "_gfw"
-						set6_name = "passwall_" .. FLAG .. "_gfw6"
-					end
-					local sets = {
-						setflag_4 .. set_name
-					}
-					if NO_PROXY_IPV6 ~= "1" then
-						table.insert(sets, setflag_6 .. set6_name)
-					end
-					if REMOTE_FAKEDNS == "1" then
-						sets = {}
-					end
-					for line in io.lines("/usr/share/passwall/rules/gfwlist") do
+				local sets = {
+					setflag_4 .. set_name
+				}
+				if NO_PROXY_IPV6 ~= "1" then
+					table.insert(sets, setflag_6 .. set6_name)
+				end
+				local f = io.open("/usr/share/passwall/rules/gfwlist")
+				if f then
+					for line in f:lines() do
 						if line ~= "" and not line:find("#") and not check_excluded_domain(line) then
 							if NO_PROXY_IPV6 == "1" then
 								set_domain_address(line, "::")
@@ -493,6 +562,7 @@ function add_rule(var)
 							set_domain_ipset(line, table.concat(sets, ","))
 						end
 					end
+					f:close()
 					log(string.format("  - 防火墙域名表(gfwlist)：%s", fwd_dns or "默认"))
 				end
 			end
@@ -500,33 +570,31 @@ function add_rule(var)
 
 		--中国列表
 		if CHN_LIST ~= "0" then
-			if fs.access("/usr/share/passwall/rules/chnlist") then
+			fwd_dns = nil
+			if CHN_LIST == "direct" then
+				fwd_dns = LOCAL_DNS
+			end
+			if CHN_LIST == "proxy" then
+				fwd_dns = TUN_DNS
+			end
+			if USE_CHINADNS_NG == "1" then
 				fwd_dns = nil
-				if CHN_LIST == "direct" then
-					fwd_dns = LOCAL_DNS
-				end
+			end
+			if fwd_dns then
+				local sets = {
+					setflag_4 .. "psw_chn",
+					setflag_6 .. "psw_chn6"
+				}
 				if CHN_LIST == "proxy" then
-					fwd_dns = TUN_DNS
-				end
-				if USE_CHINADNS_NG == "1" then
-					fwd_dns = nil
-				end
-				if fwd_dns then
-					local sets = {
-						setflag_4 .. "passwall_chn",
-						setflag_6 .. "passwall_chn6"
-					}
-					if CHN_LIST == "proxy" then
-						if NO_PROXY_IPV6 == "1" then
-							sets = {
-								setflag_4 .. "passwall_chn"
-							}
-						end
-						if REMOTE_FAKEDNS == "1" then
-							sets = {}
-						end
+					if NO_PROXY_IPV6 == "1" then
+						sets = {
+							setflag_4 .. "psw_chn"
+						}
 					end
-					for line in io.lines("/usr/share/passwall/rules/chnlist") do
+				end
+				local f = io.open("/usr/share/passwall/rules/chnlist")
+				if f then
+					for line in f:lines() do
 						if line ~= "" and not line:find("#") and not check_excluded_domain(line) then
 							if CHN_LIST == "proxy" and NO_PROXY_IPV6 == "1" then
 								set_domain_address(line, "::")
@@ -539,6 +607,7 @@ function add_rule(var)
 							set_domain_ipset(line, table.concat(sets, ","))
 						end
 					end
+					f:close()
 					log(string.format("  - 中国域名表(chnroute)：%s", fwd_dns or "默认"))
 				end
 			end
@@ -550,7 +619,7 @@ function add_rule(var)
 			local default_node_id = t["default_node"] or "_direct"
 			uci:foreach(appname, "shunt_rules", function(s)
 				local _node_id = t[s[".name"]]
-				if _node_id and _node_id ~= "_blackhole" then
+				if _node_id and _node_id ~= "_blackhole" and t["shunt_group"] == s.group then
 					if _node_id == "_default" then
 						_node_id = default_node_id
 					end
@@ -563,24 +632,24 @@ function add_rule(var)
 					if _node_id == "_direct" then
 						fwd_dns = LOCAL_DNS
 						if USE_DIRECT_LIST == "1" then
-							table.insert(sets, setflag_4 .. "passwall_white")
-							table.insert(sets, setflag_6 .. "passwall_white6")
+							table.insert(sets, setflag_4 .. "psw_white")
+							table.insert(sets, setflag_6 .. "psw_white6")
 						else
-							local set_name = "passwall_shunt"
-							local set6_name = "passwall_shunt6"
+							local set_name = "psw_shunt"
+							local set6_name = "psw_shunt6"
 							if FLAG ~= "default" then
-								set_name = "passwall_" .. FLAG .. "_shunt"
-								set6_name = "passwall_" .. FLAG .. "_shunt6"
+								set_name = "psw_" .. FLAG .. "_shunt"
+								set6_name = "psw_" .. FLAG .. "_shunt6"
 							end
 							table.insert(sets, setflag_4 .. set_name)
 							table.insert(sets, setflag_6 .. set6_name)
 						end
 					else
-						local set_name = "passwall_shunt"
-						local set6_name = "passwall_shunt6"
+						local set_name = "psw_shunt"
+						local set6_name = "psw_shunt6"
 						if FLAG ~= "default" then
-							set_name = "passwall_" .. FLAG .. "_shunt"
-							set6_name = "passwall_" .. FLAG .. "_shunt6"
+							set_name = "psw_" .. FLAG .. "_shunt"
+							set6_name = "psw_" .. FLAG .. "_shunt6"
 						end
 						fwd_dns = TUN_DNS
 						table.insert(sets, setflag_4 .. set_name)
@@ -589,29 +658,43 @@ function add_rule(var)
 						else
 							no_ipv6 = true
 						end
-						if not only_global then
-							if REMOTE_FAKEDNS == "1" then
-								sets = {}
+					end
+
+					local domain_list = s.domain_list or ""
+					local geosite_arg = ""
+					for line in string.gmatch(domain_list, "[^\r\n]+") do
+						if line ~= "" and not line:find("#") and not line:find("regexp:") and not line:find("ext:") and not line:find("rule-set:") and not line:find("rs:") then
+							if line:find("geosite:") then
+								line = string.match(line, ":([^:]+)$")
+								geosite_arg = geosite_arg .. (geosite_arg ~= "" and "," or "") .. line
+							else
+								if line:find("domain:") or line:find("full:") then
+									line = string.match(line, ":([^:]+)$")
+								end
+								line = api.get_std_domain(line)
+								add_excluded_domain(line)
+
+								if no_ipv6 then
+									set_domain_address(line, "::")
+								end
+								set_domain_dns(line, fwd_dns)
+								set_domain_ipset(line, table.concat(sets, ","))
 							end
 						end
 					end
 
-					local domain_list = s.domain_list or ""
-					for line in string.gmatch(domain_list, "[^\r\n]+") do
-						if line ~= "" and not line:find("#") and not line:find("regexp:") and not line:find("geosite:") and not line:find("ext:") then
-							if line:find("domain:") or line:find("full:") then
-								line = string.match(line, ":([^:]+)$")
-							end
-							line = api.get_std_domain(line)
+					if USE_GFW_LIST == "1" and CHN_LIST == "0" and USE_GEOVIEW == "1" and geosite_arg ~= "" then  --仅GFW模式解析geosite
+						foreach_geosite(geosite_arg, function(line)
 							add_excluded_domain(line)
-
 							if no_ipv6 then
 								set_domain_address(line, "::")
 							end
 							set_domain_dns(line, fwd_dns)
 							set_domain_ipset(line, table.concat(sets, ","))
-						end
+						end)
+						log(string.format("  - 解析分流规则(%s) Geosite 完成", s.remarks))
 					end
+
 					if _node_id ~= "_direct" then
 						log(string.format("  - Sing-Box/Xray分流规则(%s)：%s", s.remarks, fwd_dns or "默认"))
 					end

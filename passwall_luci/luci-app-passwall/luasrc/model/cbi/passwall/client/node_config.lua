@@ -1,6 +1,8 @@
 api = require "luci.passwall.api"
 appname = "passwall"
 
+api.set_default_cbi()
+
 m = Map(appname, translate("Node Config"))
 m.redirect = api.url("node_list")
 api.set_apply_on_parse(m)
@@ -9,8 +11,12 @@ if not arg[1] or not m:get(arg[1]) then
 	luci.http.redirect(m.redirect)
 end
 
+fs = require "nixio.fs"
+formvalue_key = "cbid." .. appname .. "." .. arg[1] .. "."
+
 local header = Template(appname .. "/node_config/header")
 header.api = api
+header.config = m.config
 header.section = arg[1]
 m:append(header)
 
@@ -61,11 +67,17 @@ o.write = function(self, section, value)
 	m:set(section, self.option, value)
 end
 
-local fs = api.fs
 local types_dir = "/usr/lib/lua/luci/model/cbi/passwall/client/type/"
 s.val = {}
 s.val["type"] = m.uci:get(appname, arg[1], "type")
 s.val["protocol"] = m.uci:get(appname, arg[1], "protocol")
+
+if luci.http.formvalue("cbi.submit") == "1" then
+	local formvalue_type = luci.http.formvalue(formvalue_key .. "type")
+	if formvalue_type then
+		s.val["type"] = formvalue_type
+	end
+end
 
 o = s:option(ListValue, "type", translate("Type"))
 
@@ -108,8 +120,8 @@ end
 
 local footer = Template(appname .. "/node_config/footer")
 footer.api = api
+footer.config = m.config
 footer.section = arg[1]
-
 m:append(footer)
 
-return m
+return api.return_map(m)

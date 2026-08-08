@@ -31,9 +31,14 @@ local fs	= require "nixio.fs"
 local nutil = require "nixio.util"
 local uci = require "luci.model.uci".cursor()
 local SYS  = require "luci.sys"
+local HTTP = require "luci.http"
 
 local type  = type
 local string  = string
+local tostring = tostring
+local table = table
+local math = math
+local b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 --- LuCI filesystem library.
 module "luci.openclash"
@@ -82,14 +87,34 @@ end
 -- @param filename	String containing the path of the file to read
 -- @return			String containing the file contents or nil on error
 -- @return			String containing the error message on error
-readfile = fs.readfile
+-- Wrapped readfile: if file is age-encrypted, try to decrypt with matching UCI secret first
+function readfile(filename)
+	local content, err = fs.readfile(filename)
+	if not content then return nil, err end
+	if content:find("BEGIN AGE ENCRYPTED FILE") then
+		local keys = get_age_keys(filename)
+		if keys and keys.secret and keys.secret ~= "" then
+			return age_decrypt(keys.secret, content) or content
+		else
+			return content
+		end
+	end
+	return content
+end
 
 --- Write the contents of given string to given file.
 -- @param filename	String containing the path of the file to read
 -- @param data		String containing the data to write
 -- @return			Boolean containing true on success or nil on error
 -- @return			String containing the error message on error
-writefile = fs.writefile
+-- Wrapped writefile: if public key exists for filename, encrypt before writing
+function writefile(filename, data)
+	local keys = get_age_keys(filename)
+	if keys and keys.public and keys.public ~= "" then
+		return fs.writefile(filename, age_encrypt(keys.public, data) or data)
+	end
+	return fs.writefile(filename, data)
+end
 
 --- Copies a file.
 -- @param source	Source file
@@ -335,4 +360,277 @@ function uci_get_config(section, key)
     	val = uci:get("openclash", section, key)
     end
     return val
+end
+
+function get_file_path_from_request()
+	local file_path
+	local referer = HTTP.getenv("HTTP_REFERER")
+	if referer then
+		local _, _, file_value = referer:find("file=([^&]*)$")
+		if file_value and file_value ~= "" then
+			file_path = HTTP.urldecode(file_value)
+		end
+	end
+
+	if not file_path or file_path == "/" then
+		file_path = HTTP.formvalue("file")
+		if not file_path then
+			file_path = HTTP.urldecode(file_path)
+		end
+	end
+
+	return file_path
+end
+
+function get_age_keys(file)
+	local name = filename(basename(file))
+	local pub, sec
+	uci:foreach("openclash", "config_age_secret", function(s)
+		if s and s.name then
+			if s.name == name and (not s.hidden or (s.hidden ~= "true")) then
+				if not pub and s.public then pub = s.public end
+				if not sec and s.secret then sec = s.secret end
+			end
+			return false
+		end
+	end)
+	return { public = pub, secret = sec }
+end
+
+function age_encrypt(public, content)
+    if not public or public == "" or not content then return nil end
+
+    local tmp_in = os.tmpname()
+    local tmp_out = os.tmpname()
+    local f = io.open(tmp_in, "w")
+    if not f then return nil end
+    f:write(content)
+    f:close()
+
+    local cmd = string.format(
+        "/etc/openclash/core/clash_meta age encrypt %s %s %s 2>/dev/null",
+        public, tmp_in, tmp_out
+    )
+    os.execute(cmd)
+
+    local out = nil
+    local f_out = io.open(tmp_out, "r")
+    if f_out then
+        out = f_out:read("*a") or ""
+        f_out:close()
+    end
+
+    os.remove(tmp_in)
+    os.remove(tmp_out)
+
+    return out
+end
+
+function age_decrypt(secret, content)
+    if not secret or secret == "" or not content then return nil end
+
+    local tmp_in = os.tmpname()
+    local tmp_out = os.tmpname()
+    local f = io.open(tmp_in, "w")
+    if not f then return nil end
+    f:write(content)
+    f:close()
+
+    local cmd = string.format(
+        "/etc/openclash/core/clash_meta age decrypt %s %s %s 2>/dev/null",
+        secret, tmp_in, tmp_out
+    )
+    os.execute(cmd)
+
+    local out = nil
+    local f_out = io.open(tmp_out, "r")
+    if f_out then
+        out = f_out:read("*a") or ""
+        f_out:close()
+    end
+
+    os.remove(tmp_in)
+    os.remove(tmp_out)
+
+    return out
+end
+
+function decode64(data)
+	if not data then return nil end
+	data = data:gsub('[%s]', '')
+	if #data % 4 ~= 0 then return nil end
+
+	local out = {}
+	for i = 1, #data, 4 do
+		local c1, c2, c3, c4 = data:byte(i, i+3)
+		local i1 = b64chars:find(string.char(c1), 1, true) - 1
+		local i2 = b64chars:find(string.char(c2), 1, true) - 1
+		local i3 = (c3 == 61) and -1 or (b64chars:find(string.char(c3), 1, true) - 1)
+		local i4 = (c4 == 61) and -1 or (b64chars:find(string.char(c4), 1, true) - 1)
+
+		if not i1 or not i2 or (c3 ~= 61 and not i3) or (c4 ~= 61 and not i4) then
+			return nil
+		end
+
+		local x = i1 * 0x40000 + i2 * 0x1000
+		if i3 >= 0 then x = x + i3 * 0x40 end
+		if i4 >= 0 then x = x + i4 end
+
+		table.insert(out, string.char(math.floor(x / 0x10000) % 0x100))
+		if i3 >= 0 then
+			table.insert(out, string.char(math.floor(x / 0x100) % 0x100))
+		end
+		if i4 >= 0 then
+			table.insert(out, string.char(x % 0x100))
+		end
+	end
+
+	return table.concat(out)
+end
+
+function config_refs(old_file_name, new_file_name)
+	if not old_file_name or old_file_name == "" then return end
+	local old_name_no_ext = filename(basename(old_file_name))
+	local old_file_full = basename(old_file_name)
+	local is_rename = new_file_name and new_file_name ~= ""
+	local new_name_no_ext, new_file_full
+
+	if is_rename then
+		new_name_no_ext = filename(basename(new_file_name))
+		new_file_full = basename(new_file_name)
+	end
+
+	uci:foreach("openclash", "config_subscribe",
+		function(s)
+			if s.name == old_name_no_ext then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "name", new_name_no_ext)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+				return false
+			end
+		end
+	)
+
+	uci:foreach("openclash", "subscribe_info",
+		function(s)
+			if s.name == old_name_no_ext then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "name", new_name_no_ext)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+				return false
+			end
+		end
+	)
+
+	uci:foreach("openclash", "groups",
+		function(s)
+			if s.config == old_file_full then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "config", new_file_full)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+			end
+		end
+	)
+
+	uci:foreach("openclash", "proxy-provider",
+		function(s)
+			if s.config == old_file_full then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "config", new_file_full)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+			end
+		end
+	)
+
+	uci:foreach("openclash", "servers",
+		function(s)
+			if s.config == old_file_full then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "config", new_file_full)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+			end
+		end
+	)
+
+	uci:foreach("openclash", "config_age_secret",
+		function(s)
+			if s.name == old_name_no_ext then
+				if is_rename and new_name_no_ext ~= new_file_name then
+					uci:set("openclash", s[".name"], "name", new_name_no_ext)
+				else
+					uci:delete("openclash", s[".name"])
+				end
+				return false
+			end
+		end
+	)
+
+	uci:commit("openclash")
+end
+
+--- Returns the appropriate ps command string for the system's ps implementation.
+-- Detects procps-ng (ps -efw) vs busybox (ps -w).
+-- @return String containing the ps command prefix
+function ps_cmd()
+	local ps_version = SYS.exec("ps --version 2>&1 |grep -c procps-ng |tr -d '\n'")
+	if ps_version == "1" then
+		return "ps -efw"
+	else
+		return "ps -w"
+	end
+end
+
+--- Returns the package manager type (opkg or apk).
+-- @return String "opkg" or "apk"
+function pkg_type()
+	if fs.access("/usr/bin/apk") then
+		return "apk"
+	else
+		return "opkg"
+	end
+end
+
+--- Returns the installed version of luci-app-openclash.
+-- Supports both opkg and apk package managers.
+-- @return String containing the version number, or "0" if not found
+-- NOTE: The module-level cache (_oc_version_cache) provides per-request
+-- deduplication. In OpenWrt LuCI CGI mode each HTTP request spawns a new Lua
+-- process, so cross-request caching is impossible.
+-- Since require() returns the same module instance (package.loaded), the
+-- first call caches the result and subsequent calls avoid redundant shell
+-- commands. No time-based expiration is needed — the version is immutable
+-- for the lifetime of a request.
+local _oc_version_cache = nil
+
+function oc_version()
+	if _oc_version_cache ~= nil then
+		return _oc_version_cache
+	end
+	local v
+	if pkg_type() == "opkg" then
+		v = SYS.exec("rm -f /var/lock/opkg.lock && opkg status luci-app-openclash 2>/dev/null |grep '^Version:' |awk '{print $2}' |tr -d '\n'")
+	else
+		v = SYS.exec("rm -f /lib/apk/db/lock && apk info luci-app-openclash 2>/dev/null |grep '^luci-app-openclash-[0-9]' |sed 's/luci-app-openclash-//' |tr -d '\n'")
+	end
+	if v == "" then
+		v = "0"
+	end
+	_oc_version_cache = v
+	return v
+end
+
+function IsYamlExt(e)
+	e = e or ""
+	local lower = string.lower(e)
+	return lower:sub(-5) == ".yaml" or lower:sub(-4) == ".yml"
 end

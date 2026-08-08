@@ -3,6 +3,8 @@ local appname = "passwall"
 local sys = api.sys
 local datatypes = api.datatypes
 
+api.set_default_cbi()
+
 m = Map(appname)
 api.set_apply_on_parse(m)
 
@@ -25,6 +27,7 @@ o:value("https://www.google.com/generate_204", "Google")
 o:value("https://www.youtube.com/generate_204", "YouTube")
 o:value("https://connect.rom.miui.com/generate_204", "MIUI (CN)")
 o:value("https://connectivitycheck.platform.hicloud.com/generate_204", "HiCloud (CN)")
+o:value("https://wifi.vivo.com.cn/generate_204", "VIVO (CN)")
 o.default = o.keylist[3]
 
 -- [[ Add the node via the link ]]--
@@ -32,4 +35,4 @@ s:append(Template(appname .. "/node_list/link_add_node"))
 
 m:append(Template(appname .. "/node_list/node_list"))
 
-return m
+return api.return_map(m)

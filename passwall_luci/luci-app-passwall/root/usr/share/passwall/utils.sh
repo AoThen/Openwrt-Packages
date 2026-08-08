@@ -89,7 +89,7 @@ get_host_ip() {
 	[ -z "$count" ] && count=3
 	local isip=""
 	local ip=""
-	if [ "$1" == "ipv6" ]; then
+	if [ "$1" = "ipv6" ]; then
 		isip=$(echo $host | grep -E "([A-Fa-f0-9]{1,4}::?){1,7}[A-Fa-f0-9]{1,4}")
 		if [ -n "$isip" ]; then
 			ip=$(echo "$host" | tr -d '[]')
@@ -100,7 +100,7 @@ get_host_ip() {
 	fi
 	[ -z "$isip" ] && {
 		local t=4
-		[ "$1" == "ipv6" ] && t=6
+		[ "$1" = "ipv6" ] && t=6
 		local vpsrip=$(resolveip -$t -t $count $host | awk 'NR==1{print}')
 		ip=$vpsrip
 	}
@@ -113,7 +113,7 @@ get_node_host_ip() {
 	[ -n "$address" ] && {
 		local use_ipv6=$(config_n_get $1 use_ipv6)
 		local network_type="ipv4"
-		[ "$use_ipv6" == "1" ] && network_type="ipv6"
+		[ "$use_ipv6" = "1" ] && network_type="ipv6"
 		ip=$(get_host_ip $network_type $address)
 	}
 	echo $ip
@@ -142,9 +142,10 @@ get_ip_port_from() {
 
 parse_doh() {
 	local __doh=$1 __url_var=$2 __host_var=$3 __port_var=$4 __bootstrap_var=$5
-	__doh=$(echo -e "$__doh" | tr -d ' \t\n')
+	__doh=$(printf '%s' "$__doh" | tr -d ' \t\n')
 	local __url=${__doh%%,*}
 	local __bootstrap=${__doh#*,}
+	[ "$__bootstrap" = "$__doh" ] && __bootstrap=""
 	local __host_port=$(lua_api "get_domain_from_url(\"${__url}\")")
 	local __host __port
 	if echo "${__host_port}" | grep -q '^\[.*\]:[0-9]\+$'; then
@@ -219,7 +220,7 @@ get_first_dns() {
 		echo "${2}#${3}"
 		return 1
 	}
-	eval "hosts_foreach \"${__hosts_val}\" __first \"$@\""
+	hosts_foreach "${__hosts_val}" __first "$@"
 }
 
 get_last_dns() {
@@ -230,8 +231,46 @@ get_last_dns() {
 		__last="${2}#${3}"
 		__first=${__first:-${__last}}
 	}
-	eval "hosts_foreach \"${__hosts_val}\" __every \"$@\""
-	[ "${__first}" ==  "${__last}" ] || echo "${__last}"
+	hosts_foreach "${__hosts_val}" __first "$@"
+	[ "${__first}" =  "${__last}" ] || echo "${__last}"
+}
+
+normalize_dns() {
+	local s="$1"
+	local addr port
+	case "$s" in
+		\[*\]:*)
+			# [ip6]:port
+			addr="${s%\]:*}"
+			addr="${addr#\[}"
+			port="${s##*:}"
+		;;
+		*\#*)
+			# ip4#port or ip6#port
+			addr="${s%\#*}"
+			port="${s##*\#}"
+		;;
+		*.*:*)
+			# ip4:port
+			addr="${s%:*}"
+			port="${s##*:}"
+		;;
+		\[*\])
+			# [ip6]
+			addr="${s#\[}"
+			addr="${addr%\]}"
+			port=""
+		;;
+		*)
+			addr="$s"
+			port=""
+		;;
+	esac
+	if [ -n "$port" ]; then
+		echo "${addr}#${port}"
+	else
+		echo "$addr"
+	fi
 }
 
 check_port_exists() {
@@ -280,7 +319,7 @@ get_new_port() {
 			fi
 		fi
 	fi
-	[ "$port" -lt $min_port -o "$port" -gt $max_port ] && port=$default_start_port
+	[ "$port" -lt $min_port ] || [ "$port" -gt $max_port ] && port=$default_start_port
 	local start_port="$port"
 	while :; do
 		if [ "$(check_port_exists "$port" "$protocol")" = 0 ]; then
@@ -307,9 +346,11 @@ check_ver() {
 	local version1="$1"
 	local version2="$2"
 	local i v1 v1_1 v1_2 v1_3 v2 v2_1 v2_2 v2_3
-	IFS='.'; set -- $version1; v1_1=${1:-0}; v1_2=${2:-0}; v1_3=${3:-0}
-	IFS='.'; set -- $version2; v2_1=${1:-0}; v2_2=${2:-0}; v2_3=${3:-0}
-	IFS=
+	local old_ifs="$IFS"
+	IFS='.'
+	set -- $version1; v1_1=${1:-0}; v1_2=${2:-0}; v1_3=${3:-0}
+	set -- $version2; v2_1=${1:-0}; v2_2=${2:-0}; v2_3=${3:-0}
+	IFS="$old_ifs"
 	for i in 1 2 3; do
 		eval v1=\$v1_$i
 		eval v2=\$v2_$i
@@ -357,6 +398,7 @@ set_cache_var() {
 	shift 1
 	local val="$@"
 	[ -n "${key}" ] && [ -n "${val}" ] && {
+		[ ! -d $TMP_PATH ] && mkdir -p $TMP_PATH
 		sed -i "/${key}=/d" $TMP_PATH/var >/dev/null 2>&1
 		echo "${key}=\"${val}\"" >> $TMP_PATH/var
 		eval ${key}=\"${val}\"
@@ -395,6 +437,8 @@ add_ip2route() {
 	local gateway device
 	network_get_gateway gateway "$2"
 	network_get_device device "$2"
+	[ -z "${device}" ] && device=$(ubus call "network.interface.$2" status 2>/dev/null | jsonfilter -e '@.device' 2>/dev/null)
+	[ -z "${device}" ] && [ -d "/sys/class/net/$2" ] && device="$2"
 	[ -z "${device}" ] && device="$2"
 
 	if [ -n "${gateway}" ]; then
@@ -431,16 +475,21 @@ ln_run() {
 		[ -x "${file_func}" ] || echolog "  - $(readlink ${file_func}) 没有执行权限，无法启动：${file_func} $*"
 	fi
 	#echo "${file_func} $*" >&2
-	[ -n "${file_func}" ] || echolog "  - 找不到 ${ln_name}，无法启动..."
-	[ "${output}" != "/dev/null" ] && [ "${ln_name}" != "chinadns-ng" ] && {
+	[ -n "${file_func}" ] || {
+		echolog "  - 找不到 ${ln_name}，无法启动..."
+		return 1
+	}
+	[ "${output}" != "/dev/null" ] && [ -n "$(echo "${output}" | grep -E "default|SOCKS_")" ] && [ "${ln_name}" != "chinadns-ng" ] && {
 		local persist_log_path=$(config_t_get global persist_log_path)
 		local sys_log=$(config_t_get global sys_log "0")
 	}
 	if [ -z "$persist_log_path" ] && [ "$sys_log" != "1" ]; then
 		${file_func:-echolog " - ${ln_name}"} "$@" >${output} 2>&1 &
 	else
-		[ "${output: -1, -7}" == "TCP.log" ] && local protocol="TCP"
-		[ "${output: -1, -7}" == "UDP.log" ] && local protocol="UDP"
+		case "$output" in
+			*TCP.log) local protocol="TCP" ;;
+			*UDP.log) local protocol="UDP" ;;
+		esac
 		if [ -n "${persist_log_path}" ]; then
 			mkdir -p ${persist_log_path}
 			local log_file=${persist_log_path}/passwall_${protocol}_${ln_name}_$(date '+%F').log
@@ -448,11 +497,12 @@ ln_run() {
 			${file_func:-echolog " - ${ln_name}"} "$@" >> ${log_file} 2>&1 &
 			sys_log=0
 		fi
-		if [ "${sys_log}" == "1" ]; then
+		if [ "${sys_log}" = "1" ]; then
 			echolog "记录 ${ln_name}_${protocol} 到系统日志"
 			${file_func:-echolog " - ${ln_name}"} "$@" 2>&1 | logger -t PASSWALL_${protocol}_${ln_name} &
 		fi
 	fi
+	[ "$NO_REC_PROCESS" = "1" ] && return
 	process_count=$(ls $TMP_SCRIPT_FUNC_PATH | wc -l)
 	process_count=$((process_count + 1))
 	echo "${file_func:-echolog "  - ${ln_name}"} $@ >${output}" > $TMP_SCRIPT_FUNC_PATH/$process_count
@@ -513,4 +563,34 @@ get_wan_ips() {
 		esac
 	done
 	echo "$NET_ADDR"
+}
+
+get_local_ips() {
+	local family="$1"
+	local ALL_IPS WAN_IPS ip NET_ADDR
+	if [ "$family" = "ip6" ]; then
+		ALL_IPS=$(ip -o -6 addr show scope global | awk '{print $4}' | cut -d/ -f1)
+		WAN_IPS=$(get_wan_ips ip6)
+	else
+		ALL_IPS=$(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
+		WAN_IPS=$(get_wan_ips ip4)
+	fi
+	# 补充回环（scope global 不包含）
+	[ "$family" = "ip6" ] && ALL_IPS="$ALL_IPS ::1"
+	[ "$family" != "ip6" ] && ALL_IPS="$ALL_IPS 127.0.0.1"
+	for ip in $ALL_IPS; do
+		case "$ip" in
+			""|0.0.0.0|::) continue ;;
+		esac
+		case " $WAN_IPS " in
+			*" $ip "*) continue ;;
+		esac
+		case " $NET_ADDR " in
+			*" $ip "*) ;;
+			*) NET_ADDR="${NET_ADDR:+$NET_ADDR }$ip" ;;
+		esac
+	done
+	for ip in $NET_ADDR; do
+		echo "$ip"
+	done
 }

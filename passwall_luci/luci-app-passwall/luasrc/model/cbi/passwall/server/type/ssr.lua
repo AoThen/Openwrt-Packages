@@ -1,12 +1,18 @@
 local m, s = ...
 
-local api = require "luci.passwall.api"
-
 if not api.is_finded("ssr-server") then
 	return
 end
 
 local type_name = "SSR"
+
+-- [[ ShadowsocksR ]]
+
+s.fields["type"]:value(type_name, translate("ShadowsocksR"))
+
+if s.val["type"] and s.val["type"] ~= type_name then
+	return
+end
 
 local option_prefix = "ssr_"
 
@@ -32,10 +38,6 @@ local ssr_obfs_list = {
 	"plain", "http_simple", "http_post", "random_head", "tls_simple",
 	"tls1.0_session_auth", "tls1.2_ticket_auth"
 }
-
--- [[ ShadowsocksR ]]
-
-s.fields["type"]:value(type_name, translate("ShadowsocksR"))
 
 o = s:option(Flag, _n("custom"), translate("Use Custom Config"))
 
@@ -74,16 +76,16 @@ o = s:option(Flag, _n("tcp_fast_open"), "TCP " .. translate("Fast Open"))
 o.default = "0"
 o:depends({ [_n("custom")] = false })
 
-o = s:option(TextValue, _n("custom_config"), translate("Custom Config"))
+o = s:option(TextValue, _n("custom_config"), translate("Custom Config") .. " (JSON)")
 o.rows = 10
 o.wrap = "off"
 o:depends({ [_n("custom")] = true })
-o.validate = function(self, value, t)
-	if value and api.jsonc.parse(value) then
-		return value
-	else
-		return nil, translate("Custom Config") .. " " .. translate("Must be JSON text!")
-	end
+o.datatype = "json"
+local o_validate = o.validate
+o.validate = function(self, value)
+	local v = o_validate(self, value)
+	if v then return v end
+	return nil, translate("Custom Config") .. " " .. translate("Must be JSON text!")
 end
 o.custom_cfgvalue = function(self, section, value)
 	local config_str = m:get(section, "config_str")

@@ -1,7 +1,5 @@
 local m, s = ...
 
-local api = require "luci.passwall.api"
-
 if not api.finded_com("hysteria") then
 	return
 end
@@ -10,15 +8,19 @@ local fs = api.fs
 
 local type_name = "Hysteria2"
 
+-- [[ Hysteria2 ]]
+
+s.fields["type"]:value(type_name, "Hysteria2")
+
+if s.val["type"] and s.val["type"] ~= type_name then
+	return
+end
+
 local option_prefix = "hysteria2_"
 
 local function _n(name)
 	return option_prefix .. name
 end
-
--- [[ Hysteria2 ]]
-
-s.fields["type"]:value(type_name, "Hysteria2")
 
 o = s:option(Flag, _n("custom"), translate("Use Custom Config"))
 
@@ -26,14 +28,56 @@ o = s:option(Value, _n("port"), translate("Listen Port"))
 o.datatype = "port"
 o:depends({ [_n("custom")] = false })
 
-o = s:option(Value, _n("obfs"), translate("Obfs Password"))
+o = s:option(Flag, _n("realms"), translate("Realms"))
+o.default = "0"
 o.rewrite_option = o.option
 o:depends({ [_n("custom")] = false })
+
+o = s:option(Value, _n("realm_url"), translate("Realm URL"), translate("Example:") .. "realm://public@realm.hy2.io/your-realm-name")
+o.rewrite_option = o.option
+o:depends({ [_n("realms")] = "1" })
+o.validate = function(self, value)
+	value = api.trim(value)
+	local realm = api.parse_realm_uri(value)
+	if realm then return value end
+	return nil, translate("Invalid Realm URL.")
+end
+
+o = s:option(DynamicList, _n("realm_stun"), translate("Realm STUN"))
+o.default = { "stun.sip.us:3478", "stun.nextcloud.com:3478", "global.stun.twilio.com:3478" }
+o.rewrite_option = o.option
+o:depends({ [_n("realms")] = "1" })
 
 o = s:option(Value, _n("auth_password"), translate("Auth Password"))
 o.password = true
 o.rewrite_option = o.option
 o:depends({ [_n("custom")] = false })
+
+o = s:option(ListValue, _n("obfs_type"), translate("Obfs Type"))
+o:value("", translate("Disable"))
+o:value("salamander")
+o:value("gecko")
+o.rewrite_option = o.option
+o:depends({ [_n("custom")] = false })
+
+o = s:option(Value, _n("obfs_password"), translate("Obfs Password"))
+o.rewrite_option = o.option
+o:depends({ [_n("obfs_type")] = "salamander" })
+o:depends({ [_n("obfs_type")] = "gecko" })
+
+o = s:option(Value, _n("obfs_MinPacketSize"), translate("Gecko Packet Size (min)"))
+o.datatype = "uinteger"
+o.placeholder = "512"
+o.default = "512"
+o:depends({ [_n("obfs_type")] = "gecko" })
+o.rewrite_option = o.option
+
+o = s:option(Value, _n("obfs_MaxPacketSize"), translate("Gecko Packet Size (max)"))
+o.datatype = "uinteger"
+o.placeholder = "1200"
+o.default = "1200"
+o:depends({ [_n("obfs_type")] = "gecko" })
+o.rewrite_option = o.option
 
 o = s:option(Flag, _n("udp"), translate("UDP"))
 o.default = "1"
@@ -87,12 +131,12 @@ o = s:option(TextValue, _n("custom_config"), translate("Custom Config"))
 o.rows = 10
 o.wrap = "off"
 o:depends({ [_n("custom")] = true })
-o.validate = function(self, value, t)
-	if value and api.jsonc.parse(value) then
-		return value
-	else
-		return nil, translate("Custom Config") .. " " .. translate("Must be JSON text!")
-	end
+o.datatype = "json"
+local o_validate = o.validate
+o.validate = function(self, value)
+	local v = o_validate(self, value)
+	if v then return v end
+	return nil, translate("Custom Config") .. " " .. translate("Must be JSON text!")
 end
 o.custom_cfgvalue = function(self, section, value)
 	local config_str = m:get(section, "config_str")

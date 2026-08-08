@@ -1,267 +1,17 @@
 <%+cbi/valueheader%>
-<style type="text/css">
-*{margin: 0;padding: 0;}
-
-ul{
-    list-style: none;
-}
-
-#tab{
-    width: 100%;
-    height: 100%;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 2px #ddd;
-    overflow: hidden;
-}
-
-#tab-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border-light, #e2e8f0);
-    background: var(--bg-gray, #f1f5f9);
-    min-width: 0;
-    box-shadow: none;
-    position: relative;
-    z-index: 1;
-}
-
-#tab-header ul.cbi-tabmenu {
-    display: flex;
-    width: 100%;
-    background: #f1f5f9;
-    border-radius: 8px;
-    border-bottom: none !important;
-    border: none !important;
-    gap: 5px;
-    margin: 0;
-    padding: 0;
-}
-
-#tab-header ul.cbi-tabmenu li {
-    flex: 1 1 0;
-    min-width: 0;
-    width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 0;
-    height: 40px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #64748b;
-    background: transparent;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.18s;
-    margin: 0;
-    user-select: none;
-    position: relative;
-    box-sizing: border-box;
-}
-
-#tab-header ul.cbi-tabmenu li.cbi-tab {
-    background: #3b82f6;
-    color: #fff;
-    font-weight: 600;
-    z-index: 2;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
-}
-
-#tab-header ul.cbi-tabmenu li.cbi-tab a {
-    color: #fff !important;
-    font-weight: 600;
-}
-
-#tab-header ul.cbi-tabmenu li.cbi-tab-disabled {
-    color: #fff;
-    background: #f9f9f9;
-    opacity: 0.7;
-    cursor: pointer;
-}
-
-#tab-header ul.cbi-tabmenu li.cbi-tab-disabled a {
-    color: #000 !important;
-}
-
-#tab-header ul.cbi-tabmenu li:not(.cbi-tab):hover,
-#tab-header ul.cbi-tabmenu li:not(.cbi-tab):focus {
-    color: #3b82f6;
-    background: rgba(59,130,246,0.10);
-}
-
-#tab-header ul.cbi-tabmenu li:not(.cbi-tab):hover a,
-#tab-header ul.cbi-tabmenu li:not(.cbi-tab):focus a {
-    color: #3b82f6 !important;
-}
-
-#tab-header ul.cbi-tabmenu li a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    text-decoration: none;
-    background: none;
-    border: none;
-    outline: none;
-    font: inherit;
-    color: inherit;
-    cursor: inherit;
-    padding: 0;
-    margin: 0;
-    user-select: none;
-    transition: color 0.18s;
-}
-
-#tab-content .dom{
-    display: none;
-}
-
-#tab-content .dom ul li{
-  float: left;
-  margin: 15px 10px;
-  width: 225px;
-}
-
-.radio-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    background: #f1f5f9;
-    border-radius: 6px;
-    padding: 6px 10px;
-    margin: 10px auto;
-    width: 100%;
-    max-width: 500px;
-    flex-wrap: wrap;
-    box-sizing: border-box;
-    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-}
-
-.radio-button input[type="radio"] {
-    display: none;
-}
-
-.radio-button label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 18px;
-    font-size: 15px;
-    color: #64748b;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-    min-width: 60px;
-    user-select: none;
-}
-
-.radio-button label:hover {
-    color: #3b82f6;
-    border-color: #3b82f6;
-    background: #f0f6ff;
-}
-
-.radio-button input[type="radio"]:checked + label {
-    background: #3b82f6;
-    color: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 1px 2px 0 rgba(59,130,246,0.08);
-}
-
-.btn-group {
-    display: flex;
-    justify-content: space-between;
-    width: 80%;
-    margin: 10px auto;
-}
-
-:root[data-darkmode="true"] #tab-header {
-    background: #374151;
-    border-bottom: 1px solid #374151;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu {
-    background: #374151;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li {
-    background: #1f2937;
-    color: #a1a1aa;
-    border-color: #374151;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li.cbi-tab {
-    background: #2563eb;
-    color: #fff;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li.cbi-tab a {
-    color: #fff !important;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li.cbi-tab-disabled {
-    color: #1f2937;
-    background: #1f2937;
-    opacity: 0.7;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li.cbi-tab-disabled a {
-    color: #fff !important;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li:not(.cbi-tab):hover,
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li:not(.cbi-tab):focus {
-    color: #3b82f6;
-    border-color: #3b82f6;
-    background: #22304a;
-}
-
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li:not(.cbi-tab):hover a,
-:root[data-darkmode="true"] #tab-header ul.cbi-tabmenu li:not(.cbi-tab):focus a {
-    color: #60a5fa !important;
-}
-
-:root[data-darkmode="true"] {
-    .radio-button {
-        background: #374151;
-        box-shadow: 0 1px 2px 0 rgba(0,0,0,0.15);
-    }
-    .radio-button label {
-        background: #1f2937;
-        color: #d1d5db;
-        border-color: #4b5563;
-    }
-    .radio-button label:hover {
-        color: #3b82f6;
-        border-color: #3b82f6;
-        background: #22304a;
-    }
-    .radio-button input[type="radio"]:checked + label {
-        background: #3b82f6;
-        color: #fff;
-        border-color: #3b82f6;
-        box-shadow: 0 1px 2px 0 rgba(59,130,246,0.18);
-    }
-}
-</style>
-
+<%
+    local fs = require "luci.openclash"
+    local plugin_version = fs.oc_version()
+%>
+<script src="/luci-static/resources/openclash/js/oc-icons.js?v=<%=plugin_version%>"></script>
+<%+openclash/common%>
 <body>
-    <div id="tab" class="cbi-section">
+    <div id="tab" class="cbi-section oc">
         <div id="tab-header">
             <ul class="cbi-tabmenu">
                 <li name="tab-header" class="cbi-tab"><a href="#"><%:OpenClash Log%></a></li>
                 <li name="tab-header" class="cbi-tab-disabled"><a href="#"><%:Core Log%></a></li>
+                <li name="tab-header" class="cbi-tab-disabled"><a href="#"><%:Debug Logs%></a></li>
             </ul>
         </div>
         <div id="tab-content">
@@ -283,6 +33,13 @@ ul{
                     <label for="silent"><%:Silent%></label>
                 </div>
             </div>
+            <div class="dom">
+                <textarea id="debug_log" class="cbi-input-textarea" style="width: 100%;display:none" data-update="change" rows="32" cols="60" readonly="readonly" ></textarea>
+                <div id="debug-render-wrapper">
+                    <div id="debug-rendered"></div>
+                    <div class="oc-usage-help-float" id="debug-copy-source" onclick="copyDebugSource()" title="<%:Copy Debug%>"><svg width="20" height="20"><use href="#oc-icon-copy"/></svg></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -292,6 +49,10 @@ ul{
         <input type="button" class="btn cbi-button cbi-button-apply" id="start_refresh_button" value="<%:Start Refresh%>" onclick=" return start_refresh() "/>
         <input type="button" class="btn cbi-button cbi-button-apply" id="del_log_button" value="<%:Clean%>" onclick=" return del_log() " />
         <input type="button" class="btn cbi-button cbi-button-apply" id="down_log_button" value="<%:Download Log%>" onclick=" return download_log() " />
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+            <input type="button" class="btn cbi-button cbi-button-apply" id="gen_debug_button" value="<%:Generate Logs%>" onclick="return gen_debug_logs()" />
+            <span id="debug_loading" style="display:none; vertical-align:middle; line-height:1;"><img src="<%=resource%>/icons/loading.svg" onerror="this.onerror=null;this.src='<%=resource%>/icons/loading.gif'" alt="<%:Loading...%>" style="vertical-align:middle; height:1.6em; width:auto;" /></span>
+        </span>
     </div>
 </fieldset>
 </body>
@@ -302,8 +63,10 @@ var s;
 var log_len = 0;
 var lv = document.getElementById('cbid.openclash.config.clog');
 var cl = document.getElementById('core_log');
+var dl = document.getElementById('debug_log');
 var animatingOC = false;
 var animatingCore = false;
+var animatingDebug = false;
 var coreWebSocket = null;
 var coreLogBuffer = [];
 var currentLogLevel = 'info';
@@ -311,6 +74,37 @@ var wsRetryDelay = 2000;
 var wsRetryTimer = null;
 var isPolling = false;
 var core_refresh = true;
+var wsHasData = false;
+var coreEditorInitialized = false;
+var editor_core;
+var coreLogAccumulator = '';
+var pollInterval = 1000;
+
+function accumulateCoreLog(linesArr) {
+    var reversed = linesArr.slice().reverse();
+    var batchStr = '';
+    for (var k = 0; k < reversed.length; k++) {
+        batchStr += reversed[k] + '\n';
+    }
+    if (coreLogAccumulator) {
+        var accFirstLineEnd = coreLogAccumulator.indexOf('\n');
+        var accFirstLine = accFirstLineEnd > 0 ? coreLogAccumulator.substring(0, accFirstLineEnd) : coreLogAccumulator;
+        var batchTrimmed = batchStr.slice(0, -1);
+        var batchLastLineStart = batchTrimmed.lastIndexOf('\n');
+        var batchLastLine = batchLastLineStart > 0 ? batchTrimmed.substring(batchLastLineStart + 1) : batchTrimmed;
+        if (accFirstLine === batchLastLine) {
+            batchStr = batchLastLineStart > 0 ? batchStr.substring(0, batchLastLineStart + 1) : '';
+        }
+    }
+    coreLogAccumulator = batchStr + coreLogAccumulator;
+    var accLines = coreLogAccumulator.split('\n');
+    if (accLines.length > 2000) {
+        accLines = accLines.slice(0, 1999);
+        accLines.push('...');
+        coreLogAccumulator = accLines.join('\n');
+    }
+    cl.value = coreLogAccumulator;
+}
 
 function setLogTab(log_level) {
     var radio = document.getElementsByName("radios");
@@ -373,6 +167,25 @@ function download_log(){
     var dt = new Date();
     var timestamp = dt.getFullYear()+"-"+(dt.getMonth()+1)+"-"+dt.getDate()+"-"+dt.getHours()+"-"+dt.getMinutes()+"-"+dt.getSeconds();
 
+    var activeTabId = 0;
+    var titles = document.getElementsByName('tab-header');
+    for(var i=0; i<titles.length; i++){
+        if(titles[i].className === 'cbi-tab') {
+            activeTabId = i;
+            break;
+        }
+    }
+
+    var downloadContent = "";
+
+    if (activeTabId === 2) {
+        var debug_content = dl.value || '';
+        if (!debug_content.trim()) return;
+        downloadContent += debug_content;
+        createAndDownloadFile("OpenClash-Debug-"+timestamp+".log", downloadContent);
+        return;
+    }
+
     var oc_content = "";
     if (typeof editor_oc !== 'undefined' && editor_oc) {
         oc_content = editor_oc.getValue();
@@ -381,6 +194,10 @@ function download_log(){
     } else if (lv && lv.innerHTML) {
         oc_content = lv.innerHTML;
     }
+
+    oc_content = oc_content.split('\n').filter(function(line) { 
+        return line.indexOf("】<%:Downloading URL%>【") === -1; 
+    }).join('\n');
 
     var core_content = "";
     if (typeof editor_core !== 'undefined' && editor_core) {
@@ -391,15 +208,10 @@ function download_log(){
         core_content = cl.innerHTML;
     }
 
-    oc_content = oc_content.split('\n').filter(function(line) { 
-        return line.indexOf("】<%:Downloading URL%>【") === -1; 
-    }).join('\n');
-
     if (!oc_content.trim() && !core_content.trim()) {
         return;
     }
 
-    var downloadContent = "";
     if (oc_content.trim()) {
         downloadContent += "<%:OpenClash Log%>:\n" + oc_content + "\n\n";
     }
@@ -412,16 +224,46 @@ function download_log(){
 };
 
 function del_log() {
-    XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "del_log")%>',null,function(x, data){
-        lv.innerHTML="";
-        cl.innerHTML="";
-        coreLogBuffer = [];
-        log_len = 0;
-        editor_oc.setValue(lv.value);
-        editor_core.setValue(cl.value);
-        editor_core.refresh();
-        editor_oc.refresh();
-    });
+    var activeTabId = 0;
+    var titles = document.getElementsByName('tab-header');
+    for(var i=0; i<titles.length; i++){
+        if(titles[i].className === 'cbi-tab') {
+            activeTabId = i;
+            break;
+        }
+    }
+
+    if (activeTabId === 2) {
+        XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "del_log")%>', {type: "debug"}, function(x, data){
+            dl.value = "";
+            var wrapper = document.getElementById('debug-render-wrapper');
+            var rendered = document.getElementById('debug-rendered');
+            if (wrapper) { wrapper.style.display = 'none'; }
+            if (rendered) { rendered.innerHTML = ''; }
+            if (typeof editor_debug !== 'undefined' && editor_debug) {
+                editor_debug.setValue("");
+                if (editor_debug.dom) {
+                    editor_debug.dom.style.setProperty('display', '', 'important');
+                }
+                editor_debug.refresh();
+            } else if (typeof markdown_editor === 'function' && dl) {
+                markdown_editor(dl, 'debug', true, '100%', '540px');
+            }
+        });
+    } else {
+        XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "del_log")%>', null, function(x, data){
+            lv.innerHTML="";
+            cl.innerHTML="";
+            coreLogBuffer = [];
+            log_len = 0;
+            if (typeof editor_oc !== 'undefined' && editor_oc) {
+                editor_oc.setValue(lv.value);
+            }
+            if (typeof editor_core !== 'undefined' && editor_core) {
+                editor_core.setValue(cl.value);
+            }
+        });
+    }
     return
 };
 
@@ -430,7 +272,7 @@ function p(s) {
 };
 
 function getWebSocketConnectionInfo(callback) {
-    XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "status")%>', null, function(x, status) {
+    XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "conn_status")%>', null, function(x, status) {
         if (x && x.status == 200 && status) {
             callback(status);
         } else {
@@ -463,6 +305,7 @@ function coreLogWebSocketStop() {
     } catch (e) {}
 
     coreLogBuffer = [];
+    wsHasData = false;
 }
 
 function coreLogWebSocketRetry() {
@@ -502,6 +345,7 @@ function coreLogWebSocket() {
             coreWebSocket = new WebSocket(wsUrl);
             coreWebSocket.onopen = function() {
                 coreLogBuffer = [];
+                wsHasData = false;
             };
 
             coreWebSocket.onmessage = function(event) {
@@ -509,6 +353,7 @@ function coreLogWebSocket() {
                     try {
                         var msgData = JSON.parse(event.data);
                         if (msgData && msgData.payload) {
+                            wsHasData = true;
                             var now = new Date();
                             var timestamp = now.getFullYear() + "-" + p(now.getMonth() + 1) + "-" + p(now.getDate()) + " " + 
                                            p(now.getHours()) + ":" + p(now.getMinutes()) + ":" + p(now.getSeconds());
@@ -537,6 +382,44 @@ function coreLogWebSocket() {
         }
     });
 }
+
+function gen_debug_logs()
+{
+    var loading_el = document.getElementById('debug_loading');
+    var btn = document.getElementById('gen_debug_button');
+    var originalText = btn.value;
+    if (loading_el) { loading_el.style.display = 'inline'; }
+    if (btn) { btn.value = '<%:Generating...%>'; btn.disabled = true; }
+
+    XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "gen_debug_logs")%>', null, function(x, status) {
+        if (loading_el) { loading_el.style.display = 'none'; }
+        if (btn) { btn.value = originalText; btn.disabled = false; }
+        dl.value = x.responseText || '<%:Some error occurred!%>';
+        if (typeof editor_debug !== 'undefined' && editor_debug) {
+            editor_debug.setValue(dl.value);
+        }
+        renderDebugView();
+    });
+
+    return;
+};
+
+function load_existing_debug_log()
+{
+    XHR.get('<%=luci.dispatcher.build_url("admin", "services", "openclash", "get_debug_logs")%>', null, function(x, status) {
+        if (x && x.status == 200 && x.responseText != "")
+        {
+            dl.value = x.responseText;
+            renderDebugView();
+        }
+        else
+        {
+            if (typeof markdown_editor === 'function' && dl) {
+                markdown_editor(dl, 'debug', true, '100%', '540px');
+            }
+        }
+    });
+};
 
 function line_tolocal(str) {
     var trans_local = new Array();
@@ -666,8 +549,9 @@ function smoothlyDisplayLogs(newLines, target, isEditor, currentContent, isActiv
                 }
             } else if (isAtTop) {
                 target.scrollTo(0, 0);
-                if (isFirstLoad) {
-                    target.setCursor({line: 0, ch: 0});
+                if (!cursorPos) {
+                    var firstLineLen = target.state.doc.line(1).length;
+                    target.setCursor({line: 0, ch: firstLineLen});
                 }
             }
 
@@ -744,6 +628,13 @@ function smoothlyDisplayLogs(newLines, target, isEditor, currentContent, isActiv
                     target.scrollIntoView({line: cursorPos.line, ch: cursorPos.ch}, 300);
                 }
             }
+            if (isEditor && !cursorPos) {
+                var doc = target.state.doc;
+                if (doc.lines >= 1) {
+                    var fl = doc.line(1);
+                    target.dispatch({ selection: { anchor: fl.to } });
+                }
+            }
             return;
         }
 
@@ -809,6 +700,13 @@ function smoothlyDisplayLogs(newLines, target, isEditor, currentContent, isActiv
                     target.scrollIntoView({line: cursorPos.line, ch: cursorPos.ch}, 300);
                 }
             }
+            if (isEditor && !cursorPos) {
+                var doc = target.state.doc;
+                if (doc.lines >= 1) {
+                    var fl = doc.line(1);
+                    target.dispatch({ selection: { anchor: fl.to } });
+                }
+            }
         }
     }
 
@@ -824,6 +722,8 @@ function poll_log(){
     var currentContent = "";
     var bufferToProcess = [];
 
+    clearTimeout(r);
+
     for(var i=0; i<titles.length; i++){
         if(titles[i].className === 'cbi-tab') {
             activeTabId = i;
@@ -832,23 +732,28 @@ function poll_log(){
     }
 
     if (coreWebSocket && coreWebSocket.readyState == WebSocket.OPEN) {
+        core_refresh = !wsHasData;
         if (coreLogBuffer.length > 0) {
-            core_refresh = false;
             bufferToProcess = coreLogBuffer;
             coreLogBuffer = [];
             core_logs = line_tolocal(bufferToProcess.join('\n'));
-            if (editor_core) {
+            if (editor_core && activeTabId === 1) {
                 currentCoreContent = editor_core.getValue();
-                smoothlyDisplayLogs(core_logs, editor_core, true, currentCoreContent, activeTabId === 1);
-            } else if (cl) {
-                currentCoreContent = cl.innerHTML;
-                smoothlyDisplayLogs(core_logs, cl, false, currentCoreContent, activeTabId === 1);
+                smoothlyDisplayLogs(core_logs, editor_core, true, currentCoreContent, true);
+            } else {
+                accumulateCoreLog(core_logs);
             }
         }
+    } else {
+        core_refresh = true;
     }
 
     if (isPolling) {
-        r = setTimeout("poll_log()", 1000);
+        r = setTimeout("poll_log()", pollInterval);
+        return;
+    }
+
+    if (activeTabId === 2) {
         return;
     }
     
@@ -863,7 +768,7 @@ function poll_log(){
                 if (status) {
                     if (!status.update) {
                         isPolling = false;
-                        r = setTimeout("poll_log()", 1000);
+                        r = setTimeout("poll_log()", pollInterval);
                         return;
                     }
 
@@ -889,19 +794,18 @@ function poll_log(){
                         core_logs = line_tolocal(status.core_log);
 
                         if (core_logs.length > 0) {
-                            if (editor_core) {
+                            if (editor_core && activeTabId === 1) {
                                 currentCoreContent = editor_core.getValue();
-                                smoothlyDisplayLogs(core_logs, editor_core, true, currentCoreContent, activeTabId === 1);
-                            } else if (cl) {
-                                currentCoreContent = cl.innerHTML;
-                                smoothlyDisplayLogs(core_logs, cl, false, currentCoreContent, activeTabId === 1);
+                                smoothlyDisplayLogs(core_logs, editor_core, true, currentCoreContent, true);
+                            } else {
+                                accumulateCoreLog(core_logs);
                             }
                         }
                     }
                 }
             }
             isPolling = false;
-            r = setTimeout("poll_log()", 1000);
+            r = setTimeout("poll_log()", pollInterval);
         }
     );
 };
@@ -910,28 +814,46 @@ window.onload = function(){
     var titles = document.getElementsByName('tab-header');
     var divs = document.getElementsByClassName('dom');
     if(titles.length != divs.length) return;
+
+    var tc = document.getElementById('tab-content');
+    if (tc) tc.style.position = 'relative';
+
+    divs[0].classList.add('active');
+
     for(var i=0; i<titles.length; i++){
         var li = titles[i];
         li.id = i;
         function handleTabSwitch(tab) {
             return function(e) {
                 if (tab.className === 'cbi-tab') return;
+                var prevTabId = -1;
                 for(var j=0; j<titles.length; j++){
+                    if (titles[j].className === 'cbi-tab') prevTabId = j;
                     titles[j].className = 'cbi-tab-disabled';
-                    divs[j].style.display = 'none';
+                    divs[j].classList.remove('active');
                 }
                 tab.className = 'cbi-tab';
-                divs[tab.id].style.display = 'block';
+                divs[tab.id].classList.add('active');
 
-                if(tab.id == 0 && typeof editor_oc !== 'undefined') {
-                    setTimeout(function(){
-                        editor_oc.refresh();
-                    }, 10);
-                } else if(tab.id == 1 && typeof editor_core !== 'undefined') {
-                    setTimeout(function(){
-                        editor_core.refresh();
-                    }, 10);
+                if (prevTabId == 1 && editor_core) {
+                    coreLogAccumulator = editor_core.getValue();
+                    cl.value = coreLogAccumulator;
                 }
+
+                if (tab.id == 1 && !coreEditorInitialized) {
+                    coreEditorInitialized = true;
+                    if (typeof log_editor === 'function' && cl) {
+                        cl.value = coreLogAccumulator;
+                        log_editor(cl, 'core', true, '100%', '540px');
+                    }
+                } else if (tab.id == 1 && editor_core) {
+                    editor_core.setValue(coreLogAccumulator);
+                    editor_core.refresh();
+                }
+
+                pollInterval = (tab.id == 1) ? 5000 : 1000;
+                clearTimeout(r);
+                poll_log();
             };
         }
 
@@ -940,7 +862,78 @@ window.onload = function(){
     }
     get_log_level();
     poll_log();
+    setTimeout(function() {
+        load_existing_debug_log();
+    }, 500);
 };
+
+function renderDebugView() {
+    var wrapper = document.getElementById('debug-render-wrapper');
+    var rendered = document.getElementById('debug-rendered');
+    if (!wrapper || !rendered) return;
+    var src = '';
+    if (typeof editor_debug !== 'undefined' && editor_debug) {
+        src = editor_debug.getValue();
+    } else if (dl) {
+        src = dl.value || '';
+    }
+    if (!src) return;
+
+    if (typeof editor_debug !== 'undefined' && editor_debug && editor_debug.dom) {
+        editor_debug.dom.style.setProperty('display', 'none', 'important');
+    }
+    var cms = dl.parentNode.querySelectorAll('.cm-editor');
+    for (var i = 0; i < cms.length; i++) {
+        cms[i].style.setProperty('display', 'none', 'important');
+    }
+
+    if (typeof CM6 !== 'undefined' && CM6.renderMarkdown) {
+        rendered.innerHTML = CM6.renderMarkdown(src);
+    } else {
+        rendered.innerHTML = src.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+
+    var pres = rendered.querySelectorAll('pre');
+    var copyIcon = '<svg width="14" height="14"><use href="#oc-icon-copy"/></svg>';
+    for (var i = 0; i < pres.length; i++) {
+        (function(pre) {
+            if (pre.parentNode && pre.parentNode.classList.contains('pre-copy-wrap')) return;
+            var btn = document.createElement('div');
+            btn.className = 'pre-copy-btn';
+            btn.title = '<%:Copy%>';
+            btn.innerHTML = copyIcon;
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                var text = pre.textContent || '';
+                ocCopyToClipboard(text, btn);
+            };
+            var wrap = document.createElement('div');
+            wrap.className = 'pre-copy-wrap';
+            pre.parentNode.insertBefore(wrap, pre);
+            wrap.appendChild(pre);
+            wrap.appendChild(btn);
+        })(pres[i]);
+    }
+
+    wrapper.style.display = 'block';
+    dl.style.display = 'none';
+    if (dl.parentNode && dl.parentNode.className.indexOf('oc') < 0) {
+        dl.parentNode.classList.add('oc');
+    }
+    ocUpdateTheme();
+}
+
+function copyDebugSource() {
+    var src = '';
+    if (typeof editor_debug !== 'undefined' && editor_debug) {
+        src = editor_debug.getValue();
+    } else if (dl) {
+        src = dl.value || '';
+    }
+    if (!src) return;
+    ocCopyToClipboard(src, document.getElementById('debug-copy-source'));
+}
+
 //]]>
 </script>
 <%+cbi/valuefooter%>

@@ -43,7 +43,7 @@ local excluded_domain = {
 local mydnsip = '127.0.0.1'
 local mydnsport = '5335'
 local ipsetname = 'gfwlist'
-local new_appledns = uci:get_first("shadowsocksr", "global", "apple_dns")
+local new_appledns = uci:get_first("shadowsocksr", "global", "apple_dns", "")
 local bc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 -- base64decoding
 local function base64_dec(data)
@@ -112,9 +112,7 @@ local function generate_apple(type)
 		end
 	end
 	for _, domain in ipairs(domains) do
-        if new_appledns and new_appledns ~= "" then
-            out:write(string.format("server=/%s/%s\n", domain, new_appledns))
-        end
+		out:write(string.format("server=/%s/%s\n", domain, new_appledns))
 	end
 	out:close()
 	os.remove("/tmp/ssr-update.tmp")
@@ -180,6 +178,8 @@ local function update(url, file, type, file2)
 			apple:close()
 			if new_appledns and new_appledns ~= "" then
 				generate_apple(type)
+			else
+				os.remove("/tmp/ssr-update.tmp")
 			end
 		end
 		if type == "ad_data" then
@@ -250,10 +250,6 @@ if args then
 		update(uci:get_first("shadowsocksr", "global", "adblock_url"), "/etc/ssrplus/ad.conf", args, TMP_DNSMASQ_PATH .. "/ad.conf")
 		os.exit(0)
 	end
-	if args == "nfip_data" then
-		update(uci:get_first("shadowsocksr", "global", "nfip_url"), "/etc/ssrplus/netflixip.list", args, TMP_DNSMASQ_PATH .. "/netflixip.list")
-		os.exit(0)
-	end
 else
 	log("正在更新【GFW列表】数据库")
 	update(uci:get_first("shadowsocksr", "global", "gfwlist_url"), "/etc/ssrplus/gfw_list.conf", "gfw_data", TMP_DNSMASQ_PATH .. "/gfw_list.conf")
@@ -267,10 +263,4 @@ else
 		log("正在更新【广告屏蔽】数据库")
 		update(uci:get_first("shadowsocksr", "global", "adblock_url"), "/etc/ssrplus/ad.conf", "ad_data", TMP_DNSMASQ_PATH .. "/ad.conf")
 	end
-	if uci:get_first("shadowsocksr", "global", "netflix_enable", "0") == "1" then
-		log("正在更新【Netflix IP段】数据库")
-		update(uci:get_first("shadowsocksr", "global", "nfip_url"), "/etc/ssrplus/netflixip.list", "nfip_data", TMP_DNSMASQ_PATH .. "/netflixip.list")
-	end
-	-- log("正在更新【Netflix IP段】数据库")
-	-- update(uci:get_first("shadowsocksr", "global", "nfip_url"), "/etc/ssrplus/netflixip.list", "nfip_data")
 end

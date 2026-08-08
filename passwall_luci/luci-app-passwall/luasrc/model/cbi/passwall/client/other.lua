@@ -8,6 +8,8 @@ local port_validate = function(self, value, t)
 	return value:gsub("-", ":")
 end
 
+api.set_default_cbi()
+
 m = Map(appname)
 api.set_apply_on_parse(m)
 
@@ -29,7 +31,9 @@ o.rmempty = true
 for index, value in ipairs({"stop", "start", "restart"}) do
 	o = s:option(ListValue, value .. "_week_mode", translate(value .. " automatically mode"))
 	o:value("", translate("Disable"))
-	o:value(8, translate("Loop Mode"))
+	if value == "restart" then
+		o:value(8, translate("Loop Mode"))
+	end
 	o:value(7, translate("Every day"))
 	o:value(1, translate("Every Monday"))
 	o:value(2, translate("Every Tuesday"))
@@ -38,9 +42,10 @@ for index, value in ipairs({"stop", "start", "restart"}) do
 	o:value(5, translate("Every Friday"))
 	o:value(6, translate("Every Saturday"))
 	o:value(0, translate("Every Sunday"))
-	o = s:option(ListValue, value .. "_time_mode", translate(value .. " Time(Every day)"))
-	for t = 0, 23 do o:value(t, t .. ":00") end
-	o.default = 0
+	o = s:option(Value, value .. "_time_mode", translate(value .. " Time"))
+	for t = 0, 23 do o:value(t .. ":00") end
+	o.default = "0:00"
+	o.datatype = "timehhmm"
 	o:depends(value .. "_week_mode", "0")
 	o:depends(value .. "_week_mode", "1")
 	o:depends(value .. "_week_mode", "2")
@@ -179,14 +184,17 @@ if has_xray then
 	o:value("1-5", "1-5")
 	o:depends("fragment", true)
 
-	o = s_xray:option(Value, "fragment_length", translate("Fragment Length"), translate("Fragmented packet length (byte)"))
-	o.datatype = "or(uinteger,portrange)"
-	o.default = "100-200"
+	o = s_xray:option(Value, "fragment_lengths", translate("Fragment Length"), translate("Fragmented packet length (byte)"))
+	o.default = "3-5,6-8,10-20"
 	o:depends("fragment", true)
 
-	o = s_xray:option(Value, "fragment_interval", translate("Fragment Interval"), translate("Fragmentation interval (ms)"))
-	o.datatype = "or(uinteger,portrange)"
+	o = s_xray:option(Value, "fragment_delays", translate("Fragment Delay"), translate("Fragmentation interval (ms)"))
 	o.default = "10-20"
+	o:depends("fragment", true)
+
+	o = s_xray:option(Value, "fragment_maxSplit", translate("Max Split"), translate("Limit the maximum number of splits."))
+	o.datatype = "or(uinteger,portrange)"
+	o.default = "3-6"
 	o:depends("fragment", true)
 
 	o = s_xray:option(Flag, "noise", translate("Noise"), translate("UDP noise, Under some circumstances it can bypass some UDP based protocol restrictions."))
@@ -231,11 +239,12 @@ if has_xray then
 
 	o = s_xray_noise:option(ListValue, "type", translate("Type"))
 	o:value("rand", "rand")
+	o:value("array", "array")
 	o:value("str", "str")
 	o:value("hex", "hex")
 	o:value("base64", "base64")
 
-	o = s_xray_noise:option(Value, "packet", translate("Packet"))
+	o = s_xray_noise:option(Value, "packet", translate("Packet | Rand Length"))
 	o.datatype = "minlength(1)"
 	o.rmempty = false
 
@@ -258,4 +267,4 @@ if has_singbox then
 	o.default = 0
 end
 
-return m
+return api.return_map(m)

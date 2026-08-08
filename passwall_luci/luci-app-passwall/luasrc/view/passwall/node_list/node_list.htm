@@ -2,7 +2,7 @@
 local api = require "luci.passwall.api"
 local appname = api.appname
 -%>
-<script src="<%=resource%>/view/<%=appname%>/Sortable.min.js?v=25.11.27"></script>
+<script src="<%=resource%>/view/<%=appname%>/Sortable.min.js?v=1.15.7"></script>
 
 <style>
 table th, .table .th {
@@ -278,10 +278,10 @@ table td, .table .td {
 		ajaxList = [];
 	}
 
-	function to_add_node(protocol) {
+	function to_add_node() {
 		ajaxAbortAll();
 		const dom = document.getElementsByClassName("cbi-tab")[0];
-		const current_group = dom.getAttribute("group_name")
+		const current_group = dom ? (dom.getAttribute("group_name") || "default") : "default";
 		window.location.href = '<%=api.url("add_node")%>?redirect=1&group=' + current_group;
 	}
 
@@ -399,11 +399,16 @@ table td, .table .td {
 				}
 			}
 			if (ids.length > 0) {
-				if (confirm('<%:Are you sure to delete select nodes?%>') == true){
+				const dom = document.getElementById('modal-mask');
+				if (confirm('<%:Are you sure to delete select nodes?%>') == true) {
+					dom.style.display = 'block';
+					dom.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;"><%:Processing, please wait…%></div>';
 					XHR.get('<%=api.url("delete_select_nodes")%>', {
 						ids: ids.join()
 					},
 					function(x, data) {
+						dom.innerHTML = '';
+						dom.style.display = 'none';
 						if (x && x.status == 200) {
 							/*
 							for (var i = 0 ; i < ids.length; i++) {
@@ -413,8 +418,7 @@ table td, .table .td {
 							*/
 							ajaxAbortAll();
 							window.location.href = '<%=api.url("node_list")%>';
-						}
-						else {
+						} else {
 							alert("<%:Error%>");
 						}
 					});
@@ -631,11 +635,15 @@ table td, .table .td {
 					if (cacheData && cacheData.savetime && (now - cacheData.timestamp) < cacheData.savetime) {
 						const a = ping_value[i].firstElementChild;
 						let color = "red";
-						if (cacheData.value < 100)
-							color = "green";
-						else if (cacheData.value < 200)
-							color = "#fb9a05";
-						a.innerText = cacheData.value + " ms";
+						if (cacheData.value >= 0) {
+							a.innerText = cacheData.value + " ms";
+							if (cacheData.value < 100)
+								color = "green";
+							else if (cacheData.value < 200)
+								color = "#fb9a05";
+						} else {
+							a.innerText = "<%:Timeout%>";
+						}
 						a.style.color = color;
 						a.onclick = function () {
 							ping_node(cbi_id, this, auto_detection_time);
@@ -675,15 +683,23 @@ table td, .table .td {
 									const cache_data = {
 										dom_id: strs[i],
 										timestamp: Date.now(),
-										savetime: 60 * 1000,
+										savetime: 150 * 1000,
 										value: ping
 									};
-									text = result.ping + " ms";
 									localStorage.setItem(auto_detection_time + ":" + dom.address + ":" + dom.port, JSON.stringify(cache_data));
+									text = result.ping + " ms";
 									if (ping < 100)
 										color = "green";
 									else if (ping < 200)
 										color = "#fb9a05";
+								} else {
+									const cache_data = {
+										dom_id: strs[i],
+										timestamp: Date.now(),
+										savetime: 60 * 1000,
+										value: -1
+									};
+									localStorage.setItem(auto_detection_time + ":" + dom.address + ":" + dom.port, JSON.stringify(cache_data));
 								}
 								a.innerText = text;
 								a.style.color = color;
@@ -870,6 +886,8 @@ table td, .table .td {
 				p = "URLTest";
 			} else if (protocol == "_shunt") {
 				p = "<%:Shunt%>";
+			} else if (protocol == "_iface") {
+				p = "<%:Interface%>";
 			} else if (protocol == "vmess") {
 				p = "VMess";
 			} else if (protocol == "vless") {
@@ -906,7 +924,11 @@ table td, .table .td {
 		} else {
 			port_s = o["hysteria_hop"] || o["hysteria2_hop"];
 		}
-		str += type + "：" + remarks;
+		if ((o.type === "Hysteria2" || o.protocol === 'hysteria2') && o.hysteria2_realms) {
+			str += type + " Realm：" + remarks;
+		} else {
+			str += type + "：" + remarks;
+		}
 		return str;
 	}
 
@@ -948,7 +970,7 @@ table td, .table .td {
 						var newDom = node_template.cloneNode(true);
 						newDom.classList.add("cbi-rowstyle-" + (i % 2 + 1));
 						var innerHTML = newDom.innerHTML;
-						if (auto_detection_time != "icmp" && o["address"] && o["port"]) {
+						if (auto_detection_time != "icmp" && o["address"]) {
 							innerHTML = innerHTML.split("{{ping}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:ping_node(\'{{id}}\', this, \'icmp\')"><%:Test%></a></span>');
 						} else {
 							innerHTML = innerHTML.split("{{ping}}").join('<span class="ping_value" cbiid="{{id}}"><a href="javascript:void(0)" style="color:inherit">---</a></span>');
@@ -958,16 +980,23 @@ table td, .table .td {
 						} else {
 							innerHTML = innerHTML.split("{{tcping}}").join('<span class="tcping_value" cbiid="{{id}}"><a href="javascript:void(0)" style="color:inherit">---</a></span>');
 						}
-						innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)" title="<%:TLS handshake test, latency for reference only%>"><%:Test%></a></span>');
+						let is_realm = (o.type === "Hysteria2" || o.protocol === 'hysteria2') && o.hysteria2_realms || false;
+						if (o["protocol"] === '_shunt' || is_realm) {
+							innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping" cbiid="{{id}}">---</span>');
+						} else {
+							innerHTML = innerHTML.split("{{url_test}}").join('<span class="ping"><a href="javascript:void(0)" onclick="javascript:urltest_node(\'{{id}}\', this)" title="<%:TLS handshake test, latency for reference only%>"><%:Test%></a></span>');
+						}
 						innerHTML = innerHTML.split("{{id}}").join(o[".name"]);
 						innerHTML = innerHTML.split("{{group}}").join(o["group"] || "");
 						let node_remarks = get_remarks_name(o);
 						if (show_node_info == "1") {
-							if (o["address"] && o["port"]) {
+							let _port = o["port"] || o["hysteria_hop"] || o["hysteria2_hop"];
+							if (_port) _port = _port.replace(/:/g, '-');
+							if (o["address"] && _port) {
 								let _address = o["address"]
 								if (o["full_address"])
 									_address = o["full_address"]
-								node_remarks += "<br>" + _address + ":" + o["port"]
+								node_remarks += "<br>" + _address + ":" + _port
 							}
 						}
 						innerHTML = innerHTML.split("{{remarks}}").join(node_remarks);
@@ -1082,6 +1111,15 @@ table td, .table .td {
 				el.blur();
 				auto_detection_time = el.value;
 				onChange("auto_detection_time", auto_detection_time);
+			});
+		});
+		
+		const links = document.querySelectorAll('a');
+		links.forEach(link => {
+			link.addEventListener('click', (e) => {
+				if (link.getAttribute('target') !== '_blank') {
+					ajaxAbortAll();
+				}
 			});
 		});
 	});

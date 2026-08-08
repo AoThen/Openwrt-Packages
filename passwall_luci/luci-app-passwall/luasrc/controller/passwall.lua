@@ -24,7 +24,6 @@ function index()
 	local uci = api.uci			-- in function index()
 	local fs = api.fs
 	entry({"admin", "services", appname}).dependent = true
-	entry({"admin", "services", appname, "reset_config"}, call("reset_config")).leaf = true
 	entry({"admin", "services", appname, "show"}, call("show_menu")).leaf = true
 	entry({"admin", "services", appname, "hide"}, call("hide_menu")).leaf = true
 	local e
@@ -52,13 +51,14 @@ function index()
 	entry({"admin", "services", appname, "socks_config"}, cbi(appname .. "/client/socks_config")).leaf = true
 	entry({"admin", "services", appname, "acl"}, cbi(appname .. "/client/acl"), _("Access control"), 98).leaf = true
 	entry({"admin", "services", appname, "acl_config"}, cbi(appname .. "/client/acl_config")).leaf = true
-	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Watch Logs"), 999).leaf = true
+	entry({"admin", "services", appname, "log"}, form(appname .. "/client/log"), _("Runtime Logs"), 999).leaf = true
 
 	--[[ Server ]]
 	entry({"admin", "services", appname, "server"}, cbi(appname .. "/server/index"), _("Server-Side"), 99).leaf = true
 	entry({"admin", "services", appname, "server_user"}, cbi(appname .. "/server/user")).leaf = true
 
 	--[[ API ]]
+	entry({"admin", "services", appname, "server_user_update"}, call("server_user_update")).leaf = true
 	entry({"admin", "services", appname, "server_user_status"}, call("server_user_status")).leaf = true
 	entry({"admin", "services", appname, "server_user_log"}, call("server_user_log")).leaf = true
 	entry({"admin", "services", appname, "server_get_log"}, call("server_get_log")).leaf = true
@@ -79,8 +79,8 @@ function index()
 	entry({"admin", "services", appname, "connect_status"}, call("connect_status")).leaf = true
 	entry({"admin", "services", appname, "ping_node"}, call("ping_node")).leaf = true
 	entry({"admin", "services", appname, "urltest_node"}, call("urltest_node")).leaf = true
+	entry({"admin", "services", appname, "update_config"}, call("update_config")).leaf = true
 	entry({"admin", "services", appname, "add_node"}, call("add_node")).leaf = true
-	entry({"admin", "services", appname, "update_node"}, call("update_node")).leaf = true
 	entry({"admin", "services", appname, "set_node"}, call("set_node")).leaf = true
 	entry({"admin", "services", appname, "copy_node"}, call("copy_node")).leaf = true
 	entry({"admin", "services", appname, "clear_all_nodes"}, call("clear_all_nodes")).leaf = true
@@ -96,6 +96,10 @@ function index()
 	entry({"admin", "services", appname, "subscribe_manual"}, call("subscribe_manual")).leaf = true
 	entry({"admin", "services", appname, "subscribe_manual_all"}, call("subscribe_manual_all")).leaf = true
 	entry({"admin", "services", appname, "flush_set"}, call("flush_set")).leaf = true
+	entry({"admin", "services", appname, "get_shunt_rules"}, call("get_shunt_rules")).leaf = true
+	entry({"admin", "services", appname, "add_shunt_rule"}, call("add_shunt_rule")).leaf = true
+	entry({"admin", "services", appname, "delete_select_shunt_rules"}, call("delete_select_shunt_rules")).leaf = true
+	entry({"admin", "services", appname, "save_shunt_rule_order"}, call("save_shunt_rule_order")).leaf = true
 
 	--[[rule_list]]
 	entry({"admin", "services", appname, "read_rulelist"}, call("read_rulelist")).leaf = true
@@ -107,14 +111,18 @@ function index()
 	for _, com in ipairs(coms.order) do
 		entry({"admin", "services", appname, "check_" .. com}, call("com_check", com)).leaf = true
 		entry({"admin", "services", appname, "update_" .. com}, call("com_update", com)).leaf = true
+		entry({"admin", "services", appname, "version_" .. com}, call("com_version", com)).leaf = true
 	end
 
 	--[[Backup]]
 	entry({"admin", "services", appname, "create_backup"}, call("create_backup")).leaf = true
 	entry({"admin", "services", appname, "restore_backup"}, call("restore_backup")).leaf = true
+	entry({"admin", "services", appname, "reset_config"}, call("reset_config")).leaf = true
 
 	--[[geoview]]
 	entry({"admin", "services", appname, "geo_view"}, call("geo_view")).leaf = true
+
+	entry({"admin", "services", appname, "fetch_certsha256"}, call("fetch_certsha256")).leaf = true
 end
 
 local function http_write_json(content)
@@ -133,9 +141,15 @@ local function http_write_json_error(data)
 end
 
 function reset_config()
+	uci:revert(appname)
+	luci.sys.call("echo '' > /tmp/log/passwall.log")
 	luci.sys.call('/etc/init.d/passwall stop')
-	luci.sys.call('[ -f "/usr/share/passwall/0_default_config" ] && cp -f /usr/share/passwall/0_default_config /etc/config/passwall')
-	http.redirect(api.url())
+	if luci.sys.call('[ -s "/usr/share/passwall/0_default_config" ]') == 0 then
+		luci.sys.call('cp -f /usr/share/passwall/0_default_config /etc/config/passwall')
+		api.log(" * 恢复默认配置成功。")
+	else
+		api.log(" * 找不到默认配置文件，重置失败！")
+	end
 end
 
 function show_menu()
@@ -247,18 +261,48 @@ end
 
 function get_redir_log()
 	local name = http.formvalue("name")
-	local proto = http.formvalue("proto")
+	local proto = http.formvalue("proto"):upper()
 	local path = "/tmp/etc/passwall/acl/" .. name
-	proto = proto:upper()
-	if proto == "UDP" and (uci:get(appname, "@global[0]", "udp_node") or "nil") == "tcp" and not fs.access(path .. "/" .. proto .. ".log") then
-		proto = "TCP"
+
+	local function alert(msg)
+		http.write(string.format("<script>alert('%s');window.close();</script>", i18n.translate(msg)))
 	end
+
+	if name == "default" then
+		if proto == "UDP" and (uci:get(appname, "@global[0]", "udp_node") or "nil") == "tcp" and not fs.access(path .. "/" .. proto .. ".log") then
+			proto = "TCP"
+		end
+	else
+		local global_tcp = uci:get(appname, "@global[0]", "tcp_node") or "nil"
+		local global_udp = uci:get(appname, "@global[0]", "udp_node") or "nil"
+		local acl_tcp = uci:get(appname, name, "tcp_node") or "nil"
+		local acl_udp = uci:get(appname, name, "udp_node") or "nil"
+		local global_enabled = uci:get(appname, "@global[0]", "enabled") == "1"
+		if proto == "TCP" and acl_tcp == global_tcp and global_enabled then
+			path = "/tmp/etc/passwall/acl/default"
+			if uci:get(appname, "@global[0]", "log_tcp") ~= "1" then
+				alert("The access control node is the same as the global node. Please enable global logging.")
+				return
+			end
+		end
+		if proto == "UDP" and acl_udp == global_udp and global_enabled then
+			path = "/tmp/etc/passwall/acl/default"
+			if uci:get(appname, "@global[0]", "log_udp") ~= "1" then
+				alert("The access control node is the same as the global node. Please enable global logging.")
+				return
+			end
+		end
+		if proto == "UDP" and acl_udp == "tcp" and not fs.access(path .. "/" .. proto .. ".log") then
+			proto = "TCP"
+		end
+	end
+
 	if fs.access(path .. "/" .. proto .. ".log") then
 		local content = luci.sys.exec("tail -n 19999 ".. path .. "/" .. proto .. ".log")
 		content = content:gsub("\n", "<br />")
 		http.write(content)
 	else
-		http.write(string.format("<script>alert('%s');window.close();</script>", i18n.translate("Not enabled log")))
+		alert("Not enabled log")
 	end
 end
 
@@ -277,6 +321,18 @@ end
 function get_chinadns_log()
 	local flag = http.formvalue("flag")
 	local path = "/tmp/etc/passwall/acl/" .. flag .. "/chinadns_ng.log"
+	if flag ~= "default" then
+		local global_tcp = uci:get(appname, "@global[0]", "tcp_node") or "nil"
+		local acl_tcp = uci:get(appname, flag, "tcp_node") or "nil"
+		if acl_tcp == global_tcp and uci:get(appname, "@global[0]", "enabled") == "1" then
+			path = "/tmp/etc/passwall/acl/default/chinadns_ng.log"
+			if uci:get(appname, "@global[0]", "log_chinadns_ng") ~= "1" then
+				http.write(string.format("<script>alert('%s');window.close();</script>", i18n.translate("The access control node is the same as the global node. Please enable global logging.")))
+				return
+			end
+		end
+	end
+
 	if fs.access(path) then
 		local content = luci.sys.exec("tail -n 5000 ".. path)
 		content = content:gsub("\n", "<br />")
@@ -299,7 +355,8 @@ function index_status()
 	local e = {}
 	local dns_shunt = uci:get(appname, "@global[0]", "dns_shunt") or "dnsmasq"
 	if dns_shunt == "smartdns" then
-		e.dns_mode_status = luci.sys.call("pidof smartdns >/dev/null") == 0
+		local port = api.get_cache_var("SMARTDNS_LOCAL_PORT") or 0
+		e.dns_mode_status = (port ~= 0) and luci.sys.call(string.format("netstat -apn | grep ':%s ' >/dev/null", port)) == 0 or false
 	elseif dns_shunt == "chinadns-ng" then
 		e.dns_mode_status = luci.sys.call("/bin/busybox top -bn1 | grep -v 'grep' | grep '/tmp/etc/passwall/bin/' | grep 'default' | grep 'chinadns_ng' >/dev/null") == 0
 	else
@@ -418,6 +475,23 @@ function urltest_node()
 	http_write_json(e)
 end
 
+function update_config()
+	local id = http.formvalue("id") -- Node id
+	local data = http.formvalue("data") -- json new Data
+	if id and data then
+		local data_t = jsonParse(data) or {}
+		if next(data_t) then
+			for k, v in pairs(data_t) do
+				uci:set(appname, id, k, v)
+			end
+			api.uci_save(uci, appname)
+			http_write_json_ok()
+			return
+		end
+	end
+	http_write_json_error()
+end
+
 function add_node()
 	local redirect = http.formvalue("redirect")
 
@@ -438,23 +512,6 @@ function add_node()
 		api.uci_save(uci, appname, true, true)
 		http_write_json({result = uuid})
 	end
-end
-
-function update_node()
-	local id = http.formvalue("id") -- Node id
-	local data = http.formvalue("data") -- json new Data
-	if id and data then
-		local data_t = jsonParse(data) or {}
-		if next(data_t) then
-			for k, v in pairs(data_t) do
-				uci:set(appname, id, k, v)
-			end
-			api.uci_save(uci, appname)
-			http_write_json_ok()
-			return
-		end
-	end
-	http_write_json_error()
 end
 
 function set_node()
@@ -484,17 +541,11 @@ function copy_node()
 	local uuid = api.gen_short_uuid()
 	uci:section(appname, "nodes", uuid)
 	for k, v in pairs(uci:get_all(appname, section)) do
-		local filter = k:find("%.")
-		if filter and filter == 1 then
-		else
-			xpcall(function()
-				uci:set(appname, uuid, k, v)
-			end,
-			function(e)
-			end)
+		if not k:match("^%.") and k ~= "group" then
+			if k == "remarks" then v = (v or "") .. "(1)" end
+			uci:set(appname, uuid, k, v)
 		end
 	end
-	uci:delete(appname, uuid, "group")
 	uci:set(appname, uuid, "add_mode", 1)
 	api.uci_save(uci, appname)
 	http.redirect(api.url("node_config", uuid))
@@ -540,13 +591,17 @@ function delete_select_nodes()
 				uci:delete(appname, t[".name"])
 				socks = "Socks_" .. t[".name"]
 			end
+			local changed = false
 			local auto_switch_node_list = uci:get(appname, t[".name"], "autoswitch_backup_node") or {}
 			for i = #auto_switch_node_list, 1, -1 do
 				if w == auto_switch_node_list[i] then
 					table.remove(auto_switch_node_list, i)
+					changed = true
 				end
 			end
-			uci:set_list(appname, t[".name"], "autoswitch_backup_node", auto_switch_node_list)
+			if changed then
+				uci:set_list(appname, t[".name"], "autoswitch_backup_node", auto_switch_node_list)
+			end
 		end)
 		local tcp_node = uci:get(appname, "@global[0]", "tcp_node") or ""
 		if tcp_node == w or tcp_node == socks then
@@ -702,7 +757,11 @@ function save_node_list_opt()
 end
 
 function update_rules()
-	local update = http.formvalue("update")
+	local update = http.formvalue("update") or ""
+	if update == "" then
+		http_write_json_error({ message = "missing update target" })
+		return
+	end
 	luci.sys.call("lua /usr/share/passwall/rule_update.lua log '" .. update .. "' > /dev/null 2>&1 &")
 	http_write_json()
 end
@@ -723,6 +782,23 @@ function rollback_rules()
 		luci.sys.call("lua /usr/share/passwall/rule_update.lua log '" .. rules .. "' rollback > /dev/null")
 	end
 	http_write_json_ok()
+end
+
+function server_user_update()
+	local id = http.formvalue("id") -- Node id
+	local data = http.formvalue("data") -- json new Data
+	if id and data then
+		local data_t = jsonParse(data) or {}
+		if next(data_t) then
+			for k, v in pairs(data_t) do
+				uci:set(appname .. "_server", id, k, v)
+			end
+			api.uci_save(uci, appname .. "_server")
+			http_write_json_ok()
+			return
+		end
+	end
+	http_write_json_error()
 end
 
 function server_user_status()
@@ -773,6 +849,11 @@ function com_update(comname)
 	end
 
 	http_write_json(json)
+end
+
+function com_version(comname)
+	local version = api.get_app_version(comname)
+	http_write_json_ok(version)
 end
 
 function read_rulelist()
@@ -847,6 +928,7 @@ function restore_backup()
 		fp:write(decoded)
 		fp:close()
 		if chunk_index + 1 == total_chunks then
+			uci:revert(appname)
 			luci.sys.call("echo '' > /tmp/log/passwall.log")
 			api.log(" * PassWall 配置文件上传成功…")
 			local temp_dir = '/tmp/passwall_bak'
@@ -1031,4 +1113,112 @@ function flush_set()
 	if redirect == "1" then
 		http.redirect(api.url("log"))
 	end
+end
+
+function fetch_certsha256()
+	local id = http.formvalue("id") or ""
+	local address = (id ~= "") and uci:get(appname, id, "address") or ""
+	local port = (id ~= "") and uci:get(appname, id, "port") or 0
+	local sni = (id ~= "") and uci:get(appname, id, "tls_serverName") or ""
+	sni = (sni ~= "") and sni or address
+	local protocol = uci:get(appname, id, "protocol")
+	local h3, timeout = false, 10
+	if protocol == "hysteria2" then
+		h3 = true
+		timeout = 60
+		if port == 0 then
+			local hop = uci:get(appname, id, "hysteria2_hop") or "0"
+			port = tonumber(hop:match("^%s*(%d+)"))
+		end
+	end
+	if address == "" or port == 0 then
+		http_write_json_error()
+		return
+	end
+	local data = api.fetch_cert_sha256(address, port, sni, timeout, h3)
+	http_write_json(data ~= "" and { code = 1, data = data } or { code = 0 })
+end
+
+function get_shunt_rules()
+	local id = http.formvalue("id")
+	local result = {}
+
+	if id then
+		result = uci:get_all(appname, id)
+	else
+		local default_items = {}
+		local other_items = {}
+		uci:foreach(appname, "shunt_rules", function(t)
+			if not t.group or t.group == "" then
+				default_items[#default_items + 1] = t
+			else
+				other_items[#other_items + 1] = t
+			end
+		end)
+		for i = 1, #default_items do result[#result + 1] = default_items[i] end
+		for i = 1, #other_items do result[#result + 1] = other_items[i] end
+	end
+	http_write_json(result)
+end
+
+function add_shunt_rule()
+	local add_name = http.formvalue("add_name")
+	local redirect = http.formvalue("redirect")
+
+	local uuid = add_name
+	if add_name then
+		local has = uci:get(appname, uuid)
+		if has then
+			http_write_json_error({ message = "This ID already exists." })
+			return
+		end
+	else
+		uuid = api.gen_short_uuid()
+	end
+	uci:section(appname, "shunt_rules", uuid)
+
+	local group = http.formvalue("group")
+	if group and group ~= "default" then
+		uci:set(appname, uuid, "group", group)
+	end
+
+	if redirect == "1" then
+		api.uci_save(uci, appname)
+		http.redirect(api.url("shunt_rules", uuid))
+	else
+		api.uci_save(uci, appname)
+		http_write_json_ok({uuid = uuid, redirect_url = api.url("shunt_rules", uuid)})
+	end
+end
+
+function delete_select_shunt_rules()
+	local ids = http.formvalue("ids")
+	local redirect = http.formvalue("redirect")
+	string.gsub(ids, '[^' .. "," .. ']+', function(w)
+		uci:foreach(appname, "nodes", function(s)
+			if s["protocol"] and s["protocol"] == "_shunt" then
+				uci:delete(appname, s[".name"], w)
+			end
+		end)
+		uci:delete(appname, w)
+	end)
+	if redirect == "1" then
+		api.uci_save(uci, appname)
+		http.redirect(api.url("rule"))
+	else
+		api.uci_save(uci, appname, true, true)
+	end
+end
+
+function save_shunt_rule_order()
+	local ids = http.formvalue("ids") or ""
+	local new_order = {}
+	for id in ids:gmatch("([^,]+)") do
+		new_order[#new_order + 1] = id
+	end
+	for idx, name in ipairs(new_order) do
+		luci.sys.call(string.format("uci -q reorder %s.%s=%d", appname, name, idx - 1))
+	end
+	api.sh_uci_commit(appname)
+	http_write_json({ status = "ok" })
 end
